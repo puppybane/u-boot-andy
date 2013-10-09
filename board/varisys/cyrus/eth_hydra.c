@@ -163,7 +163,8 @@ int board_eth_init(bd_t *bis)
 	fm_info_set_mdio(FM1_DTSEC4,
 		miiphy_get_dev_by_name(DEFAULT_FM_MDIO_NAME));
 
-	for (i = FM1_DTSEC1; i < FM1_DTSEC1 + CONFIG_SYS_NUM_FM1_DTSEC; i++) {
+	// Never disable DTSEC1 - it controls MDIO
+	for (i = FM1_DTSEC2; i < FM1_DTSEC1 + CONFIG_SYS_NUM_FM1_DTSEC; i++) {
 		if (i != FM1_DTSEC4) {
 			fm_disable_port(i);
 		
