@@ -49,16 +49,6 @@
 #define CONFIG_RESET_VECTOR_ADDRESS	0xfffffffc
 #endif
 
-/*#ifdef CONFIG_SRIOBOOT_SLAVE*/
-/* Set 1M boot space */
-/*#define CONFIG_SYS_SRIOBOOT_SLAVE_ADDR (CONFIG_SYS_TEXT_BASE & 0xfff00000)
-#define CONFIG_SYS_SRIOBOOT_SLAVE_ADDR_PHYS \
-(0x300000000ull | CONFIG_SYS_SRIOBOOT_SLAVE_ADDR)
-#define CONFIG_RESET_VECTOR_ADDRESS 0xfffffffc
-#define CONFIG_SYS_NO_FLASH
-#endif
-*/
-
 /* High Level Configuration Options */
 #define CONFIG_BOOKE
 #define CONFIG_E500			/* BOOKE e500 family */
@@ -92,17 +82,24 @@
 #define CONFIG_ENV_OVERWRITE
 
 #define CONFIG_SYS_NO_FLASH
-#ifdef CONFIG_SYS_NO_FLASH
-#ifndef CONFIG_SRIOBOOT_SLAVE
-#endif
-#endif
-/*
+
+/* Try turning flash back on */
+#define CONFIG_SYS_FLASH_BASE		0xe0000000	/* Start of PromJet */
+#ifdef CONFIG_PHYS_64BIT
+#define CONFIG_SYS_FLASH_BASE_PHYS	0xfe0000000ull
 #else
-#define CONFIG_FLASH_CFI_DRIVER
-#define CONFIG_SYS_FLASH_CFI
-#define CONFIG_SYS_FLASH_USE_BUFFER_WRITE
+#define CONFIG_SYS_FLASH_BASE_PHYS	CONFIG_SYS_FLASH_BASE
 #endif
-*/
+
+#define CONFIG_SYS_FLASH_BR_PRELIM \
+		(BR_PHYS_ADDR(CONFIG_SYS_FLASH_BASE_PHYS + 0x8000000) \
+		 | BR_PS_16 | BR_V)
+#define CONFIG_SYS_FLASH_OR_PRELIM ((0xf8000ff7 & ~OR_GPCM_SCY & ~OR_GPCM_EHTR) \
+					| OR_GPCM_SCY_8 | OR_GPCM_EHTR_CLEAR)
+
+#define CONFIG_SYS_BR1_PRELIM \
+	(BR_PHYS_ADDR(CONFIG_SYS_FLASH_BASE_PHYS) | BR_PS_16 | BR_V)
+#define CONFIG_SYS_OR1_PRELIM	0xf8000ff7
 
 #if defined(CONFIG_SDCARD)
 #define CONFIG_SYS_EXTRA_ENV_RELOC
@@ -112,7 +109,9 @@
 #define CONFIG_ENV_OFFSET		(512 * 1097)
 #endif
 
-#define CONFIG_SYS_CLK_FREQ	get_board_sys_clk() /* sysclk for MPC85xx */
+#define CONFIG_SYS_CLK_FREQ 133000000
+/*
+#define CONFIG_SYS_CLK_FREQ	get_board_sys_clk()  sysclk for MPC85xx */
 
 /*
  * These can be toggled for performance analysis, otherwise use default.
@@ -134,7 +133,8 @@
 #define CONFIG_SYS_NUM_ADDR_MAP		64	/* number of TLB1 entries */
 #endif
 
-#define CONFIG_POST CONFIG_SYS_POST_MEMORY	/* test POST memory test */
+/* test POST memory test */
+#define CONFIG_POST CONFIG_SYS_POST_MEMORY
 #define CONFIG_SYS_MEMTEST_START	0x00200000	/* memtest works on */
 #define CONFIG_SYS_MEMTEST_END		0x00400000
 #define CONFIG_SYS_ALT_MEMTEST
@@ -183,26 +183,36 @@
  * Local Bus Definitions
  */
 
-/* Set the local bus clock 1/8 of platform clock */
-#define CONFIG_SYS_LBC_LCRR		LCRR_CLKDIV_8
-
-#define CONFIG_SYS_FLASH_BASE		0xe0000000	/* Start of PromJet */
+/* !!! LBC !!!! */
+#if 0
+#define CONFIG_SYS_LBC0_BASE		0xe0000000	/* Start of LBC Registers */
 #ifdef CONFIG_PHYS_64BIT
-#define CONFIG_SYS_FLASH_BASE_PHYS	0xfe0000000ull
+#define CONFIG_SYS_LBC0_BASE_PHYS	0xfe0000000ull
 #else
-#define CONFIG_SYS_FLASH_BASE_PHYS	CONFIG_SYS_FLASH_BASE
+#define CONFIG_SYS_LBC0_BASE_PHYS	CONFIG_SYS_LBC_BASE
 #endif
 
-#define CONFIG_SYS_FLASH_BR_PRELIM \
-(BR_PHYS_ADDR((CONFIG_SYS_FLASH_BASE_PHYS + 0x8000000)) \
-| BR_PS_16 | BR_V)
-#define CONFIG_SYS_FLASH_OR_PRELIM ((0xf8000ff7 & ~OR_GPCM_SCY & ~OR_GPCM_EHTR) \
-| OR_GPCM_SCY_8 | OR_GPCM_EHTR_CLEAR)
+#define CONFIG_SYS_LBC1_BASE		0xe1000000	/* Start of LBC Registers */
+#ifdef CONFIG_PHYS_64BIT
+#define CONFIG_SYS_LBC1_BASE_PHYS	0xfe1000000ull
+#else
+#define CONFIG_SYS_LBC1_BASE_PHYS	CONFIG_SYS_LBC_BASE
+#endif
+#endif
 
+/* Set the local bus clock 1/16 of platform clock */
+#define CONFIG_SYS_LBC_LCRR		LCRR_CLKDIV_16
+
+/* !!! LBC !!!! */
+#if 0
+#define CONFIG_SYS_BR0_PRELIM \
+(BR_PHYS_ADDR(CONFIG_SYS_LBC0_BASE_PHYS) | BR_PS_8 | BR_V)
 #define CONFIG_SYS_BR1_PRELIM \
-(BR_PHYS_ADDR(CONFIG_SYS_FLASH_BASE_PHYS) | BR_PS_16 | BR_V)
-#define CONFIG_SYS_OR1_PRELIM	0xf8000ff7
-#define CONFIG_SYS_OR3_PRELIM	0xffffeff7	/* 32KB but only 4k mapped */
+(BR_PHYS_ADDR(CONFIG_SYS_LBC1_BASE_PHYS) | BR_PS_8 | BR_V)
+
+#define CONFIG_SYS_OR0_PRELIM	0xf8000ff7
+#define CONFIG_SYS_OR1_PRELIM	0xffffeff7	/* 32KB but only 4k mapped */
+#endif
 
 #define CONFIG_SYS_MONITOR_BASE		CONFIG_SYS_TEXT_BASE	/* start of monitor */
 
@@ -225,8 +235,8 @@
 #define CONFIG_SYS_INIT_RAM_ADDR_PHYS_LOW CONFIG_SYS_INIT_RAM_ADDR
 /* The assembler doesn't like typecast */
 #define CONFIG_SYS_INIT_RAM_ADDR_PHYS \
-((CONFIG_SYS_INIT_RAM_ADDR_PHYS_HIGH * 1ull << 32) | \
-CONFIG_SYS_INIT_RAM_ADDR_PHYS_LOW)
+	((CONFIG_SYS_INIT_RAM_ADDR_PHYS_HIGH * 1ull << 32) | \
+	  CONFIG_SYS_INIT_RAM_ADDR_PHYS_LOW)
 #else
 #define CONFIG_SYS_INIT_RAM_ADDR_PHYS	CONFIG_SYS_INIT_RAM_ADDR /* Initial L1 address */
 #define CONFIG_SYS_INIT_RAM_ADDR_PHYS_HIGH 0
@@ -398,30 +408,15 @@ CONFIG_SYS_INIT_RAM_ADDR_PHYS_LOW)
  */
 #define CONFIG_SYS_QE_FMAN_FW_IN_MMC
 #define CONFIG_SYS_QE_FMAN_FW_ADDR	(512 * 1130)
-#elif defined(CONFIG_NAND)
-#define CONFIG_SYS_QE_FMAN_FW_IN_NAND
-#define CONFIG_SYS_QE_FMAN_FW_ADDR	(6 * CONFIG_SYS_NAND_BLOCK_SIZE)
-#elif defined(CONFIG_SRIOBOOT_SLAVE)
-/*
- * Slave has no ucode locally, it can fetch this from remote. When implementing
- * in two corenet boards, slave's ucode could be stored in master's memory
- * space, the address can be mapped from slave TLB->slave LAW->
- * slave SRIO outbound window->master inbound window->master LAW->
- * the ucode address in master's NOR flash.
- */
-#define CONFIG_SYS_QE_FMAN_FW_IN_REMOTE
-#define CONFIG_SYS_QE_FMAN_FW_ADDR	0xFFE00000
-#else
-#define CONFIG_SYS_QE_FMAN_FW_IN_NOR
-#define CONFIG_SYS_QE_FMAN_FW_ADDR		0xEF000000
 #endif
+
 #define CONFIG_SYS_QE_FMAN_FW_LENGTH	0x10000
 #define CONFIG_SYS_FDT_PAD		(0x3000 + CONFIG_SYS_QE_FMAN_FW_LENGTH)
 
 #ifdef CONFIG_SYS_DPAA_FMAN
 #define CONFIG_FMAN_ENET
-#define CONFIG_PHY_VITESSE
 #define CONFIG_PHY_MICREL
+#define CONFIG_PHY_MICREL_KSZ9021
 #endif
 
 #ifdef CONFIG_PCI
@@ -569,29 +564,20 @@ CONFIG_SYS_INIT_RAM_ADDR_PHYS_LOW)
 #define __USB_PHY_TYPE	utmi
 #endif
 
-
-#define	CONFIG_EXTRA_ENV_SETTINGS				\
-	"hwconfig=fsl_ddr:ctlr_intlv=cacheline,"		\
-	"bank_intlv=cs0_cs1;"					\
-	"usb2:dr_mode=peripheral,phy_type=" __stringify(__USB_PHY_TYPE) ";"\
-	"usb1:dr_mode=host,phy_type=" __stringify(__USB_PHY_TYPE) "\0"\
-	"netdev=eth0\0"						\
-	"uboot=" __stringify(CONFIG_UBOOTPATH) "\0"		\
-	"ubootaddr=" __stringify(CONFIG_SYS_TEXT_BASE) "\0"	\
-	"tftpflash=tftpboot $loadaddr $uboot && "		\
-	"protect off $ubootaddr +$filesize && "			\
-	"erase $ubootaddr +$filesize && "			\
-	"cp.b $loadaddr $ubootaddr $filesize && "		\
-	"protect on $ubootaddr +$filesize && "			\
-	"cmp.b $loadaddr $ubootaddr $filesize\0"		\
-	"consoledev=ttyS0\0"					\
-	"ramdiskaddr=2000000\0"					\
-	"ramdiskfile=p4080ds/ramdisk.uboot\0"			\
-	"fdtaddr=c00000\0"					\
-	"fdtfile=p4080ds/p4080ds.dtb\0"				\
-	"bdev=sda3\0"						\
-	"c=ffe\0"
-
+#define	CONFIG_EXTRA_ENV_SETTINGS \
+ "hwconfig=fsl_ddr:ctlr_intlv=cacheline,"		\
+"bank_intlv=cs0_cs1;"					\
+"usb1:dr_mode=host,phy_type=" __stringify(__USB_PHY_TYPE) "\0" \
+"netdev=eth0\0"						\
+"uboot=" __stringify(CONFIG_UBOOTPATH) "\0"			\
+"ubootaddr=" __stringify(CONFIG_SYS_TEXT_BASE) "\0"			\
+"consoledev=ttyS0\0"					\
+"ramdiskaddr=2000000\0"					\
+"ramdiskfile=p4080ds/ramdisk.uboot\0"			\
+"fdtaddr=c00000\0"					\
+"fdtfile=p4080ds/p4080ds.dtb\0"				\
+"bdev=sda3\0"						\
+"c=ffe\0"
 
 #define CONFIG_HDBOOT					\
 "setenv bootargs root=/dev/$bdev rw "		\
@@ -627,6 +613,3 @@ CONFIG_SYS_INIT_RAM_ADDR_PHYS_LOW)
 
 /* end #include "corenet_ds.h" */
 
-#undef CONFIG_SYS_CLK_FREQ
-#define CONFIG_SYS_CLK_FREQ 133000000
-/*#define CONFIG_SYS_NO_FLASH*/
