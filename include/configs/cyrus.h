@@ -83,24 +83,6 @@
 
 #define CONFIG_SYS_NO_FLASH
 
-/* Try turning flash back on */
-#define CONFIG_SYS_FLASH_BASE		0xe0000000	/* Start of PromJet */
-#ifdef CONFIG_PHYS_64BIT
-#define CONFIG_SYS_FLASH_BASE_PHYS	0xfe0000000ull
-#else
-#define CONFIG_SYS_FLASH_BASE_PHYS	CONFIG_SYS_FLASH_BASE
-#endif
-
-#define CONFIG_SYS_FLASH_BR_PRELIM \
-		(BR_PHYS_ADDR(CONFIG_SYS_FLASH_BASE_PHYS + 0x8000000) \
-		 | BR_PS_16 | BR_V)
-#define CONFIG_SYS_FLASH_OR_PRELIM ((0xf8000ff7 & ~OR_GPCM_SCY & ~OR_GPCM_EHTR) \
-					| OR_GPCM_SCY_8 | OR_GPCM_EHTR_CLEAR)
-
-#define CONFIG_SYS_BR1_PRELIM \
-	(BR_PHYS_ADDR(CONFIG_SYS_FLASH_BASE_PHYS) | BR_PS_16 | BR_V)
-#define CONFIG_SYS_OR1_PRELIM	0xf8000ff7
-
 #if defined(CONFIG_SDCARD)
 #define CONFIG_SYS_EXTRA_ENV_RELOC
 #define CONFIG_ENV_IS_IN_MMC
@@ -183,28 +165,23 @@
  * Local Bus Definitions
  */
 
-/* !!! LBC !!!! */
-#if 0
 #define CONFIG_SYS_LBC0_BASE		0xe0000000	/* Start of LBC Registers */
 #ifdef CONFIG_PHYS_64BIT
 #define CONFIG_SYS_LBC0_BASE_PHYS	0xfe0000000ull
 #else
-#define CONFIG_SYS_LBC0_BASE_PHYS	CONFIG_SYS_LBC_BASE
+#define CONFIG_SYS_LBC0_BASE_PHYS	CONFIG_SYS_LBC0_BASE
 #endif
 
 #define CONFIG_SYS_LBC1_BASE		0xe1000000	/* Start of LBC Registers */
 #ifdef CONFIG_PHYS_64BIT
 #define CONFIG_SYS_LBC1_BASE_PHYS	0xfe1000000ull
 #else
-#define CONFIG_SYS_LBC1_BASE_PHYS	CONFIG_SYS_LBC_BASE
-#endif
+#define CONFIG_SYS_LBC1_BASE_PHYS	CONFIG_SYS_LBC1_BASE
 #endif
 
 /* Set the local bus clock 1/16 of platform clock */
 #define CONFIG_SYS_LBC_LCRR		LCRR_CLKDIV_16
 
-/* !!! LBC !!!! */
-#if 0
 #define CONFIG_SYS_BR0_PRELIM \
 (BR_PHYS_ADDR(CONFIG_SYS_LBC0_BASE_PHYS) | BR_PS_8 | BR_V)
 #define CONFIG_SYS_BR1_PRELIM \
@@ -212,7 +189,7 @@
 
 #define CONFIG_SYS_OR0_PRELIM	0xf8000ff7
 #define CONFIG_SYS_OR1_PRELIM	0xffffeff7	/* 32KB but only 4k mapped */
-#endif
+
 
 #define CONFIG_SYS_MONITOR_BASE		CONFIG_SYS_TEXT_BASE	/* start of monitor */
 
