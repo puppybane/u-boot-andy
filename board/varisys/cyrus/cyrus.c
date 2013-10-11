@@ -65,26 +65,6 @@ int board_early_init_f(void)
 
 int board_early_init_r(void)
 {
-	
-	const unsigned int flashbase = CONFIG_SYS_FLASH_BASE;
-	const u8 flash_esel = find_tlb_idx((void *)flashbase, 1);
-
-	/*
-	 * Remap Boot flash + PROMJET region to caching-inhibited
-	 * so that flash can be erased properly.
-	 */
-
-	/* Flush d-cache and invalidate i-cache of any FLASH data */
-	flush_dcache();
-	invalidate_icache();
-
-	/* invalidate existing TLB entry for flash + promjet */
-	disable_tlb(flash_esel);
-
-	set_tlb(1, flashbase, CONFIG_SYS_FLASH_BASE_PHYS,	/* tlb, epn, rpn */
-			MAS3_SX|MAS3_SW|MAS3_SR, MAS2_I|MAS2_G,	/* perms, wimge */
-			0, flash_esel, BOOKE_PAGESZ_256M, 1);	/* ts, esel, tsize, iprot */
-
 	set_liodns();
 	
 #ifdef CONFIG_SYS_DPAA_QBMAN
