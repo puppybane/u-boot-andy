@@ -143,8 +143,7 @@ int board_eth_init(bd_t *bis)
 {
 #ifdef CONFIG_FMAN_ENET
 	struct fsl_pq_mdio_info dtsec_mdio_info;
-	unsigned int i, slot;
-	int lane;
+	unsigned int i;
 
 	printf("Initializing Fman\n");
 
@@ -172,6 +171,25 @@ int board_eth_init(bd_t *bis)
 	}
 
 	cpu_eth_init(bis);
+	
+	/*
+	 * Enable RGMII delay on Tx and Rx for CPU port
+	 */
+	 
+	// sets address 0x104 or reg 260 for writing
+	miiphy_write(DEFAULT_FM_MDIO_NAME, 3, 0xb, 0x8104); 
+	// writes to address 0x104 , RXC/TXC to +0.96ns and TX_CTL/RX_CTL to -0.84ns
+	miiphy_write(DEFAULT_FM_MDIO_NAME, 3, 0xc, 0xf0f0); 
+	// sets address 0x105 or reg 261 for writing
+	miiphy_write(DEFAULT_FM_MDIO_NAME, 3, 0xb, 0x8105);
+	// writes to address 0x105 , RXD[3..0] to -0.
+	miiphy_write(DEFAULT_FM_MDIO_NAME, 3, 0xc, 0x0000);
+	// sets address 0x106 or reg 261 for writing
+	miiphy_write(DEFAULT_FM_MDIO_NAME, 3, 0xb, 0x8106);
+	// writes to address 0x106 , TXD[3..0] to -0.84ns
+	miiphy_write(DEFAULT_FM_MDIO_NAME, 3, 0xc, 0x0000);
+	// force re-negotiation
+	miiphy_write(DEFAULT_FM_MDIO_NAME, 3, 0x0, 0x1340);
 #endif
 
 	return pci_eth_init(bis);
