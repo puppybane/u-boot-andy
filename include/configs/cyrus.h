@@ -20,6 +20,9 @@
  * MA 02111-1307 USA
  */
 
+#ifndef __CONFIG_CYRUS_H
+#define __CONFIG_CYRUS_H
+
 /*
  * P5020 DS board configuration file
  * Also supports P5010 DS
@@ -27,23 +30,26 @@
 #define CONFIG_CYRUS
 
 #define CONFIG_PHYS_64BIT
-#define CONFIG_PPC_P5020
+
+#if !defined(CONFIG_PPC_P5020) && !defined(CONFIG_PPC_P3041)
+#error Must call Cyrus CONFIG with a specific CPU enabled.
+#endif
+
 
 #define CONFIG_MMC
 #define CONFIG_SDCARD
 #define CONFIG_FSL_SATA_V2
 #define CONFIG_PCIE3
 #define CONFIG_PCIE4
+#ifdef CONFIG_PPC_P5020
 #define CONFIG_SYS_FSL_RAID_ENGINE
+#endif
 #define CONFIG_SYS_DPAA_RMAN
 #define CONFIG_SYS_DPAA_PME
 
 /*
  * Corenet DS style board configuration file
  */
-#ifndef __CONFIG_H
-#define __CONFIG_H
-
 #ifdef CONFIG_RAMBOOT_PBL
 #define CONFIG_RAMBOOT_TEXT_BASE	CONFIG_SYS_TEXT_BASE
 #define CONFIG_RESET_VECTOR_ADDRESS	0xfffffffc
@@ -157,8 +163,12 @@
 #else
 #define CONFIG_SYS_SPD_BUS_NUM	1
 #endif
+#ifdef CONFIG_PPC_P5020
 #define SPD_EEPROM_ADDRESS1	0x51
 #define SPD_EEPROM_ADDRESS2	0x52
+#else
+#define SPD_EEPROM_ADDRESS	0x51
+#endif
 #define CONFIG_SYS_SDRAM_SIZE	4096	/* for fixed parameter use */
 
 /*
