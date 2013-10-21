@@ -423,6 +423,10 @@ static int usb_hub_configure(struct usb_device *dev)
 	      (le16_to_cpu(hubsts->wHubStatus) & HUB_STATUS_OVERCURRENT) ? \
 	      "" : "no ");
 	usb_hub_power_on(hub);
+	
+	// Give time to settle - I don't like this, but it seems definitely necessary for reliable discovery
+	// on Cyrus. 500ms is too short.
+	mdelay(1000);
 
 	/*
 	 * Reset any devices that may be in a bad state when applying
