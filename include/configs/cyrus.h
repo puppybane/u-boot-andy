@@ -53,6 +53,12 @@
 #ifdef CONFIG_RAMBOOT_PBL
 #define CONFIG_RAMBOOT_TEXT_BASE	CONFIG_SYS_TEXT_BASE
 #define CONFIG_RESET_VECTOR_ADDRESS	0xfffffffc
+#define CONFIG_PBLPBI_CONFIG $(SRCTREE)/board/varisys/cyrus/pbi.cfg
+#if defined(CONFIG_PPP_P3041)
+#define CONFIG_PBLRCW_CONFIG $(SRCTREE)/board/varisys/cyrus/rcw_p3041.cfg
+#elif defined(CONFIG_PPC_P5020)
+#define CONFIG_PBLRCW_CONFIG $(SRCTREE)/board/varisys/cyrus/rcw_p5020.cfg
+#endif
 #endif
 
 /* High Level Configuration Options */
