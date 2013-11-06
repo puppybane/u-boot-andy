@@ -54,7 +54,7 @@
 #define CONFIG_RAMBOOT_TEXT_BASE	CONFIG_SYS_TEXT_BASE
 #define CONFIG_RESET_VECTOR_ADDRESS	0xfffffffc
 #define CONFIG_PBLPBI_CONFIG $(SRCTREE)/board/varisys/cyrus/pbi.cfg
-#if defined(CONFIG_PPP_P3041)
+#if defined(CONFIG_PPC_P3041)
 #define CONFIG_PBLRCW_CONFIG $(SRCTREE)/board/varisys/cyrus/rcw_p3041.cfg
 #elif defined(CONFIG_PPC_P5020)
 #define CONFIG_PBLRCW_CONFIG $(SRCTREE)/board/varisys/cyrus/rcw_p5020.cfg
@@ -88,6 +88,10 @@
 #define CONFIG_PCIE2			/* PCIE controler 2 */
 #define CONFIG_FSL_PCI_INIT		/* Use common FSL init code */
 #define CONFIG_SYS_PCI_64BIT		/* enable 64-bit PCI resources */
+
+#define CONFIG_BIOSEMU
+#define CONFIG_LAST_STAGE_INIT		/* Required to boot video card */
+#define VIDEO_IO_OFFSET		CONFIG_SYS_PCIE1_IO_VIRT
 
 #define CONFIG_FSL_LAW			/* Use common FSL init code */
 
@@ -203,8 +207,8 @@
 #define CONFIG_SYS_BR1_PRELIM \
 (BR_PHYS_ADDR(CONFIG_SYS_LBC1_BASE_PHYS) | BR_PS_8 | BR_V)
 
-#define CONFIG_SYS_OR0_PRELIM	0xf8000ff7
-#define CONFIG_SYS_OR1_PRELIM	0xffffeff7	/* 32KB but only 4k mapped */
+#define CONFIG_SYS_OR0_PRELIM	0xfff00030
+#define CONFIG_SYS_OR1_PRELIM	0xfff00030
 
 
 #define CONFIG_SYS_MONITOR_BASE		CONFIG_SYS_TEXT_BASE	/* start of monitor */
