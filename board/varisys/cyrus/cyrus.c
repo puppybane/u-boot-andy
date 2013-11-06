@@ -65,12 +65,17 @@ int board_early_init_f(void)
 
 int board_early_init_r(void)
 {
+	volatile fsl_lbc_t *lbc = LBC_BASE_ADDR;
+	
+	lbc->lbcr = 0;
+	lbc->lcrr = CONFIG_SYS_LBC_LCRR | LCRR_EADC_1;	/* 1 clock LALE cycle */
+	
 	set_liodns();
 	
 #ifdef CONFIG_SYS_DPAA_QBMAN
 	setup_portals();
 #endif
-
+	print_lbc_regs();
 	return 0;
 }
 
@@ -90,6 +95,95 @@ static const char *serdes_clock_to_string(u32 clock)
 
 int misc_init_r(void)
 {
+	
+
+	
+	return 0;
+}
+
+#include "../../../drivers/bios_emulator/include/biosemu.h"
+extern int BootVideoCardBIOS(pci_dev_t pcidev, BE_VGAInfo ** pVGAInfo, int cleanUp);
+
+#define PCI_CLASS_VIDEO             3
+#define PCI_CLASS_VIDEO_STD         0
+#define PCI_CLASS_VIDEO_PROG_IF_VGA 0
+
+pci_dev_t find_vga()
+{
+	pci_dev_t bdf;
+	int bus, found_multi = 0;
+	
+	// Find root controller
+	struct pci_controller *hose = pci_bus_to_hose(1);
+	
+	if (! hose) {
+		printf("Unable to find root PCI controller\n");
+		return -1;
+	}
+	
+	for (bus = hose->first_busno; bus <= hose->last_busno; bus++) {
+		
+		for (bdf = PCI_BDF(bus, 0, 0);
+		     bdf < PCI_BDF(bus + 1, 0, 0);
+		     bdf += PCI_BDF(0, 0, 1)) {
+			
+			unsigned char class;
+			     
+			     
+			if (!PCI_FUNC(bdf)) {
+				unsigned char header_type;
+				pci_read_config_byte(bdf,
+						     PCI_HEADER_TYPE,
+						     &header_type);
+
+				found_multi = header_type & 0x80;
+			} else {
+				if (!found_multi)
+					continue;
+			}
+
+			pci_read_config_byte(bdf,
+					     PCI_CLASS_CODE,
+					     &class);
+			if (class != PCI_CLASS_VIDEO)
+				continue;
+			
+			pci_read_config_byte(bdf,
+					     PCI_CLASS_DEVICE,
+					     &class);			
+			if (class != PCI_CLASS_VIDEO_STD)
+				continue;
+			
+			pci_read_config_byte(bdf,
+					     PCI_CLASS_PROG,
+					     &class);
+			
+			if (class == PCI_CLASS_VIDEO_PROG_IF_VGA)
+				return bdf;			
+		}
+	}
+	
+	return -1;
+}
+
+
+int last_stage_init(void)
+{
+	// Boot video here once everything else is working
+	pci_dev_t vga = find_vga();
+
+	
+	/* PostBIOS with x86 emulater */
+	if (vga < 0)
+		printf("No VGA device found\n");
+	else if (!BootVideoCardBIOS(vga, NULL, 0)) {
+		printf("VGA initialisation failed\n");
+		return -1;
+	}
+	
+	/* VGA running...? */
+	
+	
 	return 0;
 }
 

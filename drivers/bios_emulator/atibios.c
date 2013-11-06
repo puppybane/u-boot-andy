@@ -87,7 +87,9 @@ static void PCI_doBIOSPOST(pci_dev_t pcidev, BE_VGAInfo * VGAInfo)
 	BE_setVGA(VGAInfo);
 
 	/*Execute the BIOS POST code*/
+	printf("Begin BIOS POST\n");
 	BE_callRealMode(0xC000, 0x0003, &regs, &sregs);
+	printf("End BIOS POST\n");
 
 	/*Cleanup and exit*/
 	BE_getVGA(VGAInfo);
