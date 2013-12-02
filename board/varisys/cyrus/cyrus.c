@@ -36,6 +36,8 @@
 
 #include "cyrus.h"
 
+#include <video_fb.h>
+
 DECLARE_GLOBAL_DATA_PTR;
 
 int checkboard (void)
@@ -167,7 +169,9 @@ pci_dev_t find_vga()
 	return -1;
 }
 
-int last_stage_init(void)
+static GraphicDevice grd;
+
+void * video_hw_init(void)
 {	
 	// Boot video here once everything else is working
 	pci_dev_t vga = find_vga();
@@ -180,7 +184,7 @@ int last_stage_init(void)
 		return 0;
 	} else if (!BootVideoCardBIOS(vga, NULL, 0)) {
 		printf("VGA initialisation failed\n");
-		return -1;
+		return 0;
 	}
 	
 	printf("Setting VESA Mode\n");
@@ -203,6 +207,14 @@ int last_stage_init(void)
 		
 		for(i = 0; i < 640*480*2; i++)
 			*(mmio_base + i) = i & 0xff;
+		
+		
+		grd.winSizeX = 640;
+		grd.winSizeY = 480;
+		grd.gdfBytesPP = 2;
+		grd.frameAdrs = (uint)mmio_base;
+		grd.gdfIndex = GDF_16BIT_565RGB;
+		return &grd;
 	}
 	else
 		printf("ERROR\n");

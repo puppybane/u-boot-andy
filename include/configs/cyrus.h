@@ -90,7 +90,6 @@
 #define CONFIG_SYS_PCI_64BIT		/* enable 64-bit PCI resources */
 
 #define CONFIG_BIOSEMU
-#define CONFIG_LAST_STAGE_INIT		/* Required to boot video card */
 #define VIDEO_IO_OFFSET		CONFIG_SYS_PCIE1_IO_VIRT
 
 #define CONFIG_FSL_LAW			/* Use common FSL init code */
@@ -560,6 +559,17 @@
 #else
 #define __USB_PHY_TYPE	utmi
 #endif
+
+/* Video support */
+#define CONFIG_VIDEO
+#define VIDEO_FB_LITTLE_ENDIAN
+#define CONFIG_CFB_CONSOLE
+#define CONFIG_VGA_AS_SINGLE_DEVICE
+#define CONFIG_VIDEO_BMP_LOGO
+#define CONFIG_CMD_BMP
+#define CONFIG_VGA_LOGO_ONLY
+#define CONFIG_VIDEO_BMP_GZIP
+#define CONFIG_SYS_VIDEO_LOGO_MAX_SIZE  (640*480*2 + 1024)
 
 #define	CONFIG_EXTRA_ENV_SETTINGS \
  "hwconfig=fsl_ddr:ctlr_intlv=cacheline,"		\

@@ -2289,9 +2289,10 @@ int drv_video_init(void)
 	console_dev.getc = VIDEO_GETC_FCT;	/* 'getc' function */
 #endif /* CONFIG_VGA_AS_SINGLE_DEVICE */
 
+#ifndef CONFIG_VGA_LOGO_ONLY
 	if (stdio_register(&console_dev) != 0)
 		return 0;
-
+#endif
 	/* Return success */
 	return 1;
 }
