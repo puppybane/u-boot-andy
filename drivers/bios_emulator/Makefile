@@ -1,6 +1,8 @@
 X86DIR  = x86emu
 
-obj-y = atibios.o biosemu.o besys.o bios.o \
+$(shell mkdir -p $(obj)$(X86DIR))
+
+obj-y	= atibios.o biosemu.o besys.o bios.o vesa.o \
 	$(X86DIR)/decode.o \
 	$(X86DIR)/ops2.o \
 	$(X86DIR)/ops.o \

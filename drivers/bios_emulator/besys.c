@@ -127,7 +127,7 @@ regions that are handled differently, which this function handles.
 ****************************************************************************/
 u8 X86API BE_rdb(u32 addr)
 {
-	if (_BE_env.emulateVGA && addr >= 0xA0000 && addr <= 0xBFFFF)
+	if (_BE_env.emulateVGA && addr >= 0xA0000 && addr <= 0xBFFFF) 
 		return 0;
 	else {
 		u8 val = readb_le(BE_memaddr(addr));
@@ -148,7 +148,7 @@ regions that are handled differently, which this function handles.
 ****************************************************************************/
 u16 X86API BE_rdw(u32 addr)
 {
-	if (_BE_env.emulateVGA && addr >= 0xA0000 && addr <= 0xBFFFF)
+	if (_BE_env.emulateVGA && addr >= 0xA0000 && addr <= 0xBFFFF) 
 		return 0;
 	else {
 		u8 *base = BE_memaddr(addr);
@@ -238,10 +238,11 @@ void X86API BE_wrl(u32 addr, u32 val)
 
 #define IS_TIMER_PORT(port) (0x40 <= port && port <= 0x43)
 #define IS_CMOS_PORT(port)  (0x70 <= port && port <= 0x71)
-/*#define IS_VGA_PORT(port)   (_BE_env.emulateVGA && 0x3C0 <= port && port <= 0x3DA)*/
-#define IS_VGA_PORT(port)   (0x3C0 <= port && port <= 0x3DA)
+#define IS_VGA_PORT(port)   (_BE_env.emulateVGA && 0x3C0 <= port && port <= 0x3DA)
+/* #define IS_VGA_PORT(port)   (0x3C0 <= port && port <= 0x3DA) */
 #define IS_PCI_PORT(port)   (0xCF8 <= port && port <= 0xCFF)
 #define IS_SPKR_PORT(port)  (port == 0x61)
+#define IS_MDA_PORT(port)   (0x3b4 <= port && port <= 0x3b5)
 
 /****************************************************************************
 PARAMETERS:
@@ -576,6 +577,8 @@ u8 X86API BE_inb(X86EMU_pioAddr port)
 		DB(printf("Can not interept CMOS port now!\n");)
 	else if (IS_PCI_PORT(port))
 		val = PCI_inp(port, REG_READ_BYTE);
+	else if (IS_MDA_PORT(port))
+		return 0xff; // MDA not installed - avoid machine check
 	else if (port < 0x100) {
 		DB(printf("WARN: INVALID inb.%04X -> %02X\n", (u16) port, val);)
 		val = LOG_inpb(port);
