@@ -102,6 +102,7 @@ int misc_init_r(void)
 }
 
 #include "../../../drivers/bios_emulator/include/biosemu.h"
+#include "../../../drivers/bios_emulator/vesa.h"
 extern int BootVideoCardBIOS(pci_dev_t pcidev, BE_VGAInfo ** pVGAInfo, int cleanUp);
 
 #define PCI_CLASS_VIDEO             3
@@ -166,22 +167,45 @@ pci_dev_t find_vga()
 	return -1;
 }
 
-
 int last_stage_init(void)
-{
+{	
 	// Boot video here once everything else is working
 	pci_dev_t vga = find_vga();
 
+	printf("Looking for VGA\n");
 	
 	/* PostBIOS with x86 emulater */
-	if (vga < 0)
+	if (vga < 0) {
 		printf("No VGA device found\n");
-	else if (!BootVideoCardBIOS(vga, NULL, 0)) {
+		return 0;
+	} else if (!BootVideoCardBIOS(vga, NULL, 0)) {
 		printf("VGA initialisation failed\n");
 		return -1;
 	}
 	
+	printf("Setting VESA Mode\n");
 	/* VGA running...? */
+	fbi = set_vesa_mode(0x111);
+			
+	if (fbi)
+	{
+		u8 *mmio_base;
+		int i;
+		printf("OK\n");
+		printf("XSize = %d YSize = %d Base =0x%x\n", 
+			fbi->XSize, fbi->YSize, fbi->BaseAddress);
+		
+		
+		mmio_base = pci_bus_to_virt(vga, 0xffffffffu & (u64)fbi->BaseAddress,
+					PCI_REGION_MEM, 0, MAP_NOCACHE);
+		printf("mmio_base = 0x%p\n",
+		       mmio_base);
+		
+		for(i = 0; i < 640*480*2; i++)
+			*(mmio_base + i) = i & 0xff;
+	}
+	else
+		printf("ERROR\n");
 	
 	
 	return 0;
