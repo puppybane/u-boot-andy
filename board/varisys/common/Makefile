@@ -30,6 +30,7 @@ endif
 LIB	= $(obj)libvarisys.o
 
 COBJS-$(CONFIG_FMAN_ENET)	+= fman.o
+COBJS-$(CONFIG_ID_EEPROM)	+= sys_eeprom.o
 
 # deal with common files for P-series corenet based devices
 SUBLIB-$(CONFIG_CYRUS)		+= p_corenet/libp_corenet.o
