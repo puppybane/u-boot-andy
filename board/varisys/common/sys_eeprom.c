@@ -90,6 +90,9 @@ static int has_been_read = 0;
 		  (e.id[2] == 'I') || (e.id[3] == 'D'))
 #endif
 
+/** Fixed ID field in EEPROM */
+static unsigned char uid[16];
+
 /**
  * show_eeprom - display the contents of the EEPROM
  */
@@ -108,6 +111,11 @@ void show_eeprom(void)
 
 	/* Serial number */
 	printf("SN: %s\n", e.sn);
+
+	printf("UID: ");
+	for(i = 0; i < 16; i++)
+		printf("%02x", uid[i]);
+	printf("\n");
 
 	/* Errata level. */
 #ifdef CONFIG_SYS_I2C_EEPROM_NXID
@@ -174,6 +182,10 @@ int read_eeprom(void)
 	ret = i2c_read(CONFIG_SYS_I2C_EEPROM_ADDR, 0, CONFIG_SYS_I2C_EEPROM_ADDR_LEN,
 		(void *)&e, sizeof(e));
 
+	
+	/* Fixed address of ID field */
+	i2c_read(0x5f, 0x80, 1, uid, 16);
+	
 #ifdef CONFIG_SYS_EEPROM_BUS_NUM
 	i2c_set_bus_num(bus);
 #endif
@@ -181,7 +193,7 @@ int read_eeprom(void)
 #ifdef DEBUG
 	show_eeprom();
 #endif
-
+	
 	has_been_read = (ret == 0) ? 1 : 0;
 
 	return ret;
