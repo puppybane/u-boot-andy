@@ -34,8 +34,8 @@
 #endif
 
 #ifdef CONFIG_SYS_I2C_EEPROM_NXID
-#define MAX_NUM_PORTS	23
-#define NXID_VERSION	1
+#define MAX_NUM_PORTS	8
+#define NXID_VERSION	0
 #endif
 
 /**
@@ -93,7 +93,7 @@ static int has_been_read = 0;
 /**
  * show_eeprom - display the contents of the EEPROM
  */
-static void show_eeprom(void)
+void show_eeprom(void)
 {
 	int i;
 	unsigned int crc;
@@ -156,7 +156,7 @@ static void show_eeprom(void)
 /**
  * read_eeprom - read the EEPROM into memory
  */
-static int read_eeprom(void)
+int read_eeprom(void)
 {
 	int ret;
 #ifdef CONFIG_SYS_EEPROM_BUS_NUM
@@ -235,7 +235,7 @@ static int prog_eeprom(void)
 	for (i = 0, p = &e; i < sizeof(e); i += 8, p += 8) {
 		ret = i2c_write(CONFIG_SYS_I2C_EEPROM_ADDR, i, CONFIG_SYS_I2C_EEPROM_ADDR_LEN,
 			p, min((sizeof(e) - i), 8));
-		if (ret)
+		if (ret) 
 			break;
 		udelay(5000);	/* 5ms write cycle timing */
 	}
