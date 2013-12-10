@@ -95,12 +95,17 @@ static const char *serdes_clock_to_string(u32 clock)
 	}
 }
 
+extern int read_eeprom(void);
+extern void show_eeprom(void);
+
 int misc_init_r(void)
 {
+    if (read_eeprom())
+	printf("Error reading serial number\n");
+    else
+	show_eeprom();
 	
-
-	
-	return 0;
+    return 0;
 }
 
 #include "../../../drivers/bios_emulator/include/biosemu.h"
