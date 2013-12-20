@@ -78,7 +78,7 @@ struct fsl_e_tlb_entry tlb_table[] = {
 	/* Local Bus */
 	SET_TLB_ENTRY(1, CONFIG_SYS_LBC0_BASE, CONFIG_SYS_LBC0_BASE_PHYS,
 		      MAS3_SW|MAS3_SR, MAS2_I|MAS2_G,
-		      0, 2, BOOKE_PAGESZ_4K, 1),
+		      0, 2, BOOKE_PAGESZ_32K, 1),
 	SET_TLB_ENTRY(1, CONFIG_SYS_LBC1_BASE, CONFIG_SYS_LBC1_BASE_PHYS,
 		      MAS3_SW|MAS3_SR, MAS2_I|MAS2_G,
 		      0, 3, BOOKE_PAGESZ_4K, 1),
