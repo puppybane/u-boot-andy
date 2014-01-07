@@ -40,6 +40,8 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+#define GPIO_DIR 0x0c000004
+
 int checkboard (void)
 {
 	printf("Board: CYRUS\n");
@@ -54,7 +56,8 @@ int checkboard (void)
 int board_early_init_f(void)
 {
 	volatile ccsr_gur_t *gur = (void *)(CONFIG_SYS_MPC85xx_GUTS_ADDR);
-
+	volatile ccsr_gpio_t *pgpio = (void *)(CONFIG_SYS_MPC85xx_GPIO_ADDR);
+	
 	/*
 	 * P4080 DS board only uses the DDR1_MCK0/3 and DDR2_MCK0/3
 	 * disable the DDR1_MCK1/2/4/5 and DDR2_MCK1/2/4/5 to reduce
@@ -62,6 +65,9 @@ int board_early_init_f(void)
 	 */
 	setbits_be32(&gur->ddrclkdr, 0x001B001B);
 
+	/* Set GPIO Direction */
+	setbits_be32(&pgpio->gpdir, GPIO_DIR);
+	
 	return 0;
 }
 
