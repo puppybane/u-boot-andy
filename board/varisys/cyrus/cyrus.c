@@ -40,7 +40,9 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
-#define GPIO_DIR 0x0c000004
+#define GPIO_OPENDRAIN 0x30000000
+#define GPIO_DIR       0x3c000004
+#define GPIO_INITIAL   0x30000000
 
 int checkboard (void)
 {
@@ -65,6 +67,10 @@ int board_early_init_f(void)
 	 */
 	setbits_be32(&gur->ddrclkdr, 0x001B001B);
 
+	/* Set GPIO reset lines to open-drain, tristate */
+	setbits_be32(&pgpio->gpdat, GPIO_INITIAL);
+	setbits_be32(&pgpio->gpodr, GPIO_OPENDRAIN);
+	
 	/* Set GPIO Direction */
 	setbits_be32(&pgpio->gpdir, GPIO_DIR);
 	
