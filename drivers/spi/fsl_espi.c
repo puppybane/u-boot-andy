@@ -6,7 +6,7 @@
  *
  * SPDX-License-Identifier:	GPL-2.0+
  */
-
+#define DEBUG
 #include <common.h>
 
 #include <malloc.h>
@@ -273,7 +273,7 @@ int spi_xfer(struct spi_slave *slave, unsigned int bitlen, const void *data_out,
 			}
 		}
 		if (data_in) {
-			memcpy(data_in, buffer + 2 * cmd_len, tran_len);
+			memcpy(data_in, buffer + rx_offset, tran_len);
 			if (*buffer == 0x0b) {
 				data_in += tran_len;
 				data_len -= tran_len;
