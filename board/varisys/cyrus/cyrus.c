@@ -82,7 +82,7 @@ int board_early_init_r(void)
 	volatile fsl_lbc_t *lbc = LBC_BASE_ADDR;
 	
 	lbc->lbcr = 0;
-	lbc->lcrr = CONFIG_SYS_LBC_LCRR | LCRR_EADC_1;	/* 1 clock LALE cycle */
+	lbc->lcrr = 0x80000000 | CONFIG_SYS_LBC_LCRR | LCRR_EADC_1;	/* 1 clock LALE cycle */
 	
 	set_liodns();
 	
