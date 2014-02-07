@@ -78,6 +78,11 @@
 
 #ifdef CONFIG_FMAN_ENET
 
+// TODO - base this on test of PLD registers once working.
+static int have_second_phy = 1;
+
+#define IS_VALID_PORT(p)  ((p) == FM1_DTSEC4 || (have_second_phy && (p) == FM1_DTSEC5))
+
 /*
  * Given the following ...
  *
@@ -107,14 +112,16 @@
 void board_ft_fman_fixup_port(void *fdt, char *compat, phys_addr_t addr,
 			      enum fm_port port, int offset)
 {
-	if (port != FM1_DTSEC4) {
+	if (! IS_VALID_PORT(port)) {
 		return;
 	}
 
 	/* RGMII */
 	/* The RGMII PHY is identified by the MAC connected to it */
-	fdt_set_phy_handle(fdt, compat, addr, "phy_rgmii_0");
-
+	if (port == FM1_DTSEC4)
+		fdt_set_phy_handle(fdt, compat, addr, "phy_rgmii_0");
+	else
+		fdt_set_phy_handle(fdt, compat, addr, "phy_rgmii_1");
 }
 
 #endif /* #ifdef CONFIG_FMAN_ENET */
@@ -135,8 +142,31 @@ void board_ft_fman_fixup_port(void *fdt, char *compat, phys_addr_t addr,
 void fdt_fixup_board_enet(void *fdt)
 {
 #ifdef CONFIG_FMAN_ENET
-		fdt_status_okay_by_alias(fdt, "emi1_rgmii");
+	fdt_status_okay_by_alias(fdt, "emi1_rgmii");
 #endif
+}
+
+static void cyrus_phy_tuning(int phy)
+{
+	/*
+	 * Enable RGMII delay on Tx and Rx for CPU port
+	 */
+	printf("Tuning PHY @ %d\n", phy);
+	 
+	// sets address 0x104 or reg 260 for writing
+	miiphy_write(DEFAULT_FM_MDIO_NAME, phy, 0xb, 0x8104); 
+	// writes to address 0x104 , RXC/TXC to +0.96ns and TX_CTL/RX_CTL to -0.84ns
+	miiphy_write(DEFAULT_FM_MDIO_NAME, phy, 0xc, 0xf0f0); 
+	// sets address 0x105 or reg 261 for writing
+	miiphy_write(DEFAULT_FM_MDIO_NAME, phy, 0xb, 0x8105);
+	// writes to address 0x105 , RXD[3..0] to -0.
+	miiphy_write(DEFAULT_FM_MDIO_NAME, phy, 0xc, 0x0000);
+	// sets address 0x106 or reg 261 for writing
+	miiphy_write(DEFAULT_FM_MDIO_NAME, phy, 0xb, 0x8106);
+	// writes to address 0x106 , TXD[3..0] to -0.84ns
+	miiphy_write(DEFAULT_FM_MDIO_NAME, phy, 0xc, 0x0000);
+	// force re-negotiation
+	miiphy_write(DEFAULT_FM_MDIO_NAME, phy, 0x0, 0x1340);	
 }
 
 int board_eth_init(bd_t *bis)
@@ -146,6 +176,7 @@ int board_eth_init(bd_t *bis)
 	unsigned int i;
 
 	printf("Initializing Fman\n");
+	
 
 	/* Register the real 1G MDIO bus */
 	dtsec_mdio_info.regs =
@@ -161,10 +192,15 @@ int board_eth_init(bd_t *bis)
 	fm_info_set_phy_address(FM1_DTSEC4, 3);
 	fm_info_set_mdio(FM1_DTSEC4,
 		miiphy_get_dev_by_name(DEFAULT_FM_MDIO_NAME));
+	if (have_second_phy) {
+		fm_info_set_phy_address(FM1_DTSEC5, 7);
+		fm_info_set_mdio(FM1_DTSEC5,
+			miiphy_get_dev_by_name(DEFAULT_FM_MDIO_NAME));
+	}
 
 	// Never disable DTSEC1 - it controls MDIO
 	for (i = FM1_DTSEC2; i < FM1_DTSEC1 + CONFIG_SYS_NUM_FM1_DTSEC; i++) {
-		if (i != FM1_DTSEC4) {
+		if (! IS_VALID_PORT(i)) {
 			fm_disable_port(i);
 		
 		}
@@ -172,24 +208,10 @@ int board_eth_init(bd_t *bis)
 
 	cpu_eth_init(bis);
 	
-	/*
-	 * Enable RGMII delay on Tx and Rx for CPU port
-	 */
-	 
-	// sets address 0x104 or reg 260 for writing
-	miiphy_write(DEFAULT_FM_MDIO_NAME, 3, 0xb, 0x8104); 
-	// writes to address 0x104 , RXC/TXC to +0.96ns and TX_CTL/RX_CTL to -0.84ns
-	miiphy_write(DEFAULT_FM_MDIO_NAME, 3, 0xc, 0xf0f0); 
-	// sets address 0x105 or reg 261 for writing
-	miiphy_write(DEFAULT_FM_MDIO_NAME, 3, 0xb, 0x8105);
-	// writes to address 0x105 , RXD[3..0] to -0.
-	miiphy_write(DEFAULT_FM_MDIO_NAME, 3, 0xc, 0x0000);
-	// sets address 0x106 or reg 261 for writing
-	miiphy_write(DEFAULT_FM_MDIO_NAME, 3, 0xb, 0x8106);
-	// writes to address 0x106 , TXD[3..0] to -0.84ns
-	miiphy_write(DEFAULT_FM_MDIO_NAME, 3, 0xc, 0x0000);
-	// force re-negotiation
-	miiphy_write(DEFAULT_FM_MDIO_NAME, 3, 0x0, 0x1340);
+	cyrus_phy_tuning(3);
+	if (have_second_phy)
+	    cyrus_phy_tuning(7);
+	
 #endif
 
 	return pci_eth_init(bis);
