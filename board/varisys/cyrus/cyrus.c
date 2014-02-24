@@ -223,7 +223,7 @@ void * video_hw_init(void)
 		       mmio_base);
 		
 		for(i = 0; i < 640*480*2; i++)
-			*(mmio_base + i) = i & 0xff;
+			*(mmio_base + i) = 0;
 		
 		
 		grd.winSizeX = 640;
