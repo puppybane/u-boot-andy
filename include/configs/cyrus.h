@@ -47,6 +47,9 @@
 #define CONFIG_SYS_DPAA_RMAN
 #define CONFIG_SYS_DPAA_PME
 
+/* Enable splash screen */
+#define CONFIG_PREBOOT
+
 /*
  * Corenet DS style board configuration file
  */
