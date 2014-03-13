@@ -506,6 +506,10 @@
 #define CONFIG_USB_EHCI_FSL
 #define CONFIG_EHCI_HCD_INIT_AFTER_RESET
 #define CONFIG_CMD_EXT2
+#define CONFIG_USB_MAX_CONTROLLER_COUNT 2
+#define CONFIG_EHCI_IS_TDI
+#define CONFIG_USB_KEYBOARD 
+#define CONFIG_SYS_USB_EVENT_POLL_VIA_CONTROL_EP 
 #endif
 
 #ifdef CONFIG_MMC
@@ -584,7 +588,8 @@
 #define	CONFIG_EXTRA_ENV_SETTINGS \
  "hwconfig=fsl_ddr:ctlr_intlv=cacheline,"		\
 "bank_intlv=cs0_cs1;"					\
-"usb1:dr_mode=host,phy_type=" __stringify(__USB_PHY_TYPE) "\0" \
+"usb1:dr_mode=host,phy_type=" __stringify(__USB_PHY_TYPE) ";"\
+"usb2:dr_mode=host,phy_type=" __stringify(__USB_PHY_TYPE) "\0"\
 "netdev=eth0\0"						\
 "uboot=" __stringify(CONFIG_UBOOTPATH) "\0"			\
 "ubootaddr=" __stringify(CONFIG_SYS_TEXT_BASE) "\0"			\
