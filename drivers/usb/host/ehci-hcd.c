@@ -386,9 +386,15 @@ ehci_submit_async(struct usb_device *dev, unsigned long pipe, void *buffer,
 	endpt = QH_ENDPT1_RL(8) | QH_ENDPT1_C(c) |
 		QH_ENDPT1_MAXPKTLEN(maxpacket) | QH_ENDPT1_H(0) |
 		QH_ENDPT1_DTC(QH_ENDPT1_DTC_DT_FROM_QTD) |
-		QH_ENDPT1_EPS(ehci_encode_speed(dev->speed)) |
 		QH_ENDPT1_ENDPT(usb_pipeendpoint(pipe)) | QH_ENDPT1_I(0) |
 		QH_ENDPT1_DEVADDR(usb_pipedevice(pipe));
+
+	/* Force FS for fsl HS quirk */
+	if (ctrl->has_fsl_erratum_a005275 && dev->speed == QH_HIGH_SPEED)
+		endpt |= QH_ENDPT1_EPS(ehci_encode_speed(QH_FULL_SPEED));
+	else
+		endpt |= QH_ENDPT1_EPS(ehci_encode_speed(dev->speed));
+
 	qh->qh_endpt1 = cpu_to_hc32(endpt);
 	endpt = QH_ENDPT2_MULT(1) | QH_ENDPT2_PORTNUM(dev->portnr) |
 		QH_ENDPT2_HUBADDR(dev->parent->devnum) |
