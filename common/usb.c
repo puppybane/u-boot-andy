@@ -191,6 +191,7 @@ int usb_control_msg(struct usb_device *dev, unsigned int pipe,
 	debug("usb_control_msg: request: 0x%X, requesttype: 0x%X, " \
 	      "value 0x%X index 0x%X length 0x%X\n",
 	      request, requesttype, value, index, size);
+	mdelay(10);
 	dev->status = USB_ST_NOT_PROC; /*not yet processed */
 
 	if (submit_control_msg(dev, pipe, data, size, setup_packet) < 0)
