@@ -390,9 +390,9 @@ ehci_submit_async(struct usb_device *dev, unsigned long pipe, void *buffer,
 		QH_ENDPT1_DEVADDR(usb_pipedevice(pipe));
 
 	/* Force FS for fsl HS quirk */
-	if (ctrl->has_fsl_erratum_a005275 && dev->speed == QH_HIGH_SPEED)
+	/* if (ctrl->has_fsl_erratum_a005275 && dev->speed == QH_HIGH_SPEED)
 		endpt |= QH_ENDPT1_EPS(ehci_encode_speed(QH_FULL_SPEED));
-	else
+	else */
 		endpt |= QH_ENDPT1_EPS(ehci_encode_speed(dev->speed));
 
 	qh->qh_endpt1 = cpu_to_hc32(endpt);

@@ -93,20 +93,6 @@ int board_early_init_r(void)
 	return 0;
 }
 
-static const char *serdes_clock_to_string(u32 clock)
-{
-	switch(clock) {
-	case SRDS_PLLCR0_RFCK_SEL_100:
-		return "100";
-	case SRDS_PLLCR0_RFCK_SEL_125:
-		return "125";
-	case SRDS_PLLCR0_RFCK_SEL_156_25:
-		return "156.25";
-	default:
-		return "150";
-	}
-}
-
 extern int read_eeprom(void);
 extern void show_eeprom(void);
 
