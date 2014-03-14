@@ -424,10 +424,6 @@ static int usb_hub_configure(struct usb_device *dev)
 	      "" : "no ");
 	usb_hub_power_on(hub);
 	
-	// Give time to settle - I don't like this, but it seems definitely necessary for reliable discovery
-	// on Cyrus. 500ms is too short.
-	mdelay(1000);
-
 	/*
 	 * Reset any devices that may be in a bad state when applying
 	 * the power.  This is a __weak function.  Resetting of the devices
