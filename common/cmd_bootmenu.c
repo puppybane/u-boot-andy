@@ -128,6 +128,12 @@ static void bootmenu_autoboot_loop(struct bootmenu_data *menu,
 
 	if (menu->delay == 0)
 		*key = KEY_SELECT;
+#ifdef CONFIG_ESCAPEBOOTMENU
+	else {
+		run_command(CONFIG_ESCAPEBOOTMENU, 0);
+		*key = KEY_UP; // Force redraw
+	}
+#endif
 }
 
 static void bootmenu_loop(struct bootmenu_data *menu,

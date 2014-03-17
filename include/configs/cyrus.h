@@ -573,6 +573,7 @@
 #define CONFIG_CMD_BOOTMENU		/* ANSI terminal Boot Menu */
 #define CONFIG_MENU
 #define CONFIG_MENU_SHOW
+ #define CONFIG_ESCAPEBOOTMENU "setenv stdout serial,vga"
 
 #define CONFIG_BAUDRATE	115200
 
