@@ -186,6 +186,12 @@ static void bootmenu_loop(struct bootmenu_data *menu,
 	/* enter key was pressed */
 	if (c == '\r')
 		*key = KEY_SELECT;
+	/* Mapped arrow keys on USB - ctrl-P*/
+	else if (c == 14 || c == 'n' || c == 'N') 
+		*key = KEY_DOWN;
+	/* ctrl-N */
+	else if (c == 16 || c == 'p' || c == 'P')
+		*key = KEY_UP;
 }
 
 static char *bootmenu_choice_entry(void *data)
