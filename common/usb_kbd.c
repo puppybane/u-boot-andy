@@ -341,8 +341,8 @@ static inline void usb_kbd_poll_for_event(struct usb_device *dev)
 	struct usb_kbd_pdata *data = dev->privptr;
 	iface = &dev->config.if_desc[0];
 	usb_get_report(dev, iface->desc.bInterfaceNumber,
-			1, 0, data->new, sizeof(data->new));
-	if (memcmp(data->old, data->new, sizeof(data->new)))
+			1, 0, data->new, 8);
+	if (memcmp(data->old, data->new, 8))
 		usb_kbd_irq_worker(dev);
 #endif
 }
