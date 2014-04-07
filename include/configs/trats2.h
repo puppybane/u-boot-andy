@@ -283,6 +283,7 @@
 #define CONFIG_ENV_OFFSET		((32 - 4) << 10) /* 32KiB - 4KiB */
 #define CONFIG_EFI_PARTITION
 #define CONFIG_PARTITION_UUIDS
+#define CONFIG_RANDOM_UUID
 
 #define CONFIG_BOARD_EARLY_INIT_F
 
@@ -323,6 +324,10 @@ int get_soft_i2c_sda_pin(void);
 #define CONFIG_USB_GADGET_DUALSPEED
 #define CONFIG_USB_GADGET_VBUS_DRAW	2
 #define CONFIG_USB_CABLE_CHECK
+
+/* Security subsystem - enable hw_rand() */
+#define CONFIG_EXYNOS_ACE_SHA
+#define CONFIG_LIB_HW_RAND
 
 /* Common misc for Samsung */
 #define CONFIG_MISC_COMMON

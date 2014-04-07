@@ -314,6 +314,7 @@ static inline int print_cpuinfo(void)
 }
 #endif
 int update_flash_size(int flash_size);
+int arch_early_init_r(void);
 
 /**
  * Show the DRAM size in a board-specific way
@@ -360,6 +361,11 @@ int do_ext2load(cmd_tbl_t *, int, int, char * const []);
 int	env_init     (void);
 void	env_relocate (void);
 int	envmatch     (uchar *, int);
+
+/* Avoid unfortunate conflict with libc's getenv() */
+#ifdef CONFIG_SANDBOX
+#define getenv uboot_getenv
+#endif
 char	*getenv	     (const char *);
 int	getenv_f     (const char *name, char *buf, unsigned len);
 ulong getenv_ulong(const char *name, int base, ulong default_val);
@@ -816,8 +822,7 @@ void	udelay        (unsigned long);
 void mdelay(unsigned long);
 
 /* lib/uuid.c */
-void uuid_str_to_bin(const char *uuid, unsigned char *out);
-int uuid_str_valid(const char *uuid);
+#include <uuid.h>
 
 /* lib/vsprintf.c */
 #include <vsprintf.h>
@@ -829,9 +834,7 @@ char *	strmhz(char *buf, unsigned long hz);
 #include <u-boot/crc.h>
 
 /* lib/rand.c */
-#if defined(CONFIG_RANDOM_MACADDR) || \
-	defined(CONFIG_BOOTP_RANDOM_DELAY) || \
-	defined(CONFIG_CMD_LINK_LOCAL)
+#if defined(CONFIG_LIB_RAND) || defined(CONFIG_LIB_HW_RAND)
 #define RAND_MAX -1U
 void srand(unsigned int seed);
 unsigned int rand(void);
