@@ -91,6 +91,8 @@ static const unsigned char usb_kbd_arrow[] = {
 #define USB_KBD_LEDMASK		\
 	(USB_KBD_NUMLOCK | USB_KBD_CAPSLOCK | USB_KBD_SCROLLLOCK)
 
+#define USB_KBD_PDATA_SIZE 8
+
 struct usb_kbd_pdata {
 	uint32_t	repeat_delay;
 
@@ -99,7 +101,7 @@ struct usb_kbd_pdata {
 	uint8_t		usb_kbd_buffer[USB_KBD_BUFFER_LEN];
 
 	uint8_t		*new;
-	uint8_t		old[8];
+   uint8_t     old[USB_KBD_PDATA_SIZE];
 
 	uint8_t		flags;
 };
@@ -131,7 +133,9 @@ void usb_kbd_generic_poll(void)
 	/* Submit a interrupt transfer request */
 	maxp = usb_maxpacket(usb_kbd_dev, pipe);
 	usb_submit_int_msg(usb_kbd_dev, pipe, data->new,
-			maxp > 8 ? 8 : maxp, ep->bInterval);
+           maxp > USB_KBD_PDATA_SIZE ?
+               USB_KBD_PDATA_SIZE : maxp,
+           ep->bInterval);
 }
 
 /* Puts character in the queue and sets up the in and out pointer. */
@@ -266,8 +270,10 @@ static uint32_t usb_kbd_service_key(struct usb_device *dev, int i, int up)
 		old = data->old;
 	}
 
-	if ((old[i] > 3) && (memscan(new + 2, old[i], 6) == new + 8))
+   if ((old[i] > 3) &&
+       (memscan(new + 2, old[i], 6) == new + USB_KBD_PDATA_SIZE)) {
 		res |= usb_kbd_translate(data, old[i], data->new[0], up);
+   }
 
 	return res;
 }
@@ -285,7 +291,7 @@ static int usb_kbd_irq_worker(struct usb_device *dev)
 	else if ((data->new[0] == LEFT_CNTR) || (data->new[0] == RIGHT_CNTR))
 		data->flags |= USB_KBD_CTRL;
 
-	for (i = 2; i < 8; i++) {
+   for (i = 2; i < USB_KBD_PDATA_SIZE; i++) {
 		res |= usb_kbd_service_key(dev, i, 0);
 		res |= usb_kbd_service_key(dev, i, 1);
 	}
@@ -297,7 +303,7 @@ static int usb_kbd_irq_worker(struct usb_device *dev)
 	if (res == 1)
 		usb_kbd_setled(dev);
 
-	memcpy(data->old, data->new, 8);
+   memcpy(data->old, data->new, USB_KBD_PDATA_SIZE);
 
 	return 1;
 }
@@ -305,7 +311,8 @@ static int usb_kbd_irq_worker(struct usb_device *dev)
 /* Keyboard interrupt handler */
 static int usb_kbd_irq(struct usb_device *dev)
 {
-	if ((dev->irq_status != 0) || (dev->irq_act_len != 8)) {
+   if ((dev->irq_status != 0) ||
+       (dev->irq_act_len != USB_KBD_PDATA_SIZE)) {
 		debug("USB KBD: Error %lX, len %d\n",
 		      dev->irq_status, dev->irq_act_len);
 		return 1;
@@ -333,7 +340,9 @@ static inline void usb_kbd_poll_for_event(struct usb_device *dev)
 	/* Submit a interrupt transfer request */
 	maxp = usb_maxpacket(dev, pipe);
 	usb_submit_int_msg(dev, pipe, &data->new[0],
-			maxp > 8 ? 8 : maxp, ep->bInterval);
+           maxp > USB_KBD_PDATA_SIZE ?
+               USB_KBD_PDATA_SIZE : maxp,
+           ep->bInterval);
 
 	usb_kbd_irq_worker(dev);
 #elif	defined(CONFIG_SYS_USB_EVENT_POLL_VIA_CONTROL_EP)
@@ -341,8 +350,8 @@ static inline void usb_kbd_poll_for_event(struct usb_device *dev)
 	struct usb_kbd_pdata *data = dev->privptr;
 	iface = &dev->config.if_desc[0];
 	usb_get_report(dev, iface->desc.bInterfaceNumber,
-			1, 0, data->new, sizeof(data->new));
-	if (memcmp(data->old, data->new, sizeof(data->new)))
+           1, 0, data->new, USB_KBD_PDATA_SIZE);
+   if (memcmp(data->old, data->new, USB_KBD_PDATA_SIZE))
 		usb_kbd_irq_worker(dev);
 #endif
 }
@@ -441,7 +450,8 @@ static int usb_kbd_probe(struct usb_device *dev, unsigned int ifnum)
 	memset(data, 0, sizeof(struct usb_kbd_pdata));
 
 	/* allocate input buffer aligned and sized to USB DMA alignment */
-	data->new = memalign(USB_DMA_MINALIGN, roundup(8, USB_DMA_MINALIGN));
+   data->new = memalign(USB_DMA_MINALIGN,
+               roundup(USB_KBD_PDATA_SIZE, USB_DMA_MINALIGN));
 
 	/* Insert private data into USB device structure */
 	dev->privptr = data;
@@ -459,7 +469,9 @@ static int usb_kbd_probe(struct usb_device *dev, unsigned int ifnum)
 	usb_set_idle(dev, iface->desc.bInterfaceNumber, REPEAT_RATE, 0);
 
 	debug("USB KBD: enable interrupt pipe...\n");
-	if (usb_submit_int_msg(dev, pipe, data->new, maxp > 8 ? 8 : maxp,
+   if (usb_submit_int_msg(dev, pipe, data->new,
+                  maxp > USB_KBD_PDATA_SIZE ?
+                   USB_KBD_PDATA_SIZE : maxp,
 			       ep->bInterval) < 0) {
 		printf("Failed to get keyboard state from device %04x:%04x\n",
 		       dev->descriptor.idVendor, dev->descriptor.idProduct);
