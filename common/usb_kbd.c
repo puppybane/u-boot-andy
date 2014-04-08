@@ -493,7 +493,7 @@ static int usb_kbd_probe(struct usb_device *dev, unsigned int ifnum)
 	usb_set_protocol(dev, iface->desc.bInterfaceNumber, 0);
 
 	debug("USB KBD: found set idle...\n");
-	// usb_set_idle(dev, iface->desc.bInterfaceNumber, REPEAT_RATE, 0);
+	usb_set_idle(dev, iface->desc.bInterfaceNumber, REPEAT_RATE, 0);
 
 	debug("USB KBD: enable interrupt pipe...\n");
    if (usb_submit_int_msg(dev, pipe, data->new,
