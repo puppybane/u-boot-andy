@@ -104,10 +104,6 @@ struct usb_kbd_pdata {
    uint8_t     old[USB_KBD_PDATA_SIZE];
 
 	uint8_t		flags;
-
-#if	defined(CONFIG_SYS_USB_EVENT_POLL_VIA_CONTROL_EP)
-	uint8_t     seen_empty_report;
-#endif
 };
 
 extern int __maybe_unused net_busy_flag;
@@ -352,32 +348,9 @@ static inline void usb_kbd_poll_for_event(struct usb_device *dev)
 #elif	defined(CONFIG_SYS_USB_EVENT_POLL_VIA_CONTROL_EP)
 	struct usb_interface *iface;
 	struct usb_kbd_pdata *data = dev->privptr;
-	int i, empty_report;
-
 	iface = &dev->config.if_desc[0];
 	usb_get_report(dev, iface->desc.bInterfaceNumber,
            1, 0, data->new, USB_KBD_PDATA_SIZE);
-
-    // Don't believe an empty report unless we see two in a row.
-    // Some keyboards insert spurious empty reports when accessing
-    // through control endpoint.
-	empty_report = 1;
-	for(i = 0; i < USB_KBD_PDATA_SIZE; i++) {
-		if (data->new[i] != 0) {
-			empty_report = 0;
-			break;
-		}
-	}
-
-	if (empty_report) {
-		if ( ! data->seen_empty_report) {
-			data->seen_empty_report = 1;
-			return;
-		}
-	}
-	data->seen_empty_report = empty_report;
-
-
    if (memcmp(data->old, data->new, USB_KBD_PDATA_SIZE))
 		usb_kbd_irq_worker(dev);
 #endif
