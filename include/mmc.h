@@ -372,6 +372,8 @@ struct mmc *mmc_spi_init(uint bus, uint cs, uint speed, uint mode);
 int mmc_legacy_init(int verbose);
 #endif
 
+int board_mmc_init(bd_t *bis);
+
 /* Set block count limit because of 16 bit register limit on some hardware*/
 #ifndef CONFIG_SYS_MMC_MAX_BLK_COUNT
 #define CONFIG_SYS_MMC_MAX_BLK_COUNT 65535
