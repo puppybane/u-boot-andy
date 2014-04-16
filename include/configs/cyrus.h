@@ -59,6 +59,8 @@
 #define CONFIG_SYS_FSL_PBL_PBI $(SRCTREE)/board/varisys/cyrus/pbi.cfg
 #if defined(CONFIG_PPC_P3041)
 #define CONFIG_SYS_FSL_PBL_RCW $(SRCTREE)/board/varisys/cyrus/rcw_p3041.cfg
+#elif defined(CONFIG_CYRUS_V2)
+#define CONFIG_SYS_FSL_PBL_RCW $(SRCTREE)/board/varisys/cyrus/rcw_p5020_v2.cfg
 #elif defined(CONFIG_PPC_P5020)
 #define CONFIG_SYS_FSL_PBL_RCW $(SRCTREE)/board/varisys/cyrus/rcw_p5020.cfg
 #endif
