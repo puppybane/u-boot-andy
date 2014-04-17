@@ -357,6 +357,11 @@
 #define CONFIG_SYS_I2C_EEPROM_ADDR_LEN	1
 #define CONFIG_SYS_EEPROM_BUS_NUM	1
 
+#define CONFIG_CMD_DATE			1
+#define CONFIG_RTC_MCP7411		1
+#define CONFIG_SYS_RTC_BUS_NUM		1
+#define CONFIG_SYS_I2C_RTC_ADDR		0x6f
+
 /*
  * eSPI - Enhanced SPI
  */
@@ -365,10 +370,10 @@
 
 #define CONFIG_HARD_SPI
 #define CONFIG_FSL_ESPI
-
 #define CONFIG_CMD_SF
-#define CONFIG_SF_DEFAULT_SPEED		10000000
-#define CONFIG_SF_DEFAULT_MODE		0
+#define CONFIG_CMD_SPI
+#define CONFIG_SF_DEFAULT_SPEED         10000000
+#define CONFIG_SF_DEFAULT_MODE          0
 
 /*
  * General PCI
@@ -484,8 +489,8 @@
 #define CONFIG_TSEC2		1
 #define CONFIG_TSEC2_NAME	"eTSEC2"
 
-#define TSEC1_PHY_ADDR		1
-#define TSEC2_PHY_ADDR		2
+#define TSEC1_PHY_ADDR		6
+#define TSEC2_PHY_ADDR		0x1f
 
 #define TSEC1_FLAGS		(TSEC_GIGABIT | TSEC_REDUCED)
 #define TSEC2_FLAGS		(TSEC_GIGABIT | TSEC_REDUCED)
@@ -496,6 +501,9 @@
 #define CONFIG_ETHPRIME		"eTSEC1"
 
 #define CONFIG_PHY_GIGE		/* Include GbE speed/duplex detection */
+ 
+#define CONFIG_PHY_MICREL
+#define CONFIG_PHY_MICREL_KSZ9021
 #endif
 
 /*
