@@ -53,6 +53,10 @@ int ehci_hcd_init(int index, enum usb_init_type init,
 		break;
 	case 1:
 		ehci = (struct usb_ehci *)CONFIG_SYS_FSL_USB2_ADDR;
+		if (! hwconfig("usb2")) {
+			printf("Disabled\n");
+			return -1;
+		}
 		break;
 	default:
 		printf("ERROR: wrong controller index!!\n");
