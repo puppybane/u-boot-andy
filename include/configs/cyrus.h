@@ -203,7 +203,7 @@
 #endif
 
 /* Set the local bus clock 1/16 of platform clock */
-#define CONFIG_SYS_LBC_LCRR		LCRR_CLKDIV_8
+#define CONFIG_SYS_LBC_LCRR		(LCRR_CLKDIV_16 | LCRR_EADC_1)
 
 #define CONFIG_SYS_BR0_PRELIM \
 (BR_PHYS_ADDR(CONFIG_SYS_LBC0_BASE_PHYS) | BR_PS_16 | BR_V)
