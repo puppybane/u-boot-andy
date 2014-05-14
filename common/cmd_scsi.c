@@ -17,6 +17,8 @@
 
 #ifdef CONFIG_SCSI_DEV_LIST
 #define SCSI_DEV_LIST CONFIG_SCSI_DEV_LIST
+#elif defined(CONFIG_FSL_SATA)
+#define SCSI_DEV_LIST
 #else
 #ifdef CONFIG_SCSI_SYM53C8XX
 #define SCSI_VEND_ID	0x1000
@@ -122,8 +124,16 @@ void scsi_scan(int mode)
 			if((perq & 0x1f)==0x1f) {
 				continue; /* skip unknown devices */
 			}
-			if((modi&0x80)==0x80) /* drive is removable */
+			if((modi&0x80)==0x80) /* drive is removable */ {
 				scsi_dev_desc[scsi_max_devs].removable=true;
+
+				scsi_setup_start_unit(pccb);
+				pccb->datalen = 0;
+				if (scsi_exec(pccb) != true) {
+					printf("Unable to start removable drive...\n");
+				}
+
+			}
 			/* get info for this device */
 			scsi_ident_cpy((unsigned char *)&scsi_dev_desc[scsi_max_devs].vendor[0],
 				       &tempbuff[8], 8);
@@ -137,6 +147,7 @@ void scsi_scan(int mode)
 			pccb->datalen=0;
 			scsi_setup_test_unit_ready(pccb);
 			if (scsi_exec(pccb) != true) {
+				printf("Not ready...\n");
 				if (scsi_dev_desc[scsi_max_devs].removable == true) {
 					scsi_dev_desc[scsi_max_devs].type=perq;
 					goto removable;
@@ -576,6 +587,17 @@ void scsi_setup_test_unit_ready(ccb * pccb)
 	pccb->msgout[0]=SCSI_IDENTIFY; /* NOT USED */
 }
 
+void scsi_setup_start_unit(ccb * pccb)
+{
+	pccb->cmd[0]=0x1b; // START/STOP
+	pccb->cmd[1]=pccb->lun<<5;
+	pccb->cmd[2]=0;
+	pccb->cmd[3]=0;
+	pccb->cmd[4]=3; // Load and go
+	pccb->cmd[5]=0;
+	pccb->cmdlen=6;
+	pccb->msgout[0]=SCSI_IDENTIFY; /* NOT USED */
+}
 void scsi_setup_read_ext(ccb * pccb, unsigned long start, unsigned short blocks)
 {
 	pccb->cmd[0]=SCSI_READ10;

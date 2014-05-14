@@ -93,6 +93,7 @@ typedef struct fsl_sata_reg {
 #define HCONTROL_ENTERPRISE_EN		0x10000000 /* Enterprise mode enabled */
 #define HCONTROL_HDR_SNOOP		0x00000400 /* Command header snoop */
 #define HCONTROL_PMP_ATTACHED		0x00000200 /* Port multiplier attached */
+#define HCONTROL_CLEAR_ERROR	(1<<27)
 
 /* Interrupt enable */
 #define HCONTROL_FATAL_ERR		0x00000020

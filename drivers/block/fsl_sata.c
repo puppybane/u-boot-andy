@@ -9,11 +9,13 @@
 #include <command.h>
 #include <asm/io.h>
 #include <asm/processor.h>
+#include <asm/errno.h>
 #include <asm/fsl_serdes.h>
 #include <malloc.h>
 #include <libata.h>
 #include <fis.h>
 #include <sata.h>
+#include <scsi.h>
 #include "fsl_sata.h"
 
 #ifndef CONFIG_SYS_SATA1_FLAGS
@@ -45,21 +47,21 @@ static inline void sdelay(unsigned long sec)
 
 static void fsl_sata_dump_sfis(struct sata_fis_d2h *s)
 {
-	printf("Status FIS dump:\n\r");
-	printf("fis_type:		%02x\n\r", s->fis_type);
-	printf("pm_port_i:		%02x\n\r", s->pm_port_i);
-	printf("status:			%02x\n\r", s->status);
-	printf("error:			%02x\n\r", s->error);
-	printf("lba_low:		%02x\n\r", s->lba_low);
-	printf("lba_mid:		%02x\n\r", s->lba_mid);
-	printf("lba_high:		%02x\n\r", s->lba_high);
-	printf("device:			%02x\n\r", s->device);
-	printf("lba_low_exp:		%02x\n\r", s->lba_low_exp);
-	printf("lba_mid_exp:		%02x\n\r", s->lba_mid_exp);
-	printf("lba_high_exp:		%02x\n\r", s->lba_high_exp);
-	printf("res1:			%02x\n\r", s->res1);
-	printf("sector_count:		%02x\n\r", s->sector_count);
-	printf("sector_count_exp:	%02x\n\r", s->sector_count_exp);
+	debug("Status FIS dump:\n\r");
+	debug("fis_type:		%02x\n\r", s->fis_type);
+	debug("pm_port_i:		%02x\n\r", s->pm_port_i);
+	debug("status:			%02x\n\r", s->status);
+	debug("error:			%02x\n\r", s->error);
+	debug("lba_low:		%02x\n\r", s->lba_low);
+	debug("lba_mid:		%02x\n\r", s->lba_mid);
+	debug("lba_high:		%02x\n\r", s->lba_high);
+	debug("device:			%02x\n\r", s->device);
+	debug("lba_low_exp:		%02x\n\r", s->lba_low_exp);
+	debug("lba_mid_exp:		%02x\n\r", s->lba_mid_exp);
+	debug("lba_high_exp:		%02x\n\r", s->lba_high_exp);
+	debug("res1:			%02x\n\r", s->res1);
+	debug("sector_count:		%02x\n\r", s->sector_count);
+	debug("sector_count_exp:	%02x\n\r", s->sector_count_exp);
 }
 
 static int ata_wait_register(unsigned __iomem *addr, u32 mask,
@@ -257,32 +259,32 @@ int init_sata(int dev)
 
 static void fsl_sata_dump_regs(fsl_sata_reg_t __iomem *reg)
 {
-	printf("\n\rSATA:           %08x\n\r", (u32)reg);
-	printf("CQR:            %08x\n\r", in_le32(&reg->cqr));
-	printf("CAR:            %08x\n\r", in_le32(&reg->car));
-	printf("CCR:            %08x\n\r", in_le32(&reg->ccr));
-	printf("CER:            %08x\n\r", in_le32(&reg->cer));
-	printf("CQR:            %08x\n\r", in_le32(&reg->cqr));
-	printf("DER:            %08x\n\r", in_le32(&reg->der));
-	printf("CHBA:           %08x\n\r", in_le32(&reg->chba));
-	printf("HStatus:        %08x\n\r", in_le32(&reg->hstatus));
-	printf("HControl:       %08x\n\r", in_le32(&reg->hcontrol));
-	printf("CQPMP:          %08x\n\r", in_le32(&reg->cqpmp));
-	printf("SIG:            %08x\n\r", in_le32(&reg->sig));
-	printf("ICC:            %08x\n\r", in_le32(&reg->icc));
-	printf("SStatus:        %08x\n\r", in_le32(&reg->sstatus));
-	printf("SError:         %08x\n\r", in_le32(&reg->serror));
-	printf("SControl:       %08x\n\r", in_le32(&reg->scontrol));
-	printf("SNotification:  %08x\n\r", in_le32(&reg->snotification));
-	printf("TransCfg:       %08x\n\r", in_le32(&reg->transcfg));
-	printf("TransStatus:    %08x\n\r", in_le32(&reg->transstatus));
-	printf("LinkCfg:        %08x\n\r", in_le32(&reg->linkcfg));
-	printf("LinkCfg1:       %08x\n\r", in_le32(&reg->linkcfg1));
-	printf("LinkCfg2:       %08x\n\r", in_le32(&reg->linkcfg2));
-	printf("LinkStatus:     %08x\n\r", in_le32(&reg->linkstatus));
-	printf("LinkStatus1:    %08x\n\r", in_le32(&reg->linkstatus1));
-	printf("PhyCtrlCfg:     %08x\n\r", in_le32(&reg->phyctrlcfg));
-	printf("SYSPR:          %08x\n\r", in_be32(&reg->syspr));
+	debug("\n\rSATA:           %08x\n\r", (u32)reg);
+	debug("CQR:            %08x\n\r", in_le32(&reg->cqr));
+	debug("CAR:            %08x\n\r", in_le32(&reg->car));
+	debug("CCR:            %08x\n\r", in_le32(&reg->ccr));
+	debug("CER:            %08x\n\r", in_le32(&reg->cer));
+	debug("CQR:            %08x\n\r", in_le32(&reg->cqr));
+	debug("DER:            %08x\n\r", in_le32(&reg->der));
+	debug("CHBA:           %08x\n\r", in_le32(&reg->chba));
+	debug("HStatus:        %08x\n\r", in_le32(&reg->hstatus));
+	debug("HControl:       %08x\n\r", in_le32(&reg->hcontrol));
+	debug("CQPMP:          %08x\n\r", in_le32(&reg->cqpmp));
+	debug("SIG:            %08x\n\r", in_le32(&reg->sig));
+	debug("ICC:            %08x\n\r", in_le32(&reg->icc));
+	debug("SStatus:        %08x\n\r", in_le32(&reg->sstatus));
+	debug("SError:         %08x\n\r", in_le32(&reg->serror));
+	debug("SControl:       %08x\n\r", in_le32(&reg->scontrol));
+	debug("SNotification:  %08x\n\r", in_le32(&reg->snotification));
+	debug("TransCfg:       %08x\n\r", in_le32(&reg->transcfg));
+	debug("TransStatus:    %08x\n\r", in_le32(&reg->transstatus));
+	debug("LinkCfg:        %08x\n\r", in_le32(&reg->linkcfg));
+	debug("LinkCfg1:       %08x\n\r", in_le32(&reg->linkcfg1));
+	debug("LinkCfg2:       %08x\n\r", in_le32(&reg->linkcfg2));
+	debug("LinkStatus:     %08x\n\r", in_le32(&reg->linkstatus));
+	debug("LinkStatus1:    %08x\n\r", in_le32(&reg->linkstatus1));
+	debug("PhyCtrlCfg:     %08x\n\r", in_le32(&reg->phyctrlcfg));
+	debug("SYSPR:          %08x\n\r", in_be32(&reg->syspr));
 }
 
 static int fsl_ata_exec_ata_cmd(struct fsl_sata *sata, struct sata_fis_h2d *cfis,
@@ -434,6 +436,156 @@ static int fsl_ata_exec_ata_cmd(struct fsl_sata *sata, struct sata_fis_h2d *cfis
 	out_le32(&reg->ccr, val32);
 
 	return len;
+}
+
+static int fsl_ata_exec_scsi_cmd(struct fsl_sata *sata, 
+				ccb *pccb,
+				int tag)
+{
+	cmd_hdr_entry_t *cmd_hdr;
+	cmd_desc_t *cmd_desc;
+	sata_fis_h2d_t *h2d;
+	prd_entry_t *prde;
+	u32 ext_c_ddc;
+	u32 prde_count;
+	u32 val32;
+	u32 ttl;
+	fsl_sata_reg_t __iomem *reg = sata->reg_base;
+	int i;
+	u8 *buffer = pccb->pdata;
+	int len = pccb->datalen;
+	int result = -EINVAL;
+
+	/* Check xfer length */
+	if (len > SATA_HC_MAX_XFER_LEN) {
+		printf("max transfer length is 64MB\n\r");
+		return result;
+	}
+
+	/* Setup the command descriptor */
+	cmd_desc = sata->cmd_desc + tag;
+
+	/* Get the pointer cfis of command descriptor */
+	h2d = (sata_fis_h2d_t *)cmd_desc->cfis;
+
+	/* Zero the cfis of command descriptor */
+	memset((void *)h2d, 0, SATA_HC_CMD_DESC_CFIS_SIZE);
+
+	/* Copy the cfis from user to command descriptor */
+	h2d->fis_type = SATA_FIS_TYPE_REGISTER_H2D;
+	h2d->pm_port_c = 0x80; /* is command */
+	h2d->command = ATA_CMD_PACKET;
+
+	debug("SCSI cmd len %d data len %d\n", pccb->cmdlen, len);
+	memset(cmd_desc->acmd, 0, 
+		SATA_HC_CMD_DESC_ACMD_SIZE + SATA_HC_CMD_DESC_RES);
+	memcpy(cmd_desc->acmd, pccb->cmd, pccb->cmdlen);
+
+	/* Setup the PRD table */
+	prde = (prd_entry_t *)cmd_desc->prdt;
+	memset((void *)prde, 0, sizeof(struct prdt));
+
+	prde_count = 0;
+	ttl = len;
+	for (i = 0; i < SATA_HC_MAX_PRD_DIRECT; i++) {
+		if (!len)
+			break;
+		prde->dba = cpu_to_le32((u32)buffer & ~0x3);
+		debug("dba = %08x\n\r", (u32)buffer);
+
+		if (len < PRD_ENTRY_MAX_XFER_SZ) {
+			ext_c_ddc = PRD_ENTRY_DATA_SNOOP | len;
+			debug("ext_c_ddc1 = %08x, len = %08x\n\r", ext_c_ddc, len);
+			prde->ext_c_ddc = cpu_to_le32(ext_c_ddc);
+			prde_count++;
+			prde++;
+			break;
+		} else {
+			ext_c_ddc = PRD_ENTRY_DATA_SNOOP; /* 4M bytes */
+			debug("ext_c_ddc2 = %08x, len = %08x\n\r", ext_c_ddc, len);
+			prde->ext_c_ddc = cpu_to_le32(ext_c_ddc);
+			buffer += PRD_ENTRY_MAX_XFER_SZ;
+			len -= PRD_ENTRY_MAX_XFER_SZ;
+			prde_count++;
+			prde++;
+		}
+	}
+
+	/* Setup the command slot of cmd hdr */
+	cmd_hdr = (cmd_hdr_entry_t *)&sata->cmd_hdr->cmd_slot[tag];
+
+	cmd_hdr->cda = cpu_to_le32((u32)cmd_desc & ~0x3);
+
+	val32 = prde_count << CMD_HDR_PRD_ENTRY_SHIFT;
+	val32 |= sizeof(sata_fis_h2d_t);
+	cmd_hdr->prde_fis_len = cpu_to_le32(val32);
+
+	cmd_hdr->ttl = cpu_to_le32(ttl);
+
+	val32 = CMD_HDR_ATTR_RES | CMD_HDR_ATTR_SNOOP |
+			 CMD_HDR_ATTR_TAG | CMD_HDR_ATTR_ATAPI;
+	val32 |= tag;
+
+	debug("attribute = %08x\n\r", val32);
+	cmd_hdr->attribute = cpu_to_le32(val32);
+
+	/* Make sure cmd desc and cmd slot valid before commmand issue */
+	sync();
+
+	/* PMP*/
+	val32 = (u32)(h2d->pm_port_c & 0x0f);
+	out_le32(&reg->cqpmp, val32);
+
+	/* Wait no active */
+	if (ata_wait_register(&reg->car, (1 << tag), 0, 10000))
+		printf("Wait no active time out\n\r");
+
+	/* Issue command */
+	if (!(in_le32(&reg->cqr) & (1 << tag))) {
+		val32 = 1 << tag;
+		out_le32(&reg->cqr, val32);
+	}
+
+	/* Wait command completed for 10s */
+	if (ata_wait_register(&reg->ccr, (1 << tag), (1 << tag), 10000)) {
+		printf("SCSI command time out\n\r");
+	}
+
+	val32 = in_le32(&reg->cer);
+
+
+	if (val32) {
+		u32 hstatus = in_le32(&reg->hstatus);
+		u32 der = in_le32(&reg->der);
+		u32 hcontrol = in_le32(&reg->hcontrol);
+
+		if (hstatus & HSTATUS_DATA_OVERRUN) {
+			// Ignore spurious ATAPI overrun
+			debug("Clearing spurious data length mismatch");
+		} else {
+			printf("CE at device 0x%x\n", hstatus);
+			fsl_sata_dump_sfis((struct sata_fis_d2h *)cmd_desc->sfis);
+			fsl_sata_dump_regs(reg);
+		}
+
+		out_le32(&reg->hcontrol, hcontrol | HCONTROL_CLEAR_ERROR);
+		out_le32(&reg->hcontrol, hcontrol & ~HCONTROL_CLEAR_ERROR);
+		out_le32(&reg->serror, in_le32(&reg->serror));
+		out_le32(&reg->cer, val32);
+		out_le32(&reg->der, der);
+
+		if (hstatus & HSTATUS_DATA_OVERRUN)
+			result = 0;
+		else
+			result = -EIO;
+	} else
+	    result = 0;
+
+	/* Clear complete flags */
+	val32 = in_le32(&reg->ccr);
+	out_le32(&reg->ccr, val32);
+
+	return result;
 }
 
 static int fsl_ata_exec_reset_cmd(struct fsl_sata *sata, struct sata_fis_h2d *cfis,
@@ -845,4 +997,58 @@ int scan_sata(int dev)
 #endif
 	free((void *)id);
 	return 0;
+}
+
+int scsi_exec(ccb *pccb)
+{
+	int ret;
+	int port = pccb->target;
+	fsl_sata_t *sata;
+
+	if (port < 0 || port > CONFIG_SYS_SATA_MAX_DEVICE) {
+		debug("SCSI port out of range %d\n", port);
+		return -ENODEV;
+	}
+
+	sata = (fsl_sata_t *)sata_dev_desc[port].priv;
+	if (! sata) {
+		debug("SCSI port not initialised %d\n", port);
+		return -ENODEV;
+	}
+
+	if (! sata->link) {
+		debug("SCSI link not present");
+		return -ENODEV;
+	}
+
+	debug("SCSI target %d\n", port);
+
+	ret = fsl_ata_exec_scsi_cmd(sata, pccb, 0);
+
+	if (ret) {
+		debug("SCSI command 0x%02x ret errno %d\n", pccb->cmd[0], ret);
+		return false;
+	}
+	return true;
+
+}
+
+void __weak scsi_init(void)
+{
+}
+
+void scsi_low_level_init(int busdevfunc)
+{
+	/* Will be initialised by SATA code */
+}
+
+void scsi_bus_reset(void)
+{
+	/*Not implement*/
+}
+
+
+void scsi_print_error(ccb * pccb)
+{
+	/*The sata error info can be read in the sata driver*/
 }
