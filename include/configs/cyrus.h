@@ -471,6 +471,7 @@
 #define CONFIG_ISO_PARTITION
 #define CONFIG_CMD_PART
 #define CONFIG_CMD_EXT2
+#define CONFIG_FS_ISO9660
 #endif
 
 #ifdef CONFIG_FMAN_ENET
