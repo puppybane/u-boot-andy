@@ -553,7 +553,6 @@ static int fsl_ata_exec_scsi_cmd(struct fsl_sata *sata,
 
 	val32 = in_le32(&reg->cer);
 
-
 	if (val32) {
 		u32 hstatus = in_le32(&reg->hstatus);
 		u32 der = in_le32(&reg->der);
@@ -1007,18 +1006,18 @@ int scsi_exec(ccb *pccb)
 
 	if (port < 0 || port > CONFIG_SYS_SATA_MAX_DEVICE) {
 		debug("SCSI port out of range %d\n", port);
-		return -ENODEV;
+		return false;
 	}
 
 	sata = (fsl_sata_t *)sata_dev_desc[port].priv;
 	if (! sata) {
 		debug("SCSI port not initialised %d\n", port);
-		return -ENODEV;
+		return false;
 	}
 
 	if (! sata->link) {
 		debug("SCSI link not present");
-		return -ENODEV;
+		return false;
 	}
 
 	debug("SCSI target %d\n", port);

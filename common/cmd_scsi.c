@@ -111,6 +111,9 @@ void scsi_scan(int mode)
 			pccb->pdata=(unsigned char *)&tempbuff;
 			pccb->datalen=512;
 			scsi_setup_inquiry(pccb);
+
+			memset(tempbuff, 0xff, 32);
+
 			if (scsi_exec(pccb) != true) {
 				if(pccb->contr_stat==SCSI_SEL_TIME_OUT) {
 					debug ("Selection timeout ID %d\n",pccb->target);
@@ -118,9 +121,13 @@ void scsi_scan(int mode)
 				}
 				scsi_print_error(pccb);
 				continue;
-			}
+			} 
 			perq=tempbuff[0];
 			modi=tempbuff[1];
+
+			if (perq == 0xff)
+				continue; /* Skip corrupted result */
+
 			if((perq & 0x1f)==0x1f) {
 				continue; /* skip unknown devices */
 			}
