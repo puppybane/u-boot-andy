@@ -55,6 +55,7 @@ static block_dev_desc_t scsi_dev_desc[CONFIG_SYS_SCSI_MAX_DEVICE];
  *  forward declerations of some Setup Routines
  */
 void scsi_setup_test_unit_ready(ccb * pccb);
+void scsi_setup_start_unit(ccb * pccb);
 void scsi_setup_read6(ccb * pccb, unsigned long start, unsigned short blocks);
 void scsi_setup_read_ext(ccb * pccb, unsigned long start, unsigned short blocks);
 static void scsi_setup_write_ext(ccb *pccb, unsigned long start,
@@ -107,6 +108,7 @@ void scsi_scan(int mode)
 	for(i=0;i<CONFIG_SYS_SCSI_MAX_SCSI_ID;i++) {
 		pccb->target=i;
 		for(lun=0;lun<CONFIG_SYS_SCSI_MAX_LUN;lun++) {
+
 			pccb->lun=lun;
 			pccb->pdata=(unsigned char *)&tempbuff;
 			pccb->datalen=512;
@@ -152,15 +154,30 @@ void scsi_scan(int mode)
 			scsi_dev_desc[scsi_max_devs].lun=pccb->lun;
 
 			pccb->datalen=0;
-			scsi_setup_test_unit_ready(pccb);
-			if (scsi_exec(pccb) != true) {
-				printf("Not ready...\n");
-				if (scsi_dev_desc[scsi_max_devs].removable == true) {
+			if (scsi_dev_desc[scsi_max_devs].removable == true) {
+				// Give CD-ROM time to spin up
+				int retry = 10;
+
+				while(retry > 0) {
+					scsi_setup_test_unit_ready(pccb);
+					if (scsi_exec(pccb) == true) 
+						break;
+					printf("Not ready...\n");
+					retry--;
+					mdelay(1500);
+				}
+				if (retry <= 0) {
 					scsi_dev_desc[scsi_max_devs].type=perq;
 					goto removable;
 				}
-				scsi_print_error(pccb);
-				continue;
+
+			} else {
+				scsi_setup_test_unit_ready(pccb);
+				if (scsi_exec(pccb) != true) {
+					printf("Not ready...\n");
+					scsi_print_error(pccb);
+					continue;
+				}
 			}
 			if (scsi_read_capacity(pccb, &capacity, &blksz)) {
 				scsi_print_error(pccb);
