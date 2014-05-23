@@ -192,6 +192,11 @@ void pci_init_board(void)
 
 int board_early_init_r(void)
 {
+	volatile fsl_lbc_t *lbc = LBC_BASE_ADDR;
+	
+	lbc->lbcr = 0;
+	lbc->lcrr = 0x80000000 | CONFIG_SYS_LBC_LCRR;	/* 1 clock LALE cycle */
+	
 	
 	return 0;
 }
