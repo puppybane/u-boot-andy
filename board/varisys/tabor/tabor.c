@@ -192,8 +192,36 @@ void pci_init_board(void)
 
 int board_early_init_r(void)
 {
+	volatile fsl_lbc_t *lbc = LBC_BASE_ADDR;
+	
+	lbc->lbcr = 0;
+	lbc->lcrr = 0x80000000 | CONFIG_SYS_LBC_LCRR;	/* 1 clock LALE cycle */
+	
 	
 	return 0;
+}
+
+static void tabor_phy_tuning(int phy)
+{
+	/*
+	 * Enable RGMII delay on Tx and Rx for CPU port
+	 */
+	printf("Tuning PHY @ %d\n", phy);
+	 
+	// sets address 0x104 or reg 260 for writing
+	miiphy_write(DEFAULT_MII_NAME, phy, 0xb, 0x8104); 
+	// writes to address 0x104 , RXC/TXC to +0.96ns and TX_CTL/RX_CTL to -0.84ns
+	miiphy_write(DEFAULT_MII_NAME, phy, 0xc, 0xf0f0); 
+	// sets address 0x105 or reg 261 for writing
+	miiphy_write(DEFAULT_MII_NAME, phy, 0xb, 0x8105);
+	// writes to address 0x105 , RXD[3..0] to -0.
+	miiphy_write(DEFAULT_MII_NAME, phy, 0xc, 0x0000);
+	// sets address 0x106 or reg 261 for writing
+	miiphy_write(DEFAULT_MII_NAME, phy, 0xb, 0x8106);
+	// writes to address 0x106 , TXD[3..0] to -0.84ns
+	miiphy_write(DEFAULT_MII_NAME, phy, 0xc, 0x0000);
+	// force re-negotiation
+	miiphy_write(DEFAULT_MII_NAME, phy, 0x0, 0x1340);	
 }
 
 /*
@@ -222,6 +250,9 @@ int board_eth_init(bd_t *bis)
 	mdio_info.regs = (struct tsec_mii_mng *)CONFIG_SYS_MDIO_BASE_ADDR;
 	mdio_info.name = DEFAULT_MII_NAME;
 	fsl_pq_mdio_init(bis, &mdio_info);
+
+	tabor_phy_tuning(TSEC1_PHY_ADDR);
+	tabor_phy_tuning(TSEC2_PHY_ADDR);
 
 	return tsec_eth_init(bis, tsec_info, num) + pci_eth_init(bis);
 }

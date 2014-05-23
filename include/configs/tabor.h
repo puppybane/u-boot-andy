@@ -173,46 +173,6 @@
 #endif
 #endif
 
-/* Nand Flash */
-#if defined(CONFIG_NAND_FSL_ELBC)
-#define CONFIG_SYS_NAND_BASE		0xff800000
-#ifdef CONFIG_PHYS_64BIT
-#define CONFIG_SYS_NAND_BASE_PHYS	0xfff800000ull
-#else
-#define CONFIG_SYS_NAND_BASE_PHYS	CONFIG_SYS_NAND_BASE
-#endif
-
-#define CONFIG_SYS_NAND_BASE_LIST	{CONFIG_SYS_NAND_BASE}
-#define CONFIG_SYS_MAX_NAND_DEVICE	1
-#define CONFIG_MTD_NAND_VERIFY_WRITE
-#define CONFIG_CMD_NAND			1
-#define CONFIG_SYS_NAND_BLOCK_SIZE	(256 * 1024)
-#define CONFIG_ELBC_NAND_SPL_STATIC_PGSIZE
-
-/* NAND flash config */
-#define CONFIG_SYS_NAND_BR_PRELIM  (BR_PHYS_ADDR(CONFIG_SYS_NAND_BASE_PHYS) \
-			       | (2<<BR_DECC_SHIFT)    /* Use HW ECC */ \
-			       | BR_PS_8	       /* Port Size = 8 bit */ \
-			       | BR_MS_FCM	       /* MSEL = FCM */ \
-			       | BR_V)		       /* valid */
-#define CONFIG_SYS_NAND_OR_PRELIM  (OR_AM_32KB	       /* length 256K */ \
-			       | OR_FCM_PGS	       /* Large Page*/ \
-			       | OR_FCM_CSCT \
-			       | OR_FCM_CST \
-			       | OR_FCM_CHT \
-			       | OR_FCM_SCY_1 \
-			       | OR_FCM_TRLX \
-			       | OR_FCM_EHTR)
-#ifdef CONFIG_NAND
-#define CONFIG_SYS_BR0_PRELIM	CONFIG_SYS_NAND_BR_PRELIM /* NAND Base Address */
-#define CONFIG_SYS_OR0_PRELIM	CONFIG_SYS_NAND_OR_PRELIM /* NAND Options */
-#else
-#define CONFIG_SYS_BR1_PRELIM	CONFIG_SYS_NAND_BR_PRELIM /* NAND Base Address */
-#define CONFIG_SYS_OR1_PRELIM	CONFIG_SYS_NAND_OR_PRELIM /* NAND Options */
-#endif
-
-#endif /* CONFIG_NAND_FSL_ELBC */
-
 #define CONFIG_BOARD_EARLY_INIT_F
 #define CONFIG_BOARD_EARLY_INIT_R
 #define CONFIG_MISC_INIT_R
@@ -233,6 +193,21 @@
 
 #define CONFIG_SYS_MONITOR_LEN		(512 * 1024)
 #define CONFIG_SYS_MALLOC_LEN		(10 * 1024 * 1024)
+
+#define CONFIG_SYS_LBC0_BASE		0xe0000000	/* Start of LBC Registers */
+#ifdef CONFIG_PHYS_64BIT
+#define CONFIG_SYS_LBC0_BASE_PHYS	0xfe0000000ull
+#else
+#define CONFIG_SYS_LBC0_BASE_PHYS	CONFIG_SYS_LBC0_BASE
+#endif
+
+#define CONFIG_SYS_BR0_PRELIM \
+(BR_PHYS_ADDR(CONFIG_SYS_LBC0_BASE_PHYS) | BR_PS_8 | BR_V)
+
+#define CONFIG_SYS_OR0_PRELIM	0xfff00010
+
+/* Set the local bus clock 1/16 of platform clock */
+#define CONFIG_SYS_LBC_LCRR		(LCRR_CLKDIV_16 | LCRR_EADC_1)
 
 /*
  * Config the L2 Cache as L2 SRAM
@@ -489,8 +464,8 @@
 #define CONFIG_TSEC2		1
 #define CONFIG_TSEC2_NAME	"eTSEC2"
 
-#define TSEC1_PHY_ADDR		6
-#define TSEC2_PHY_ADDR		0x1f
+#define TSEC1_PHY_ADDR		3
+#define TSEC2_PHY_ADDR		7
 
 #define TSEC1_FLAGS		(TSEC_GIGABIT | TSEC_REDUCED)
 #define TSEC2_FLAGS		(TSEC_GIGABIT | TSEC_REDUCED)
@@ -552,6 +527,7 @@
  */
 #include <config_cmd_default.h>
 
+#define CONFIG_CMD_DHCP
 #define CONFIG_CMD_ELF
 #define CONFIG_CMD_ERRATA
 #define CONFIG_CMD_IRQ
