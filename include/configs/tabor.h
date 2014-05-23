@@ -489,8 +489,8 @@
 #define CONFIG_TSEC2		1
 #define CONFIG_TSEC2_NAME	"eTSEC2"
 
-#define TSEC1_PHY_ADDR		6
-#define TSEC2_PHY_ADDR		0x1f
+#define TSEC1_PHY_ADDR		3
+#define TSEC2_PHY_ADDR		7
 
 #define TSEC1_FLAGS		(TSEC_GIGABIT | TSEC_REDUCED)
 #define TSEC2_FLAGS		(TSEC_GIGABIT | TSEC_REDUCED)
@@ -552,6 +552,7 @@
  */
 #include <config_cmd_default.h>
 
+#define CONFIG_CMD_DHCP
 #define CONFIG_CMD_ELF
 #define CONFIG_CMD_ERRATA
 #define CONFIG_CMD_IRQ
