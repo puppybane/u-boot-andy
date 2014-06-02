@@ -43,7 +43,7 @@ DECLARE_GLOBAL_DATA_PTR;
 #define GPIO_OPENDRAIN 0x30000000
 #define GPIO_DIR       0x3c000004
 #define GPIO_INITIAL   0x30000000
-#define GPIO_VGA_SWITCH (1<<19)
+#define GPIO_VGA_SWITCH 0x00001000
 
 int checkboard (void)
 {
@@ -180,15 +180,16 @@ void * video_hw_init(void)
 	volatile ccsr_gpio_t *pgpio = (void *)(CONFIG_SYS_MPC85xx_GPIO_ADDR);
 	// Boot video here once everything else is working
 	pci_dev_t vga = find_vga();
-	u32 pins = in_be32(&pgpio->gpdir);
+	u32 pins = in_be32(&pgpio->gpdat);
 
 	printf("Looking for VGA\n");
+	printf("PINS: 0x%08x\n", pins);
 	
 	/* PostBIOS with x86 emulater */
 	if (vga < 0) {
 		printf("No VGA device found\n");
 		return 0;
-	} else if ((pins & GPIO_VGA_SWITCH) == 0) {
+	} else if ((pins & GPIO_VGA_SWITCH) != 0) {
 		printf("Fit jumper to enable VGA\n");
 		return 0;
 	} else if (!BootVideoCardBIOS(vga, NULL, 0)) {
