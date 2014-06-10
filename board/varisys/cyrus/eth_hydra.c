@@ -81,7 +81,15 @@
 // TODO - base this on test of PLD registers once working.
 static int have_second_phy = 1;
 
-#define IS_VALID_PORT(p)  ((p) == FM1_DTSEC4 || (have_second_phy && (p) == FM1_DTSEC5))
+#ifdef CONFIG_PPC_P5040
+#define FIRST_PORT FM1_DTSEC5
+#define SECOND_PORT FM2_DTSEC5
+#else
+#define FIRST_PORT FM1_DTSEC4
+#define SECOND_PORT FM1_DTSEC5
+#endif
+
+#define IS_VALID_PORT(p)  ((p) == FIRST_PORT || (have_second_phy && (p) == SECOND_PORT))
 
 /*
  * Given the following ...
@@ -118,7 +126,7 @@ void board_ft_fman_fixup_port(void *fdt, char *compat, phys_addr_t addr,
 
 	/* RGMII */
 	/* The RGMII PHY is identified by the MAC connected to it */
-	if (port == FM1_DTSEC4)
+	if (port == FIRST_PORT)
 		fdt_set_phy_handle(fdt, compat, addr, "phy_rgmii_0");
 	else
 		fdt_set_phy_handle(fdt, compat, addr, "phy_rgmii_1");
@@ -189,12 +197,12 @@ int board_eth_init(bd_t *bis)
 	/*
 	 * DTSEC4 is RGMII, but connected to PHY address 3 unlike the development system
 	 */
-	fm_info_set_phy_address(FM1_DTSEC4, 3);
-	fm_info_set_mdio(FM1_DTSEC4,
+	fm_info_set_phy_address(FIRST_PORT, 3);
+	fm_info_set_mdio(FIRST_PORT,
 		miiphy_get_dev_by_name(DEFAULT_FM_MDIO_NAME));
 	if (have_second_phy) {
-		fm_info_set_phy_address(FM1_DTSEC5, 7);
-		fm_info_set_mdio(FM1_DTSEC5,
+		fm_info_set_phy_address(SECOND_PORT, 7);
+		fm_info_set_mdio(SECOND_PORT,
 			miiphy_get_dev_by_name(DEFAULT_FM_MDIO_NAME));
 	}
 
@@ -205,6 +213,15 @@ int board_eth_init(bd_t *bis)
 		
 		}
 	}
+#ifdef CONFIG_PPC_P5040
+	for (i = FM2_DTSEC2; i < FM2_DTSEC1 + CONFIG_SYS_NUM_FM2_DTSEC; i++) {
+		if (! IS_VALID_PORT(i)) {
+			fm_disable_port(i);
+		
+		}
+	}
+
+#endif
 
 	cpu_eth_init(bis);
 	

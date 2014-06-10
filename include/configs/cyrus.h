@@ -31,7 +31,7 @@
 
 #define CONFIG_PHYS_64BIT
 
-#if !defined(CONFIG_PPC_P5020) && !defined(CONFIG_PPC_P3041)
+#if !defined(CONFIG_PPC_P5020) && !defined(CONFIG_PPC_P3041) && !defined(CONFIG_PPC_P5040)
 #error Must call Cyrus CONFIG with a specific CPU enabled.
 #endif
 
@@ -43,8 +43,8 @@
 #define CONFIG_PCIE4
 #ifdef CONFIG_PPC_P5020
 #define CONFIG_SYS_FSL_RAID_ENGINE
-#endif
 #define CONFIG_SYS_DPAA_RMAN
+#endif
 #define CONFIG_SYS_DPAA_PME
 
 /* Enable splash screen */
@@ -63,6 +63,8 @@
 #define CONFIG_SYS_FSL_PBL_RCW $(SRCTREE)/board/varisys/cyrus/rcw_p5020_v2.cfg
 #elif defined(CONFIG_PPC_P5020)
 #define CONFIG_SYS_FSL_PBL_RCW $(SRCTREE)/board/varisys/cyrus/rcw_p5020.cfg
+#elif defined(CONFIG_PPC_P5040)
+#define CONFIG_SYS_FSL_PBL_RCW $(SRCTREE)/board/varisys/cyrus/rcw_p5040.cfg
 #endif
 #endif
 
@@ -176,7 +178,7 @@
 #else
 #define CONFIG_SYS_SPD_BUS_NUM	1
 #endif
-#ifdef CONFIG_PPC_P5020
+#if defined(CONFIG_PPC_P5020) || defined(CONFIG_PPC_P5040)
 #define SPD_EEPROM_ADDRESS1	0x51
 #define SPD_EEPROM_ADDRESS2	0x52
 #else
