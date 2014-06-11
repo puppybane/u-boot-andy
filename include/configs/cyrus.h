@@ -58,15 +58,20 @@
 #define CONFIG_RESET_VECTOR_ADDRESS	0xfffffffc
 #define CONFIG_SYS_FSL_PBL_PBI $(SRCTREE)/board/varisys/cyrus/pbi.cfg
 #if defined(CONFIG_PPC_P3041)
+#define CONFIG_SYS_CLK_FREQ 133000000
 #define CONFIG_SYS_FSL_PBL_RCW $(SRCTREE)/board/varisys/cyrus/rcw_p3041.cfg
 #elif defined(CONFIG_CYRUS_V2)
+#define CONFIG_SYS_CLK_FREQ 133000000
 #define CONFIG_SYS_FSL_PBL_RCW $(SRCTREE)/board/varisys/cyrus/rcw_p5020_v2.cfg
 #elif defined(CONFIG_PPC_P5020)
+#define CONFIG_SYS_CLK_FREQ 133000000
 #define CONFIG_SYS_FSL_PBL_RCW $(SRCTREE)/board/varisys/cyrus/rcw_p5020.cfg
 #elif defined(CONFIG_PPC_P5040)
+#define CONFIG_SYS_CLK_FREQ 100000000
 #define CONFIG_SYS_FSL_PBL_RCW $(SRCTREE)/board/varisys/cyrus/rcw_p5040.cfg
 #endif
 #endif
+
 
 /* High Level Configuration Options */
 #define CONFIG_BOOKE
@@ -111,10 +116,6 @@
 #define CONFIG_ENV_SIZE			0x2000
 #define CONFIG_ENV_OFFSET		(512 * 1097)
 #endif
-
-#define CONFIG_SYS_CLK_FREQ 133000000
-/*
-#define CONFIG_SYS_CLK_FREQ	get_board_sys_clk()  sysclk for MPC85xx */
 
 /*
  * These can be toggled for performance analysis, otherwise use default.
