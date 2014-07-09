@@ -84,8 +84,11 @@
 #define CONFIG_L2_CACHE
 #define CONFIG_BTB
 
-#define CONFIG_SYS_MEMTEST_START	0x00000000
-#define CONFIG_SYS_MEMTEST_END		0x7fffffff
+#define CONFIG_CMD_MEMTEST
+#define CONFIG_CMD_MEMORY
+#define CONFIG_SYS_MEMTEST_START	0x02000000
+#define CONFIG_SYS_MEMTEST_END		0x03ffffff
+#define CONFIG_SYS_ALT_MEMTEST
 
 #define CONFIG_SYS_CCSRBAR		0xffe00000
 #define CONFIG_SYS_CCSRBAR_PHYS_LOW	CONFIG_SYS_CCSRBAR
@@ -207,7 +210,7 @@
 #define CONFIG_SYS_OR0_PRELIM	0xfff00010
 
 /* Set the local bus clock 1/16 of platform clock */
-#define CONFIG_SYS_LBC_LCRR		(LCRR_CLKDIV_16 | LCRR_EADC_1)
+#define CONFIG_SYS_LBC_LCRR		(LCRR_CLKDIV_8 | LCRR_EADC_1)
 
 /*
  * Config the L2 Cache as L2 SRAM
@@ -268,6 +271,7 @@
 #define CONFIG_SYS_HUSH_PARSER
 
 /* Video */
+#define CONFIG_FSL_DIU_FB
 
 #ifdef CONFIG_FSL_DIU_FB
 #define CONFIG_SYS_DIU_ADDR	(CONFIG_SYS_CCSRBAR + 0x10000)
@@ -278,15 +282,6 @@
 #define CONFIG_VGA_AS_SINGLE_DEVICE
 #define CONFIG_VIDEO_LOGO
 #define CONFIG_VIDEO_BMP_LOGO
-#define CONFIG_CFI_FLASH_USE_WEAK_ACCESSORS
-/*
- * With CONFIG_CFI_FLASH_USE_WEAK_ACCESSORS, flash I/O is really slow, so
- * disable empty flash sector detection, which is I/O-intensive.
- */
-#undef CONFIG_SYS_FLASH_EMPTY_INFO
-#endif
-
-#ifndef CONFIG_FSL_DIU_FB
 #endif
 
 #ifdef CONFIG_ATI
@@ -618,7 +613,8 @@
 	"fdtaddr=c00000\0"	  			      	\
 	"fdtfile=p1022ds.dtb\0"	  				\
 	"bdev=sda3\0"		  			      	\
-	"hwconfig=esdhc;audclk:12\0"
+	"hwconfig=esdhc;audclk:12\0"            \
+	"video-mode=fslfb:800x600-32@60,monitor=dvi\0"
 
 #define CONFIG_HDBOOT					\
 	"setenv bootargs root=/dev/$bdev rw "		\
