@@ -33,7 +33,7 @@ int board_early_init_f(void)
 	ccsr_gur_t *gur = (void *)CONFIG_SYS_MPC85xx_GUTS_ADDR;
 
 	/* Set pmuxcr to allow both i2c1 and i2c2, set 8 bit LBC */
-	gur->pmuxcr = 0x40011060;
+	gur->pmuxcr = 0x40011030;
 	gur->pmuxcr2 = 0xf6000000;
 	/* Disable unused USB2 */
 	gur->devdisr = 0x07400000;
