@@ -49,6 +49,7 @@ obj-$(CONFIG_ENV_IS_NOWHERE) += env_nowhere.o
 
 # command
 obj-$(CONFIG_CMD_AMBAPP) += cmd_ambapp.o
+obj-$(CONFIG_CMD_AMIGABOOT) += cmd_amigaboot.o
 obj-$(CONFIG_SOURCE) += cmd_source.o
 obj-$(CONFIG_CMD_SOURCE) += cmd_source.o
 obj-$(CONFIG_CMD_BDI) += cmd_bdinfo.o
@@ -56,6 +57,7 @@ obj-$(CONFIG_CMD_BEDBUG) += bedbug.o cmd_bedbug.o
 obj-$(CONFIG_CMD_BMP) += cmd_bmp.o
 obj-$(CONFIG_CMD_BOOTMENU) += cmd_bootmenu.o
 obj-$(CONFIG_CMD_BOOTLDR) += cmd_bootldr.o
+obj-$(CONFIG_CMD_BOOTOPTIONS) += cmd_bootoptions.o
 obj-$(CONFIG_CMD_BOOTSTAGE) += cmd_bootstage.o
 obj-$(CONFIG_CMD_CACHE) += cmd_cache.o
 obj-$(CONFIG_CMD_CBFS) += cmd_cbfs.o
@@ -148,7 +150,11 @@ obj-$(CONFIG_CMD_SETEXPR) += cmd_setexpr.o
 obj-$(CONFIG_CMD_SOFTSWITCH) += cmd_softswitch.o
 obj-$(CONFIG_CMD_SPI) += cmd_spi.o
 obj-$(CONFIG_CMD_SPIBOOTLDR) += cmd_spibootldr.o
+obj-$(CONFIG_CMD_START_LINUX) += cmd_startlinux.o
+obj-$(CONFIG_CMD_START_AMIGAOS) += cmd_startamigaos.o
+obj-$(CONFIG_CMD_START_AMIGACLASSIC) += cmd_startamigaclassic.o
 obj-$(CONFIG_CMD_STRINGS) += cmd_strings.o
+obj-$(CONFIG_CMD_SYSINFO) += cmd_sysinfo.o
 obj-$(CONFIG_CMD_TERMINAL) += cmd_terminal.o
 obj-$(CONFIG_CMD_TIME) += cmd_time.o
 obj-$(CONFIG_CMD_TRACE) += cmd_trace.o

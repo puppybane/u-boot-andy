@@ -56,7 +56,7 @@ bmp_image_t *gunzip_bmp(unsigned long addr, unsigned long *lenp,
 
 	/* align to 32-bit-aligned-address + 2 */
 	bmp = (bmp_image_t *)((((unsigned int)dst + 1) & ~3) + 2);
-
+ 
 	if (gunzip(bmp, CONFIG_SYS_VIDEO_LOGO_MAX_SIZE, (uchar *)addr, &len) != 0) {
 		free(dst);
 		return NULL;
@@ -196,7 +196,7 @@ static int bmp_info(ulong addr)
 		bmp = gunzip_bmp(addr, &len, &bmp_alloc_addr);
 
 	if (bmp == NULL) {
-		printf("There is no valid bmp file at the given address\n");
+		printf("NULL - There is no valid bmp file at the given address\n");
 		return 1;
 	}
 
@@ -233,7 +233,7 @@ int bmp_display(ulong addr, int x, int y)
 		bmp = gunzip_bmp(addr, &len, &bmp_alloc_addr);
 
 	if (!bmp) {
-		printf("There is no valid bmp file at the given address\n");
+		printf(" Not bmp - There is no valid bmp file at the given address\n");
 		return 1;
 	}
 

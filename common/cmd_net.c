@@ -12,6 +12,8 @@
 #include <command.h>
 #include <net.h>
 
+#undef CONFIG_CMD_NFS
+
 static int netboot_common(enum proto_t, cmd_tbl_t *, int, char * const []);
 
 static int do_bootp(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])

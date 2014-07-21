@@ -14,6 +14,7 @@
  */
 
 #define CONFIG_CMD_AMBAPP	/* AMBA Plug & Play Bus print utility */
+#define CONFIG_CMD_AMIGABOOTMENU	/* Graphical Amiga Boot Menu Display */
 #define CONFIG_CMD_ASKENV	/* ask for env variable		*/
 #define CONFIG_CMD_BDI		/* bdinfo			*/
 #define CONFIG_CMD_BEDBUG	/* Include BedBug Debugger	*/
@@ -88,6 +89,10 @@
 #define CONFIG_CMD_SNTP		/* SNTP support			*/
 #define CONFIG_CMD_SOURCE	/* "source" command support	*/
 #define CONFIG_CMD_SPI		/* SPI utility			*/
+#define CONFIG_CMD_START_AMIGAOS	/* Start AmigaOS  */
+#define CONFIG_CMD_START_AMIGACLASSIC	/* Start Amiga Classic  */
+#define CONFIG_CMD_START_LINUX	/* Start Linux  */
+#define CONFIG_CMD_SYSINFO	/* Graphical Amiga System Info  */
 #define CONFIG_CMD_TERMINAL	/* built-in Serial Terminal	*/
 #define CONFIG_CMD_UBI		/* UBI Support			*/
 #define CONFIG_CMD_UBIFS	/* UBIFS Support		*/

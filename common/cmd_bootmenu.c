@@ -86,7 +86,7 @@ static void bootmenu_autoboot_loop(struct bootmenu_data *menu,
 
 	if (menu->delay > 0) {
 		printf(ANSI_CURSOR_POSITION, menu->count + 5, 1);
-		printf("  Hit any key to stop autoboot: %2d ", menu->delay);
+//		printf("  Hit any key to stop autoboot: %2d ", menu->delay);
 	}
 
 	while (menu->delay > 0) {
@@ -457,6 +457,7 @@ void menu_display_statusline(struct menu *m)
 
 	menu = entry->menu;
 
+#ifdef NORMAL_U-BOOT
 	printf(ANSI_CURSOR_POSITION, 1, 1);
 	puts(ANSI_CLEAR_LINE);
 	printf(ANSI_CURSOR_POSITION, 2, 1);
@@ -473,6 +474,7 @@ void menu_display_statusline(struct menu *m)
 	puts(ANSI_CLEAR_LINE_TO_END);
 	printf(ANSI_CURSOR_POSITION, menu->count + 7, 1);
 	puts(ANSI_CLEAR_LINE);
+#endif
 }
 
 #ifdef CONFIG_MENU_SHOW

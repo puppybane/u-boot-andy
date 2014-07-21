@@ -45,11 +45,11 @@ static ccb tempccb;	/* temporary scsi command buffer */
 
 static unsigned char tempbuff[512]; /* temporary data buffer */
 
-static int scsi_max_devs; /* number of highest available scsi device */
+int scsi_max_devs; /* number of highest available scsi device */
 
-static int scsi_curr_dev; /* current device */
+int scsi_curr_dev; /* current device */
 
-static block_dev_desc_t scsi_dev_desc[CONFIG_SYS_SCSI_MAX_DEVICE];
+block_dev_desc_t scsi_dev_desc[CONFIG_SYS_SCSI_MAX_DEVICE];
 
 /********************************************************************************
  *  forward declerations of some Setup Routines
@@ -201,8 +201,9 @@ removable:
 		scsi_curr_dev=0;
 	else
 		scsi_curr_dev = -1;
-
-	printf("Found %d device(s).\n", scsi_max_devs);
+	if (mode==1) {
+		printf("Found %d device(s).\n", scsi_max_devs);
+	}
 #ifndef CONFIG_SPL_BUILD
 	setenv_ulong("scsidevs", scsi_max_devs);
 #endif

@@ -11,6 +11,8 @@
 
 #include <fsl_ddr.h>
 
+char dimm_name[32] ;
+
 #if defined(CONFIG_SYS_FSL_DDR3)
 static unsigned int
 compute_cas_latency_ddr3(const dimm_params_t *dimm_params,
@@ -226,12 +228,14 @@ compute_lowest_common_dimm_parameters(const dimm_params_t *dimm_params,
 #ifndef CONFIG_SPL_BUILD
 				printf("Detected RDIMM %s\n",
 					dimm_params[i].mpart);
+//				strcpy(dimm_name, dimm_params[i].mpart) ;
 #endif
 			} else {
 				temp2 = 1;
 #ifndef CONFIG_SPL_BUILD
 				printf("Detected UDIMM %s\n",
 					dimm_params[i].mpart);
+//				strcpy(dimm_name, dimm_params[i].mpart) ;
 #endif
 			}
 		}

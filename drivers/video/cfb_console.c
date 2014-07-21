@@ -623,7 +623,7 @@ static void video_drawchars(int xx, int yy, unsigned char *s, int count)
 	}
 }
 
-static inline void video_drawstring(int xx, int yy, unsigned char *s)
+inline void video_drawstring(int xx, int yy, unsigned char *s)
 {
 	video_drawchars(xx, yy, s, strlen((char *) s));
 }
@@ -2217,6 +2217,20 @@ static int video_init(void)
 	eorx = fgx ^ bgx;
 
 	video_clear();
+
+/* Change background colour to grey if at all possible */
+/* 16 BIT 565RGB 00000 000000 00000 */
+/* Byte swapped and everything */
+/*      1000 0 000 010 0 0000  => Red  */
+/*      0000 0 000 000 1 0000  => Blue  */
+/*      0000 0 010 000 0 0000  => Dull Green */
+/*      1100 0 011 000 1 1000  => Grey */
+/*      0001 1 000 110 0 0110  => Light grey */
+/*	1010 1 110 010 1 0101  => Desired grey */
+/* Grey is 170 / 170 / 170 decimal in Windows */
+
+	bgx = 0xad55ad55 ;
+	fgx = 0x00000000 ;
 
 #ifdef CONFIG_VIDEO_LOGO
 	/* Plot the logo and get start point of console */

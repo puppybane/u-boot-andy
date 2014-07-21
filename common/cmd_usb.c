@@ -23,7 +23,7 @@ static int usb_ether_curr_dev = -1; /* current ethernet device */
 #endif
 
 /* some display routines (info command) */
-static char *usb_get_class_desc(unsigned char dclass)
+char *usb_get_class_desc(unsigned char dclass)
 {
 	switch (dclass) {
 	case USB_CLASS_PER_INTERFACE:
@@ -141,7 +141,7 @@ static void usb_display_string(struct usb_device *dev, int index)
 	}
 }
 
-static void usb_display_desc(struct usb_device *dev)
+void usb_display_desc(struct usb_device *dev)
 {
 	if (dev->descriptor.bDescriptorType == USB_DT_DEVICE) {
 		printf("%d: %s,  USB Revision %x.%x\n", dev->devnum,
@@ -231,8 +231,8 @@ static void usb_display_ep_desc(struct usb_endpoint_descriptor *epdesc)
 	printf("\n");
 }
 
-/* main routine to diasplay the configs, interfaces and endpoints */
-static void usb_display_config(struct usb_device *dev)
+/* main routine to display the configs, interfaces and endpoints */
+void usb_display_config(struct usb_device *dev)
 {
 	struct usb_config *config;
 	struct usb_interface *ifdesc;

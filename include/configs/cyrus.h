@@ -50,6 +50,14 @@
 /* Enable splash screen */
 #define CONFIG_PREBOOT
 
+/* Enable Amiga Boot screen */
+#define CONFIG_CMD_AMIGABOOT
+#define CONFIG_CMD_SYSINFO
+#define CONFIG_CMD_BOOTOPTIONS
+#define CONFIG_CMD_START_AMIGAOS
+#define CONFIG_CMD_START_AMIGACLASSIC
+#define CONFIG_CMD_START_LINUX
+
 /*
  * Corenet DS style board configuration file
  */
@@ -443,7 +451,7 @@
 #ifdef CONFIG_PCI
 #define CONFIG_PCI_INDIRECT_BRIDGE
 #define CONFIG_PCI_PNP			/* do pci plug-and-play */
-#define CONFIG_E1000
+#undef CONFIG_E1000
 #define CONFIG_NET_MULTI
 
 #define CONFIG_PCI_SCAN_SHOW		/* show pci devices on startup */
