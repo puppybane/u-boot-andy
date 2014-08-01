@@ -57,7 +57,7 @@ static char *bootmenu_getoption(unsigned short int n)
 	return getenv(name);
 }
 
-static void bootmenu_print_entry(void *data)
+static int bootmenu_print_entry(void *data)
 {
 	struct bootmenu_entry *entry = data;
 	int reverse = (entry->menu->active == entry->num);
@@ -77,6 +77,7 @@ static void bootmenu_print_entry(void *data)
 
 	if (reverse)
 		puts(ANSI_COLOR_RESET);
+	return 0;
 }
 
 static void bootmenu_autoboot_loop(struct bootmenu_data *menu,
@@ -457,7 +458,7 @@ void menu_display_statusline(struct menu *m)
 
 	menu = entry->menu;
 
-#ifdef NORMAL_U-BOOT
+#ifdef NORMAL_U_BOOT
 	printf(ANSI_CURSOR_POSITION, 1, 1);
 	puts(ANSI_CLEAR_LINE);
 	printf(ANSI_CURSOR_POSITION, 2, 1);

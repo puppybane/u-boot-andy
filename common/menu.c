@@ -35,7 +35,7 @@ struct menu {
 	int timeout;
 	char *title;
 	int prompt;
-	void (*item_data_print)(void *);
+	int (*item_data_print)(void *);
 	char *(*item_choice)(void *);
 	void *item_choice_data;
 	struct list_head items;
@@ -82,9 +82,9 @@ static inline void *menu_item_print(struct menu *m,
 		puts(item->key);
 		putc('\n');
 	} else {
-		m->item_data_print(item->data);
+		if (m->item_data_print(item->data) < 0)
+			return m;
 	}
-
 	return NULL;
 }
 
@@ -115,7 +115,7 @@ void menu_display_statusline(struct menu *m)
  * Display a menu so the user can make a choice of an item. First display its
  * title, if any, and then each item in the menu.
  */
-static inline void menu_display(struct menu *m)
+static inline int menu_display(struct menu *m)
 {
 	if (m->title) {
 		puts(m->title);
@@ -123,7 +123,10 @@ static inline void menu_display(struct menu *m)
 	}
 	menu_display_statusline(m);
 
-	menu_items_iter(m, menu_item_print, NULL);
+	if (menu_items_iter(m, menu_item_print, NULL))
+		return -1;
+	else
+		return 0;
 }
 
 /*
@@ -193,7 +196,8 @@ static inline int menu_interactive_choice(struct menu *m, void **choice)
 	while (!choice_item) {
 		cbuf[0] = '\0';
 
-		menu_display(m);
+		if (menu_display(m) < 0)
+			return -EINVAL;
 
 		if (!m->item_choice) {
 			readret = readline_into_buffer("Enter choice: ", cbuf,
@@ -357,7 +361,7 @@ int menu_item_add(struct menu *m, char *item_key, void *item_data)
  * insufficient memory available to create the menu.
  */
 struct menu *menu_create(char *title, int timeout, int prompt,
-				void (*item_data_print)(void *),
+				int (*item_data_print)(void *),
 				char *(*item_choice)(void *),
 				void *item_choice_data)
 {

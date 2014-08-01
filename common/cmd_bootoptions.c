@@ -74,42 +74,55 @@ static char *bootoptionsmenu_getoption(unsigned short int n)
 	}
 }
 
-static void bootoptionsmenu_print_entry(void *data)
+static bmp_image_t *unpack_bmp(unsigned long addr)
+{
+    void *bmp_alloc_addr = NULL;
+    unsigned long len;
+    bmp_image_t *bmp = (bmp_image_t *)addr;
+
+    if ((bmp->header.signature[0] != 'B') ||
+          (bmp->header.signature[1] != 'M'))
+        bmp = gunzip_bmp(addr, &len, bmp_alloc_addr);
+
+    if (!bmp)
+            printf(" Not bmp - There is no valid bmp file at address 0x%lx\n",
+            	addr);
+	
+    return bmp;
+}
+
+static int bootoptionsmenu_print_entry(void *data)
 {
 	struct amigabootmenu_entry *entry = data;
 	int reverse = (entry->menu->active == entry->num);
-	ulong addr = 0x1002a000 ;
+	ulong addr_std = 0x1002a000 ;
 	ulong addr_inv = 0x10032000 ;
 	ulong addr_back_button = 0x1000e000 ;
 	ulong addr_back_button_inv = 0x10028000 ;
+	ulong addr;
 	bmp_image_t *bmp ;
-	void *bmp_alloc_addr = NULL;
-	unsigned long len;
 
 	if (entry->num == 4) {
 		if (reverse) {
-			bmp = (bmp_image_t *) (addr_back_button_inv) ;
+			addr = addr_back_button_inv;
 		} else {
-			bmp = (bmp_image_t *) (addr_back_button) ;
+			addr = addr_back_button;
 		}
 	} else {
 		if (reverse) {
-			bmp = (bmp_image_t *) (addr_inv + ((entry->num) * 0x2000)) ;
+			addr = addr_inv + ((entry->num) * 0x2000);
 		} else {
-			bmp = (bmp_image_t *) (addr + ((entry->num) * 0x2000)) ;
+			addr = addr_std + ((entry->num) * 0x2000);
 		}
 	}
-	if (!((bmp->header.signature[0]=='B') &&
-	      (bmp->header.signature[1]=='M')))
-		bmp = gunzip_bmp(addr, &len, &bmp_alloc_addr);
 
-	if (!bmp) {
-		printf(" Not bmp - There is no valid bmp file at the given address\n");
-		return ;
-	}
+	bmp = unpack_bmp(addr);
+	if (!bmp) 
+		return -1;
 
 
 	video_display_bitmap((unsigned long)bmp, buttonpos, (entry->num * 30) + 190);
+	return 0;
 }
 
 static void bootoptionsmenu_loop(struct amigabootmenu_data *menu,
@@ -198,43 +211,35 @@ static void bootoptionsmenu_loop(struct amigabootmenu_data *menu,
 	}
 
 	if (*key == KEY_SELECT) {
-		ulong addr = 0x1002a000 ;
+		ulong addr_std = 0x1002a000 ;
 		ulong addr_inv = 0x10032000 ;
 		ulong addr_back_button = 0x1000e000 ;
 		ulong addr_back_button_inv = 0x10028000 ;
+		ulong addr;
 		bmp_image_t *bmp ;
-		void *bmp_alloc_addr = NULL;
-		unsigned long len, delay;
+		unsigned long delay;
 		ulong start = get_timer(0);
 
 		/* Grey out current active button */
 		if (current_active == 4) {
-			bmp = (bmp_image_t *) (addr_back_button) ;
+			addr = addr_back_button;
 		} else {
-			bmp = (bmp_image_t *) (addr + (current_active * 0x2000)) ;
+			addr = addr_std + (current_active * 0x2000) ;
 		}
-		if (!((bmp->header.signature[0]=='B') &&
-			(bmp->header.signature[1]=='M')))
-			bmp = gunzip_bmp(addr, &len, &bmp_alloc_addr);
-		if (!bmp) {
-			printf(" Not bmp - There is no valid bmp file at the given address\n");
+		bmp = unpack_bmp(addr);
+		if (!bmp)
 			return ;
-		}
 		video_display_bitmap((unsigned long)bmp, buttonpos, (current_active * 30) + 190);
 
 		/* Highlight selected button and pause slightly before acting */
 		if (menu->active == 4) {
-			bmp = (bmp_image_t *) (addr_back_button_inv) ;
+			addr = addr_back_button_inv;
 		} else {
-			bmp = (bmp_image_t *) (addr_inv + ((menu->active) * 0x2000)) ;
+			addr = addr_inv + ((menu->active) * 0x2000);
 		}
-		if (!((bmp->header.signature[0]=='B') &&
-			(bmp->header.signature[1]=='M')))
-			bmp = gunzip_bmp(addr_inv, &len, &bmp_alloc_addr);
-		if (!bmp) {
-			printf(" Not bmp - There is no valid bmp file at the given address\n");
+		bmp = unpack_bmp(addr);
+		if (!bmp) 
 			return ;
-		}
 		video_display_bitmap((unsigned long)bmp, buttonpos, (menu->active * 30) + 190);
 
 		delay = 1 * CONFIG_SYS_HZ;
@@ -244,17 +249,13 @@ static void bootoptionsmenu_loop(struct amigabootmenu_data *menu,
 
 		/* Then restore before acting */
 		if (menu->active == 4) {
-			bmp = (bmp_image_t *) (addr_back_button) ;
+			addr = addr_back_button;
 		} else {
-			bmp = (bmp_image_t *) (addr + (menu->active * 0x2000)) ;
+			addr = addr + (menu->active * 0x2000) ;
 		}
-		if (!((bmp->header.signature[0]=='B') &&
-			(bmp->header.signature[1]=='M')))
-			bmp = gunzip_bmp(addr, &len, &bmp_alloc_addr);
-		if (!bmp) {
-			printf(" Not bmp - There is no valid bmp file at the given address\n");
+		bmp = unpack_bmp(addr);
+		if (!bmp) 
 			return ;
-		}
 		video_display_bitmap((unsigned long)bmp, buttonpos, (menu->active * 30) + 190);
 
 		start = get_timer(0);
@@ -490,44 +491,25 @@ static void bootoptions_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const a
 #ifdef Inline
 
 	for (ii = 0; ii < 4; ii++) {
-		bmp = (bmp_image_t *) (addr_boot_menu_options + (ii * 0x2000)) ;
+		bmp = unpack_bmp(addr_boot_menu_options + (ii * 0x2000)) ;
 
-		if (!((bmp->header.signature[0]=='B') &&
-	      	(bmp->header.signature[1]=='M')))
-			bmp = gunzip_bmp(addr_boot_menu_options + (ii * 0x2000) , &len, &bmp_alloc_addr);
-
-		if (!bmp) {
-			printf(" Not bmp - There is no valid bmp file at the given address\n");
+		if (!bmp) 
 			return ;
-		}
 
 		video_display_bitmap((unsigned long)bmp, buttonpos, 190 + (ii * 20));
 	}
 	
-	bmp = (bmp_image_t *)addr_back_button;
-	if (!((bmp->header.signature[0]=='B') &&
-	      (bmp->header.signature[1]=='M')))
-		bmp = gunzip_bmp(addr_back_button, &len, &bmp_alloc_addr);
-
-	if (!bmp) {
-		printf(" Not bmp - There is no valid bmp file at the given address\n");
+	bmp = unpack_bmp(addr_back_button);
+	if (!bmp)
 		return ;
-	}
 
 	video_display_bitmap((unsigned long)bmp, buttonpos, 330);
 
 	getc() ;
 
-	if (!((bmp->header.signature[0]=='B') &&
-	      (bmp->header.signature[1]=='M')))
-		bmp = gunzip_bmp(addr_back_button_inv, &len, &bmp_alloc_addr);
-
-	if (!bmp) {
-		printf(" Not bmp - There is no valid bmp file at the given address\n");
+	bmp = unpack_bmp(addr_back_button_inv);
+	if (!bmp)
 		return ;
-	}
-
-	bmp = (bmp_image_t *) (addr_back_button_inv) ;
 
 	video_display_bitmap((unsigned long)bmp, buttonpos, 330);
 

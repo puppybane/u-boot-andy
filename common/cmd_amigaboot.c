@@ -43,7 +43,7 @@ enum amigabootmenu_key {
 };
 
 /* Function Declarations */
-void amigabootmenu_clear_screen( void ) ;
+int amigabootmenu_clear_screen( void ) ;
 extern void video_drawstring(int xx, int yy, unsigned char *s) ;
 extern void sysinfo_draw_titled_box(int x, int y, int w, int h, char * title) ;
 extern struct bmp_image *gunzip_bmp(unsigned long addr, unsigned long *lenp, void **alloc_addr);
@@ -77,22 +77,32 @@ static char *amigabootmenu_getoption(unsigned short int n)
 	}
 }
 
-void amigabootmenu_clear_screen( )
+static bmp_image_t *unpack_bmp(unsigned long addr)
+{
+    void *bmp_alloc_addr = NULL;
+    unsigned long len;
+    bmp_image_t *bmp = (bmp_image_t *)addr;
+
+    if ((bmp->header.signature[0] != 'B') ||
+          (bmp->header.signature[1] != 'M'))
+        bmp = gunzip_bmp(addr, &len, bmp_alloc_addr);
+
+    if (!bmp)
+            printf(" Not bmp - There is no valid bmp file at address 0x%lx\n",
+            	addr);
+	
+    return bmp;
+}
+
+int amigabootmenu_clear_screen( )
 {
 	ulong addr = 0x10001000 ;
-        bmp_image_t *bmp = (bmp_image_t *)addr;
-        void *bmp_alloc_addr = NULL;
-        unsigned long len;
+    bmp_image_t *bmp;
 	int ii, jj; 
 
-        if (!((bmp->header.signature[0]=='B') &&
-              (bmp->header.signature[1]=='M')))
-                bmp = gunzip_bmp(addr, &len, &bmp_alloc_addr);
-
-        if (!bmp) {
-                printf(" Not bmp - There is no valid bmp file at the given address\n");
-                return ;
-        }
+	bmp = unpack_bmp(addr);
+    if (! bmp)
+	    return -1;  
 	
 	for (ii = 0; ii < 80; ii++ ) {
 		for (jj = 0; jj < 50; jj++) {
@@ -100,36 +110,30 @@ void amigabootmenu_clear_screen( )
 		}
 	}
 
-	return ;
+	return 0;
 }
 
-static void amigabootmenu_print_entry(void *data)
+static int amigabootmenu_print_entry(void *data)
 {
 	struct amigabootmenu_entry *entry = data;
 	int reverse = (entry->menu->active == entry->num);
-	ulong addr = 0x1000c000 ;
+	ulong addr_std = 0x1000c000 ;
 	ulong addr_inv = 0x1001a000 ;
-        bmp_image_t *bmp = (bmp_image_t *)addr;
-        void *bmp_alloc_addr = NULL;
-        unsigned long len;
-
-        if (!((bmp->header.signature[0]=='B') &&
-              (bmp->header.signature[1]=='M')))
-                bmp = gunzip_bmp(addr, &len, &bmp_alloc_addr);
-
-        if (!bmp) {
-                printf(" Not bmp - There is no valid bmp file at the given address\n");
-                return ;
-        }
+	ulong addr;
+    bmp_image_t *bmp;
 
 	if (reverse) {
-		bmp = (bmp_image_t *) (addr_inv - ((entry->num) * 0x2000)) ;
+		addr = (addr_inv - ((entry->num) * 0x2000)) ;
 	} else {
-		bmp = (bmp_image_t *) (addr - ((entry->num) * 0x2000)) ;
+		addr = (addr_std - ((entry->num) * 0x2000)) ;
 	}
 
-        video_display_bitmap((unsigned long)bmp, buttonpos, (entry->num * 30) + 190);
+	bmp = unpack_bmp(addr);
+	if (! bmp)
+		return -1;
 
+    video_display_bitmap((unsigned long)bmp, buttonpos, (entry->num * 30) + 190);
+    return 0;
 }
 
 #ifdef AUTO_BOOT
@@ -278,14 +282,10 @@ static void amigabootmenu_loop(struct amigabootmenu_data *menu,
 		ulong start = get_timer(0);
 
 		/* Grey out current active button */
-		bmp = (bmp_image_t *) (addr - ((current_active) * 0x2000)) ;
-		if (!((bmp->header.signature[0]=='B') &&
-		      	(bmp->header.signature[1]=='M')))
-			bmp = gunzip_bmp(addr, &len, &bmp_alloc_addr);
-		if (!bmp) {
-			printf(" Not bmp - There is no valid bmp file at the given address\n");
+		bmp = unpack_bmp(addr - ((current_active) * 0x2000)) ;
+		if (!bmp)
 			return ;
-		}
+
 		video_display_bitmap((unsigned long)bmp, buttonpos, (current_active * 30) + 190);
 
 		/* Highlight selected button and pause slightly before acting */
@@ -306,14 +306,17 @@ static void amigabootmenu_loop(struct amigabootmenu_data *menu,
 
 		start = get_timer(0) ;
 		/* Then put original greyed button back before continuing */
-		bmp = (bmp_image_t *) (addr - ((menu->active) * 0x2000)) ;
+		bmp = unpack_bmp (addr - ((menu->active) * 0x2000));
+		if (! bmp)
+			return;
 		video_display_bitmap((unsigned long)bmp, buttonpos, (menu->active * 30) + 190);
 
 		delay = 1 * CONFIG_SYS_HZ;
 		while (get_timer(start) < delay) {
 			udelay(1);
 		}
-		amigabootmenu_clear_screen() ;
+		if (amigabootmenu_clear_screen() < 0)
+			return;
 	}
 
 	/* enter key was pressed */
@@ -523,8 +526,11 @@ static void amigabootmenu_show(int mdelay)
 
 	/* Temporarily pop up animated splash screen - first time only */
 	if (init == 0) {
-		amigabootmenu_clear_screen() ;
-		bmp = (bmp_image_t *)(addr_splash) ;
+		if (amigabootmenu_clear_screen() < 0)
+			return;
+		bmp = unpack_bmp(addr_splash) ;
+		if (! bmp)
+			return;
 		video_display_bitmap((unsigned long)bmp, 0, 0);
 
 		/* Start USB */
@@ -535,7 +541,9 @@ static void amigabootmenu_show(int mdelay)
 		mdelay = 0 ;
 		for (jj = 0; jj < 10; jj++) {
 			for (ii = 0; ii < 10; ii++) {
-				bmp = (bmp_image_t *)(addr_splash + (ii * 0x1000000)) ;
+				bmp = unpack_bmp(addr_splash + (ii * 0x1000000)) ;
+				if (! bmp)
+					return;
 				video_display_bitmap((unsigned long)bmp, 0, 0);
 				delay = 100 ;
 				while (get_timer(start) < delay) {
