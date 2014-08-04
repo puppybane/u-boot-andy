@@ -23,6 +23,7 @@
 #include <i2c.h>
 #include <version.h>
 #include <fsl_ddr.h>
+#include <amigaboot.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -153,7 +154,7 @@ void sysinfo_board_add_ram_info(char *data_buffer)
 
 //	strcpy(data_buffer, info.dimm_params[0][0].mpart) ;
 //	strcpy(data_buffer, dimm_name) ;
-
+	memset(data_buffer, '\0', 128) ;
 	strcat(data_buffer, "DDR");
 	switch ((sdram_cfg & SDRAM_CFG_SDRAM_TYPE_MASK) >>
 		SDRAM_CFG_SDRAM_TYPE_SHIFT) {
@@ -281,6 +282,23 @@ static void sysinfo_usb_display_class_sub(unsigned char dclass, unsigned char su
 	return ;
 }
 
+static bmp_image_t *unpack_bmp(unsigned long addr)
+{
+    void *bmp_alloc_addr = NULL;
+    unsigned long len;
+    bmp_image_t *bmp = (bmp_image_t *)addr;
+
+    if ((bmp->header.signature[0] != 'B') ||
+          (bmp->header.signature[1] != 'M'))
+        bmp = gunzip_bmp(addr, &len, bmp_alloc_addr);
+
+    if (!bmp)
+            printf(" Not bmp - There is no valid bmp file at address 0x%lx\n",
+                addr);
+
+    return bmp;
+}
+
 
 void sysinfo_usb_display_desc(struct usb_device *dev, int dev_no)
 {
@@ -339,8 +357,8 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 	typedef struct button6 button ;
 	char 	cpu_type[32] ;
 	char	cpu_core1[32] ;
-	ulong addr = 0x1000e000 ;
-	ulong addr_inv = 0x10028000 ;
+	ulong addr = BACK_BUTTON ;
+	ulong addr_inv = BACK_BUTTON_INV ;
 	bmp_image_t *bmp = (bmp_image_t *)addr;
 	void *bmp_alloc_addr = NULL;
 	int reverse=0, len ;
@@ -558,19 +576,12 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 	}
 
 	if (reverse) {
-		bmp = (bmp_image_t *) (addr_inv) ;
+		addr = addr_inv ;
 	} else {
-		bmp = (bmp_image_t *) (addr) ;
+		addr = addr ;
 	}
 
-	if (!((bmp->header.signature[0]=='B') &&
-		 (bmp->header.signature[1]=='M')))
-		bmp = gunzip_bmp(addr, (long unsigned int *)&len, &bmp_alloc_addr);
-
-	if (!bmp) {
-		printf(" Not bmp - There is no valid bmp file at the given address\n");
-		return ;
-	}
+	bmp = unpack_bmp(addr) ;
 
 	video_display_bitmap((unsigned long)bmp, buttonpos , 570);
 
@@ -604,7 +615,7 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 
 void sysinfo_draw_titled_box(int x, int y, int w, int h, char * title)
 {
-	ulong addr = 0x1001c000 ;
+	ulong addr = BOX_CHARS ;
 	bmp_image_t *bmp, 
 			*tlbmp =  (bmp_image_t *)addr, *blbmp =  (bmp_image_t *)addr, 
 			*brbmp =  (bmp_image_t *)addr, *tlinebmp =  (bmp_image_t *)addr, 

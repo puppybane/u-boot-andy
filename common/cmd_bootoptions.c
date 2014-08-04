@@ -15,6 +15,7 @@
 #include <linux/string.h>
 
 #include <video.h>
+#include <amigaboot.h>
 
 /* maximum amigabootmenu entries */
 #define MAX_COUNT       99
@@ -95,10 +96,10 @@ static int bootoptionsmenu_print_entry(void *data)
 {
 	struct amigabootmenu_entry *entry = data;
 	int reverse = (entry->menu->active == entry->num);
-	ulong addr_std = 0x1002a000 ;
-	ulong addr_inv = 0x10032000 ;
-	ulong addr_back_button = 0x1000e000 ;
-	ulong addr_back_button_inv = 0x10028000 ;
+	ulong addr_std = BOOTMENU_BUTTONS ;
+	ulong addr_inv = BOOTMENU_BUTTONS_INV ;
+	ulong addr_back_button = BACK_BUTTON ;
+	ulong addr_back_button_inv = BACK_BUTTON_INV ;
 	ulong addr;
 	bmp_image_t *bmp ;
 
@@ -211,10 +212,10 @@ static void bootoptionsmenu_loop(struct amigabootmenu_data *menu,
 	}
 
 	if (*key == KEY_SELECT) {
-		ulong addr_std = 0x1002a000 ;
-		ulong addr_inv = 0x10032000 ;
-		ulong addr_back_button = 0x1000e000 ;
-		ulong addr_back_button_inv = 0x10028000 ;
+		ulong addr_std = BOOTMENU_BUTTONS ;
+		ulong addr_inv = BOOTMENU_BUTTONS_INV ;
+		ulong addr_back_button = BACK_BUTTON ;
+		ulong addr_back_button_inv = BACK_BUTTON_INV ;
 		ulong addr;
 		bmp_image_t *bmp ;
 		unsigned long delay;

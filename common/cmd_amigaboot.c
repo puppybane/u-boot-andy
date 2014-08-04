@@ -15,6 +15,7 @@
 #include <linux/string.h>
 #include <video.h>
 #include <usb.h>
+#include <amigaboot.h>
 
 /* maximum amigabootmenu entries */
 #define MAX_COUNT	99
@@ -96,7 +97,7 @@ static bmp_image_t *unpack_bmp(unsigned long addr)
 
 int amigabootmenu_clear_screen( )
 {
-	ulong addr = 0x10001000 ;
+	ulong addr = BLANK_SCREEN ;
     bmp_image_t *bmp;
 	int ii, jj; 
 
@@ -117,8 +118,8 @@ static int amigabootmenu_print_entry(void *data)
 {
 	struct amigabootmenu_entry *entry = data;
 	int reverse = (entry->menu->active == entry->num);
-	ulong addr_std = 0x1000c000 ;
-	ulong addr_inv = 0x1001a000 ;
+	ulong addr_std = MAINMENU_BUTTONS ;
+	ulong addr_inv = MAINMENU_BUTTONS_INV ;
 	ulong addr;
     bmp_image_t *bmp;
 
@@ -274,8 +275,8 @@ static void amigabootmenu_loop(struct amigabootmenu_data *menu,
 	}
 
 	if (*key == KEY_SELECT) {
-		ulong addr = 0x1000c000 ;
-		ulong addr_inv = 0x1001a000 ;
+		ulong addr = MAINMENU_BUTTONS ;
+		ulong addr_inv = MAINMENU_BUTTONS_INV ;
        		bmp_image_t *bmp ;
        		void *bmp_alloc_addr = NULL;
 		unsigned long len, delay;
@@ -516,10 +517,9 @@ static void amigabootmenu_show(int mdelay)
 //	char *main_title ;
 	int cols, rows ;
 	int ii, jj ;
-	ulong addr = 0x11000000 ;
-	ulong addr_splash = 0x12000000 ;
-	ulong maintitle_addr = 0x1003a000 ;
-        bmp_image_t *bmp = (bmp_image_t *)addr;
+	ulong addr_splash = SPLASHIMAGE ;
+	ulong maintitle_addr = MAIN_TITLE ;
+        bmp_image_t *bmp ;
 	ulong start = get_timer(0);
 	unsigned char bBootMenu = 0 ;
 	int delay ;
@@ -541,7 +541,7 @@ static void amigabootmenu_show(int mdelay)
 		mdelay = 0 ;
 		for (jj = 0; jj < 10; jj++) {
 			for (ii = 0; ii < 10; ii++) {
-				bmp = unpack_bmp(addr_splash + (ii * 0x1000000)) ;
+				bmp = unpack_bmp(addr_splash + (ii * 0x00080000)) ;
 				if (! bmp)
 					return;
 				video_display_bitmap((unsigned long)bmp, 0, 0);
