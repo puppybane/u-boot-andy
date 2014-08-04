@@ -703,6 +703,10 @@ void console_cursor(int state)
 #ifndef VIDEO_HW_RECTFILL
 static void memsetl(int *p, int c, int v)
 {
+	if (VIDEO_PIXEL_SIZE == 4)
+		v = SWAP32(v);
+	else if (VIDEO_PIXEL_SIZE == 2)
+		v = SHORTSWAP32(v);
 	while (c--)
 		*(p++) = v;
 }
@@ -2214,9 +2218,7 @@ static int video_init(void)
 			 CONSOLE_BG_COL;
 		break;
 	}
-	eorx = fgx ^ bgx;
 
-	video_clear();
 
 /* Change background colour to grey if at all possible */
 /* 16 BIT 565RGB 00000 000000 00000 */
@@ -2231,6 +2233,11 @@ static int video_init(void)
 
 	bgx = 0xad55ad55 ;
 	fgx = 0x00000000 ;
+
+	eorx = fgx ^ bgx;
+
+	video_clear();
+
 
 #ifdef CONFIG_VIDEO_LOGO
 	/* Plot the logo and get start point of console */

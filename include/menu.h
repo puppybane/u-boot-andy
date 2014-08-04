@@ -10,7 +10,7 @@
 struct menu;
 
 struct menu *menu_create(char *title, int timeout, int prompt,
-				void (*item_data_print)(void *),
+				int (*item_data_print)(void *),
 				char *(*item_choice)(void *),
 				void *item_choice_data);
 int menu_default_set(struct menu *m, char *item_key);

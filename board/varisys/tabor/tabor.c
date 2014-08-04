@@ -32,18 +32,16 @@ int board_early_init_f(void)
 {
 	ccsr_gur_t *gur = (void *)CONFIG_SYS_MPC85xx_GUTS_ADDR;
 
-	/* Set pmuxcr to allow both i2c1 and i2c2 */
-	setbits_be32(&gur->pmuxcr, 0x1000);
-#ifdef CONFIG_SYS_RAMBOOT
-	setbits_be32(&gur->pmuxcr,
-		in_be32(&gur->pmuxcr) | MPC85xx_PMUXCR_SD_DATA);
-#endif
+	/* Set pmuxcr to allow both i2c1 and i2c2, set 8 bit LBC */
+	gur->pmuxcr = 0x40011030;
+	gur->pmuxcr2 = 0xf6000000;
+	/* Disable unused USB2 */
+	gur->devdisr = 0x07400000;
 
-	/* Read back the register to synchronize the write. */
+	/* Read back the registers to synchronize the write. */
 	in_be32(&gur->pmuxcr);
-
-	/* Set the pin muxing to enable ETSEC2. */
-	clrbits_be32(&gur->pmuxcr2, 0x001F8000);
+	in_be32(&gur->pmuxcr2);
+	in_be32(&gur->devdisr);
 
 	return 0;
 }
@@ -61,7 +59,6 @@ int checkboard(void)
 int misc_init_r(void)
 {
 	u8 temp;
-	const char *audclk;
 	size_t arglen;
 	ccsr_gur_t *gur = (void *)(CONFIG_SYS_MPC85xx_GUTS_ADDR);
 
@@ -80,36 +77,6 @@ int misc_init_r(void)
 	if (i2c_read(CONFIG_TFP410_I2C_ADDR, 0x0A, 1, &temp, sizeof(temp)) < 0)
 		return -1;
 	debug("DVI Encoder Read: 0x%02x\n",temp);
-
-	/* Enable the USB2 in PMUXCR2 and FGPA */
-	if (hwconfig("usb2")) {
-		clrsetbits_be32(&gur->pmuxcr2, MPC85xx_PMUXCR2_ETSECUSB_MASK,
-			MPC85xx_PMUXCR2_USB);
-	}
-
-	/* tdm and audio can not enable simultaneous*/
-	if (hwconfig("tdm") && hwconfig("audclk")){
-		printf("WARNING: TDM and AUDIO can not be enabled simultaneous !\n");
-		return -1;
-	}
-
-	/* Enable the TDM in PMUXCR and FGPA */
-	if (hwconfig("tdm")) {
-		clrsetbits_be32(&gur->pmuxcr, MPC85xx_PMUXCR_TDM_MASK,
-			MPC85xx_PMUXCR_TDM);
-		/* TDM need some configration option by SPI */
-		clrsetbits_be32(&gur->pmuxcr, MPC85xx_PMUXCR_SPI_MASK,
-			MPC85xx_PMUXCR_SPI);
-	}
-
-	/*
-	 * Enable the reference clock for the WM8776 codec, and route the MUX
-	 * pins for SSI. The default is the 12.288 MHz clock
-	 */
-
-	if (hwconfig("audclk")) {
-		// Todo - fix for Tabor
-	}
 
 	return 0;
 }
@@ -267,20 +234,8 @@ int board_eth_init(bd_t *bis)
  */
 static void ft_codec_setup(void *blob, const char *compatible)
 {
-	const char *audclk;
-	size_t arglen;
-	u32 freq;
-
-	audclk = hwconfig_arg("audclk", &arglen);
-	if (audclk) {
-		if (strncmp(audclk, "11", 2) == 0)
-			freq = 11289600;
-		else
-			freq = 12288000;
-
-		do_fixup_by_compat_u32(blob, compatible, "clock-frequency",
-				       freq, 1);
-	}
+	do_fixup_by_compat_u32(blob, compatible, "clock-frequency",
+			       12288000, 1);
 }
 
 void ft_board_setup(void *blob, bd_t *bd)
