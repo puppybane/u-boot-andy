@@ -1061,12 +1061,17 @@ int
 submit_bulk_msg(struct usb_device *dev, unsigned long pipe, void *buffer,
 		int length)
 {
+	int result;
+	int retries = 5;
 
 	if (usb_pipetype(pipe) != PIPE_BULK) {
 		debug("non-bulk pipe (type=%lu)", usb_pipetype(pipe));
 		return -1;
 	}
-	return ehci_submit_async(dev, pipe, buffer, length, NULL);
+	do {
+		result = ehci_submit_async(dev, pipe, buffer, length, NULL);
+	 } while (--retries > 0 && (dev->status & USB_ST_STALLED));
+	 return result;
 }
 
 int
@@ -1074,6 +1079,8 @@ submit_control_msg(struct usb_device *dev, unsigned long pipe, void *buffer,
 		   int length, struct devrequest *setup)
 {
 	struct ehci_ctrl *ctrl = dev->controller;
+	int result;
+	int retries = 5;
 
 	if (usb_pipetype(pipe) != PIPE_CONTROL) {
 		debug("non-control pipe (type=%lu)", usb_pipetype(pipe));
@@ -1085,7 +1092,10 @@ submit_control_msg(struct usb_device *dev, unsigned long pipe, void *buffer,
 			dev->speed = USB_SPEED_HIGH;
 		return ehci_submit_root(dev, pipe, buffer, length, setup);
 	}
-	return ehci_submit_async(dev, pipe, buffer, length, setup);
+	do {
+	 	result = ehci_submit_async(dev, pipe, buffer, length, setup);
+	 } while (--retries > 0 && (dev->status & USB_ST_STALLED));
+	 return result;
 }
 
 struct int_queue {
