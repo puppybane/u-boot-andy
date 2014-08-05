@@ -1,0 +1,3 @@
+setenv loadbmps mmc read 0x10005000 0x500 0x2000\;mmc read 0x10050000 0x800 0xc000
+saveenv
+run loadbmps

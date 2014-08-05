@@ -32,7 +32,7 @@ sudo dd of=/dev/sde if=bottomline.bmp bs=512 seek=1712
 sudo dd of=/dev/sde if=sideline.bmp bs=512 seek=1728
 sudo dd of=/dev/sde if=maintitle.bmp bs=512 seek=1744
 
-sudo dd of=/dev/sde if=lb.img bs=512 seek=1792
+sudo dd of=/dev/sde if=lb2.img bs=512 seek=1792
 sudo dd of=/dev/sde if=logo.bmp bs=512 seek=1808
 
 sudo dd of=/dev/sde if=X5000_Boot01.bmp bs=512 seek=2048
