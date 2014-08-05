@@ -182,9 +182,6 @@ void * video_hw_init(void)
 	pci_dev_t vga = find_vga();
 	u32 pins = in_be32(&pgpio->gpdat);
 
-	// Temporary setting due to lack of jumper
-	pins &= ~GPIO_VGA_SWITCH ;
-
 	printf("Looking for VGA\n");
 	printf("PINS: 0x%08x\n", pins);
 	
@@ -201,9 +198,6 @@ void * video_hw_init(void)
 	}
 	
 	printf("Setting VESA Mode\n");
-	/* VGA running...? */
-	/* Set to 640 * 480 */
-//	fbi = set_vesa_mode(0x111);
 	/* Set to 800 * 600 */
 	fbi = set_vesa_mode(0x114);
 			
@@ -221,17 +215,6 @@ void * video_hw_init(void)
 		printf("mmio_base = 0x%p\n",
 		       mmio_base);
 		
-#ifdef STANDARD_VGA
-		for(i = 0; i < 640*480*2; i++)
-			*(mmio_base + i) = 0;
-		
-		grd.winSizeX = 640;
-		grd.winSizeY = 480;
-		grd.gdfBytesPP = 2;
-		grd.frameAdrs = (uint)mmio_base;
-		grd.gdfIndex = GDF_16BIT_565RGB;
-		return &grd;
-#else
 		for(i = 0; i < 800*600*2; i++)
 			*(mmio_base + i) = 0;
 		
@@ -241,8 +224,6 @@ void * video_hw_init(void)
 		grd.frameAdrs = (uint)mmio_base;
 		grd.gdfIndex = GDF_16BIT_565RGB;
 		return &grd;
-
-#endif
 	}
 	else
 		printf("ERROR\n");
