@@ -57,7 +57,12 @@
 #define CONFIG_CMD_START_AMIGAOS
 #define CONFIG_CMD_START_AMIGACLASSIC
 #define CONFIG_CMD_START_LINUX
-
+ /* Start offset on SD card */
+#define CONFIG_AMIGABOOT_BLOCK_OFFS                1536   
+/* #blks to read */     
+#define CONFIG_AMIGABOOT_BLOCK_LEN                300 
+/* MCC device to load from */               
+#define CONFIG_AMIGABOOT_MCC_DEV                0                
 /*
  * Corenet DS style board configuration file
  */
