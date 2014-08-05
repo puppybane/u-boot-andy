@@ -58,7 +58,7 @@
 #define CONFIG_CMD_START_AMIGACLASSIC
 #define CONFIG_CMD_START_LINUX
  /* Start offset on SD card */
-#define CONFIG_AMIGABOOT_BLOCK_OFFS                1536   
+#define CONFIG_AMIGABOOT_BLOCK_OFFS                0x4000   
 /* #blks to read */     
 #define CONFIG_AMIGABOOT_BLOCK_LEN                300 
 /* MCC device to load from */               
