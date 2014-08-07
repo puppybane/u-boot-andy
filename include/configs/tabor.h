@@ -541,18 +541,17 @@
  * USB
  */
 #define CONFIG_HAS_FSL_DR_USB
-#ifdef CONFIG_HAS_FSL_DR_USB
 #define CONFIG_USB_EHCI
-
-#ifdef CONFIG_USB_EHCI
 #define CONFIG_CMD_USB
 #define CONFIG_EHCI_HCD_INIT_AFTER_RESET
 #define CONFIG_USB_EHCI_FSL
 #define CONFIG_USB_STORAGE
+#define CONFIG_EHCI_IS_TDI
+#define CONFIG_USB_KEYBOARD 
+#define CONFIG_SYS_USB_EVENT_POLL
 #define CONFIG_CMD_FAT
-#endif
-#endif
-
+#define CONFIG_CONSOLE_MUX
+#define CONFIG_SYS_CONSOLE_IS_IN_ENV
 /*
  * Miscellaneous configurable options
  */
@@ -613,7 +612,7 @@
 	"fdtaddr=c00000\0"	  			      	\
 	"fdtfile=p1022ds.dtb\0"	  				\
 	"bdev=sda3\0"		  			      	\
-	"hwconfig=esdhc;audclk:12\0"            \
+	"hwconfig=esdhc;audclk:12;usb1:dr_mode=host,phy_type=ulpi\0"            \
 	"video-mode=fslfb:800x600-32@60,monitor=dvi\0"
 
 #define CONFIG_HDBOOT					\
