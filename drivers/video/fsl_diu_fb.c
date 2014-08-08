@@ -374,6 +374,12 @@ int fsl_diu_init(u16 xres, u16 yres, u32 pixel_format, int gamma_fix)
 	return 0;
 }
 
+void diu_disable(void)
+{
+	struct diu *hw = (struct diu *)CONFIG_SYS_DIU_ADDR;
+	out_be32(&hw->diu_mode, 0);	/* Temporarily disable the DIU */
+}
+
 void *diu_get_screen_base(void)
 {
 	return info.screen_base;

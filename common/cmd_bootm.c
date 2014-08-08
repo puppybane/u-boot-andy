@@ -22,6 +22,7 @@
 #include <asm/byteorder.h>
 #include <asm/io.h>
 #include <linux/compiler.h>
+#include <fsl_diu_fb.h>
 
 #if defined(CONFIG_BOOTM_VXWORKS) && \
 	(defined(CONFIG_PPC) || defined(CONFIG_ARM))
@@ -588,6 +589,11 @@ static ulong bootm_disable_interrupts(void)
 	 */
 	usb_stop();
 #endif
+
+#ifdef CONFIG_FSL_DIU_FB
+	diu_disable();
+#endif
+
 	return iflag;
 }
 

@@ -272,25 +272,11 @@
 
 #define CONFIG_CMD_BOOTMENU		/* ANSI terminal Boot Menu */
 #define CONFIG_MENU
-#define CONFIG_MENU_SHOW
+#undef CONFIG_MENU_SHOW
 #define CONFIG_ESCAPEBOOTMENU "setenv stdout serial,vga"
 
 /* Enable splash screen */
 #define CONFIG_PREBOOT
-
-/* Enable Amiga Boot screen */
-#define CONFIG_CMD_AMIGABOOT
-#define CONFIG_CMD_SYSINFO
-#define CONFIG_CMD_BOOTOPTIONS
-#define CONFIG_CMD_START_AMIGAOS
-#define CONFIG_CMD_START_AMIGACLASSIC
-#define CONFIG_CMD_START_LINUX
- /* Start offset on SD card */
-#define CONFIG_AMIGABOOT_BLOCK_OFFS                0x4000   
-/* #blks to read */     
-#define CONFIG_AMIGABOOT_BLOCK_LEN                300 
-/* MCC device to load from */               
-#define CONFIG_AMIGABOOT_MCC_DEV                0                
 
 /* Video */
 #define CONFIG_VIDEO
@@ -322,6 +308,22 @@
 #define CONFIG_SYS_VIDEO_LOGO_MAX_SIZE  (640*480*2 + 1024)
 #endif
 
+/* Enable Amiga Boot screen */
+#ifdef CONFIG_VIDEO
+#define CONFIG_CMD_AMIGABOOT
+#define CONFIG_CMD_SYSINFO
+#define CONFIG_CMD_BOOTOPTIONS
+#define CONFIG_CMD_START_AMIGAOS
+#define CONFIG_CMD_START_AMIGACLASSIC
+#define CONFIG_CMD_START_LINUX
+ /* Start offset on SD card */
+#define CONFIG_AMIGABOOT_BLOCK_OFFS                0x4000   
+/* #blks to read */     
+#define CONFIG_AMIGABOOT_BLOCK_LEN                300 
+/* MCC device to load from */               
+#define CONFIG_AMIGABOOT_MCC_DEV                0                
+#endif
+	
 /*
  * Pass open firmware flat tree
  */
@@ -526,10 +528,11 @@
 #define CONFIG_ENV_OFFSET	0x100000	/* 1MB */
 #define CONFIG_ENV_SECT_SIZE	0x10000
 #elif defined(CONFIG_SDCARD)
+#define CONFIG_SYS_EXTRA_ENV_RELOC
 #define CONFIG_ENV_IS_IN_MMC
-#define CONFIG_FSL_FIXED_MMC_LOCATION
-#define CONFIG_ENV_SIZE		0x2000
-#define CONFIG_SYS_MMC_ENV_DEV	0
+#define CONFIG_SYS_MMC_ENV_DEV          0
+#define CONFIG_ENV_SIZE			0x2000
+#define CONFIG_ENV_OFFSET		(512 * 1097)
 #elif defined(CONFIG_NAND)
 #ifdef CONFIG_TPL_BUILD
 #define CONFIG_ENV_SIZE		0x2000
