@@ -315,6 +315,21 @@ void console_cursor(int state);
 #define CONSOLE_SCROLL_SIZE	(CONSOLE_SIZE - CONSOLE_ROW_SIZE)
 
 /* Macros */
+#ifdef CONFIG_VIDEO_BI_ENDIAN
+#define SWAP16(x) ((pGD->littleEndian) ? ((((x) & 0x00ff) << 8) | \
+				  ((x) >> 8) \
+				) : (x))
+#define SWAP32(x)	((pGD->littleEndian) ? ((((x) & 0x000000ff) << 24) | \
+				 (((x) & 0x0000ff00) <<  8) | \
+				 (((x) & 0x00ff0000) >>  8) | \
+				 (((x) & 0xff000000) >> 24)   \
+				) : (x))
+#define SHORTSWAP32(x)	((pGD->littleEndian) ? ((((x) & 0x000000ff) <<  8) | \
+				 (((x) & 0x0000ff00) >>  8) | \
+				 (((x) & 0x00ff0000) <<  8) | \
+				 (((x) & 0xff000000) >>  8)   \
+				) : (x))
+#else
 #ifdef	VIDEO_FB_LITTLE_ENDIAN
 #define SWAP16(x)		((((x) & 0x00ff) << 8) | \
 				  ((x) >> 8) \
@@ -336,6 +351,7 @@ void console_cursor(int state);
 #define SHORTSWAP32(x)		(((x) >> 16) | ((x) << 16))
 #else
 #define SHORTSWAP32(x)		(x)
+#endif
 #endif
 #endif
 
@@ -1214,6 +1230,20 @@ void video_set_lut(unsigned int, unsigned char, unsigned char, unsigned char)
 	fb += 4;					\
 }
 
+#ifdef CONFIG_VIDEO_BI_ENDIAN
+#define FILL_24BIT_888RGB(r,g,b) {			\
+  if (pGD->littleEndian) { \
+	fb[0] = b;					\
+	fb[1] = g;					\
+	fb[2] = r;					\
+  } else {                      \
+	fb[0] = r;					\
+	fb[1] = g;					\
+	fb[2] = b;					\
+  }                             \
+	fb += 3;					\
+}
+#else
 #ifdef VIDEO_FB_LITTLE_ENDIAN
 #define FILL_24BIT_888RGB(r,g,b) {			\
 	fb[0] = b;					\
@@ -1228,6 +1258,7 @@ void video_set_lut(unsigned int, unsigned char, unsigned char, unsigned char)
 	fb[2] = b;					\
 	fb += 3;					\
 }
+#endif
 #endif
 
 #if defined(VIDEO_FB_16BPP_PIXEL_SWAP)
@@ -1963,6 +1994,17 @@ static void plot_logo_or_black(void *screen, int width, int x, int y, int black)
 							 b));
 				break;
 			case GDF_24BIT_888RGB:
+#ifdef CONFIG_VIDEO_BI_ENDIAN
+			if (pGD->littleEndian) {
+				dest[0] = b;
+				dest[1] = g;
+				dest[2] = r;
+			} else {
+				dest[0] = r;
+				dest[1] = g;
+				dest[2] = b;
+			}
+#else
 #ifdef VIDEO_FB_LITTLE_ENDIAN
 				dest[0] = b;
 				dest[1] = g;
@@ -1971,6 +2013,7 @@ static void plot_logo_or_black(void *screen, int width, int x, int y, int black)
 				dest[0] = r;
 				dest[1] = g;
 				dest[2] = b;
+#endif
 #endif
 				break;
 			}
@@ -2200,14 +2243,14 @@ static int video_init(void)
 			(CONSOLE_BG_COL >> 3));
 		break;
 	case GDF_32BIT_X888RGB:
-		fgx =	(CONSOLE_FG_COL << 16) |
+	case GDF_24BIT_888RGB:
+		/* fgx =	(CONSOLE_FG_COL << 16) |
 			(CONSOLE_FG_COL <<  8) |
 			 CONSOLE_FG_COL;
 		bgx =	(CONSOLE_BG_COL << 16) |
 			(CONSOLE_BG_COL <<  8) |
 			 CONSOLE_BG_COL;
-		break;
-	case GDF_24BIT_888RGB:
+		break; */
 		fgx =	(CONSOLE_FG_COL << 24) |
 			(CONSOLE_FG_COL << 16) |
 			(CONSOLE_FG_COL <<  8) |
@@ -2231,8 +2274,10 @@ static int video_init(void)
 /*	1010 1 110 010 1 0101  => Desired grey */
 /* Grey is 170 / 170 / 170 decimal in Windows */
 
-	bgx = 0xad55ad55 ;
-	fgx = 0x00000000 ;
+//	bgx = 0xad55ad55 ;
+//	fgx = 0x00000000 ;
+
+	printf("bgx = 0x%x fgx = 0x%x\n", bgx, fgx);
 
 	eorx = fgx ^ bgx;
 

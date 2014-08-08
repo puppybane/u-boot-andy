@@ -51,6 +51,9 @@ typedef struct {
     unsigned int mode;
     unsigned int gdfIndex;
     unsigned int gdfBytesPP;
+#ifdef CONFIG_VIDEO_BI_ENDIAN
+    unsigned int littleEndian;
+#endif
     unsigned int fg;
     unsigned int bg;
     unsigned int plnSizeX;

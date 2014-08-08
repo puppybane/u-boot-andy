@@ -30,7 +30,7 @@
 #define CONFIG_SPL_TEXT_BASE		0xf8f81000
 #define CONFIG_SPL_PAD_TO		0x20000
 #define CONFIG_SPL_MAX_SIZE		(128 * 1024)
-#define CONFIG_SYS_MMC_U_BOOT_SIZE	(768 << 10)
+#define CONFIG_SYS_MMC_U_BOOT_SIZE	(1024 << 10)
 #define CONFIG_SYS_MMC_U_BOOT_DST	(0x11000000)
 #define CONFIG_SYS_MMC_U_BOOT_START	(0x11000000)
 #define CONFIG_SYS_MMC_U_BOOT_OFFS	(128 << 10)
@@ -270,30 +270,56 @@
 /* Use the HUSH parser */
 #define CONFIG_SYS_HUSH_PARSER
 
+#define CONFIG_CMD_BOOTMENU		/* ANSI terminal Boot Menu */
+#define CONFIG_MENU
+#define CONFIG_MENU_SHOW
+#define CONFIG_ESCAPEBOOTMENU "setenv stdout serial,vga"
+
+/* Enable splash screen */
+#define CONFIG_PREBOOT
+
+/* Enable Amiga Boot screen */
+#define CONFIG_CMD_AMIGABOOT
+#define CONFIG_CMD_SYSINFO
+#define CONFIG_CMD_BOOTOPTIONS
+#define CONFIG_CMD_START_AMIGAOS
+#define CONFIG_CMD_START_AMIGACLASSIC
+#define CONFIG_CMD_START_LINUX
+ /* Start offset on SD card */
+#define CONFIG_AMIGABOOT_BLOCK_OFFS                0x4000   
+/* #blks to read */     
+#define CONFIG_AMIGABOOT_BLOCK_LEN                300 
+/* MCC device to load from */               
+#define CONFIG_AMIGABOOT_MCC_DEV                0                
+
 /* Video */
+#define CONFIG_VIDEO
 #define CONFIG_FSL_DIU_FB
+#define CONFIG_ATI
+#define CONFIG_VIDEO_BI_ENDIAN
 
 #ifdef CONFIG_FSL_DIU_FB
 #define CONFIG_SYS_DIU_ADDR	(CONFIG_SYS_CCSRBAR + 0x10000)
-#define CONFIG_VIDEO
-#define CONFIG_CMD_BMP
-#define CONFIG_CFB_CONSOLE
-#define CONFIG_VIDEO_SW_CURSOR
-#define CONFIG_VGA_AS_SINGLE_DEVICE
-#define CONFIG_VIDEO_LOGO
-#define CONFIG_VIDEO_BMP_LOGO
+#define CONFIG_DIU_SECONDARY
 #endif
 
 #ifdef CONFIG_ATI
 #define VIDEO_IO_OFFSET		CONFIG_SYS_PCIE1_IO_VIRT
-#define CONFIG_VIDEO
 #define CONFIG_BIOSEMU
+#endif
+
+#ifdef CONFIG_VIDEO
+#define CONFIG_CMD_BMP
 #define CONFIG_VIDEO_SW_CURSOR
-#define CONFIG_ATI_RADEON_FB
-#define CONFIG_VIDEO_LOGO
-#define CONFIG_SYS_ISA_IO_BASE_ADDRESS VIDEO_IO_OFFSET
-#define CONFIG_CFB_CONSOLE
 #define CONFIG_VGA_AS_SINGLE_DEVICE
+#define CONFIG_VIDEO_LOGO
+#define CONFIG_CFB_CONSOLE
+#define CONFIG_CFB_CONSOLE_ANSI
+#define CONFIG_SYS_CONSOLE_FG_COL	0x00
+#define CONFIG_SYS_CONSOLE_BG_COL	170
+#define CONFIG_VIDEO_BMP_LOGO
+#define CONFIG_VIDEO_BMP_GZIP
+#define CONFIG_SYS_VIDEO_LOGO_MAX_SIZE  (640*480*2 + 1024)
 #endif
 
 /*
@@ -411,7 +437,6 @@
 #define CONFIG_PCI_INDIRECT_BRIDGE
 #define CONFIG_PCI_PNP			/* do pci plug-and-play */
 #define CONFIG_PCI_SCAN_SHOW		/* show pci devices on startup */
-#define CONFIG_E1000			/* Define e1000 pci Ethernet card */
 #endif
 
 /* SATA */
@@ -428,10 +453,22 @@
 #define CONFIG_SYS_SATA2_FLAGS		FLAGS_DMA
 
 #ifdef CONFIG_FSL_SATA
+
+#define CONFIG_SYS_SCSI_MAX_SCSI_ID	2
+#define CONFIG_SYS_SCSI_MAX_LUN	1
+#define CONFIG_SYS_SCSI_MAX_DEVICE	(CONFIG_SYS_SCSI_MAX_SCSI_ID * CONFIG_SYS_SCSI_MAX_LUN)
+#define CONFIG_SYS_SCSI_MAXDEVICE	CONFIG_SYS_SCSI_MAX_DEVICE
+
 #define CONFIG_LBA48
 #define CONFIG_CMD_SATA
+#define CONFIG_CMD_SCSI
+#define CONFIG_PARTITION_UUIDS
+#define CONFIG_CMD_FS_GENERIC
 #define CONFIG_DOS_PARTITION
+#define CONFIG_ISO_PARTITION
+#define CONFIG_CMD_PART
 #define CONFIG_CMD_EXT2
+#define CONFIG_FS_ISO9660
 #endif
 
 #define CONFIG_MMC

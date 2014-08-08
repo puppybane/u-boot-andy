@@ -58,11 +58,127 @@ void diu_set_pixel_clock(unsigned int pixclock)
 	out_be32(&gur->clkdvdr, temp | 0x80000000 | ((pixval & 0x1F) << 16));
 }
 
-int platform_diu_init(unsigned int xres, unsigned int yres, const char *port)
+#include "../../../drivers/bios_emulator/include/biosemu.h"
+#include "../../../drivers/bios_emulator/vesa.h"
+extern int BootVideoCardBIOS(pci_dev_t pcidev, BE_VGAInfo ** pVGAInfo, int cleanUp);
+
+#define PCI_CLASS_VIDEO             3
+#define PCI_CLASS_VIDEO_STD         0
+#define PCI_CLASS_VIDEO_PROG_IF_VGA 0
+
+pci_dev_t find_vga()
+{
+	pci_dev_t bdf;
+	int bus, found_multi = 0;
+	
+	// Find root controller
+	struct pci_controller *hose = pci_bus_to_hose(1);
+	
+	if (! hose) {
+		printf("Unable to find root PCI controller\n");
+		return -1;
+	}
+	
+	for (bus = hose->first_busno; bus <= hose->last_busno; bus++) {
+		
+		for (bdf = PCI_BDF(bus, 0, 0);
+		     bdf < PCI_BDF(bus + 1, 0, 0);
+		     bdf += PCI_BDF(0, 0, 1)) {
+			
+			unsigned char class;
+			     
+			     
+			if (!PCI_FUNC(bdf)) {
+				unsigned char header_type;
+				pci_read_config_byte(bdf,
+						     PCI_HEADER_TYPE,
+						     &header_type);
+
+				found_multi = header_type & 0x80;
+			} else {
+				if (!found_multi)
+					continue;
+			}
+
+			pci_read_config_byte(bdf,
+					     PCI_CLASS_CODE,
+					     &class);
+			if (class != PCI_CLASS_VIDEO)
+				continue;
+			
+			pci_read_config_byte(bdf,
+					     PCI_CLASS_DEVICE,
+					     &class);			
+			if (class != PCI_CLASS_VIDEO_STD)
+				continue;
+			
+			pci_read_config_byte(bdf,
+					     PCI_CLASS_PROG,
+					     &class);
+			
+			if (class == PCI_CLASS_VIDEO_PROG_IF_VGA)
+				return bdf;			
+		}
+	}
+	
+	return -1;
+}
+
+static GraphicDevice grd;
+
+#ifdef CONFIG_ATI
+static void *init_vga(pci_dev_t vga)
+{
+	if (!BootVideoCardBIOS(vga, NULL, 0)) {
+		printf("VGA initialisation failed\n");
+		return 0;
+	}
+
+	printf("Setting VESA Mode\n");
+	/* Set to 800 * 600 */
+	fbi = set_vesa_mode(0x114);
+			
+	if (fbi)
+	{
+		u8 *mmio_base;
+		int i;
+		printf("OK\n");
+		printf("XSize = %lu YSize = %lu Base =0x%x\n", 
+			fbi->XSize, fbi->YSize, fbi->BaseAddress);
+		
+		
+		mmio_base = pci_bus_to_virt(vga, 0xffffffffu & (u64)fbi->BaseAddress,
+					PCI_REGION_MEM, 0, MAP_NOCACHE);
+		printf("mmio_base = 0x%p\n",
+		       mmio_base);
+		
+		for(i = 0; i < 800*600*2; i++)
+			*(mmio_base + i) = 0;
+		
+		grd.winSizeX = 800;
+		grd.winSizeY = 600;
+		grd.gdfBytesPP = 2;
+		grd.frameAdrs = (uint)mmio_base;
+		grd.gdfIndex = GDF_16BIT_565RGB;
+		grd.littleEndian = 1;
+		return &grd;
+	}
+	else
+		printf("ERROR\n");
+	
+	
+	return 0;
+}
+
+#endif
+
+void *init_diu(void)
 {
 	ccsr_gur_t *gur = (void *)(CONFIG_SYS_MPC85xx_GUTS_ADDR);
 	u32 pixel_format;
 
+	grd.winSizeX = 800;
+	grd.winSizeY = 600;
 
 	pixel_format = cpu_to_le32(AD_BYTE_F | (3 << AD_ALPHA_C_SHIFT) |
 		(0 << AD_BLUE_C_SHIFT) | (1 << AD_GREEN_C_SHIFT) |
@@ -70,11 +186,61 @@ int platform_diu_init(unsigned int xres, unsigned int yres, const char *port)
 		(8 << AD_COMP_2_SHIFT) | (8 << AD_COMP_1_SHIFT) |
 		(8 << AD_COMP_0_SHIFT) | (3 << AD_PIXEL_S_SHIFT));
 
-	printf("DIU:   Initialising @ %ux%u\n", xres, yres);
-
 	/* Set PMUXCR to switch the muxed pins from the LBC to the DIU */
 	clrsetbits_be32(&gur->pmuxcr, PMUXCR_ELBCDIU_MASK, PMUXCR_ELBCDIU_DIU);
 	in_be32(&gur->pmuxcr);
 
-	return fsl_diu_init(xres, yres, pixel_format, 0);
+	if (fsl_diu_init(grd.winSizeX, grd.winSizeY, pixel_format, 0) < 0)
+		return NULL;
+
+	/* fill in Graphic device struct */
+	sprintf(grd.modeIdent, "%ix%ix%i %ikHz %iHz",
+		grd.winSizeX, grd.winSizeY, 32, 64, 60);
+
+	grd.frameAdrs = (unsigned int)diu_get_screen_base();
+	grd.plnSizeX = grd.winSizeX;
+	grd.plnSizeY = grd.winSizeY;
+
+	grd.gdfBytesPP = 4;
+	grd.gdfIndex = GDF_32BIT_X888RGB;
+
+	grd.isaBase = 0;
+	grd.pciBase = 0;
+	grd.memSize = 800 * 600 * 4;
+
+	/* Cursor Start Address */
+	grd.dprBase = 0;
+	grd.vprBase = 0;
+	grd.cprBase = 0;
+
+	return &grd;
+}
+
+void * video_hw_init(void)
+{	
+	//volatile ccsr_gpio_t *pgpio = (void *)(CONFIG_SYS_MPC85xx_GPIO_ADDR);
+	// Boot video here once everything else is working
+	pci_dev_t vga;
+	//u32 pins = in_be32(&pgpio->gpdat);
+
+   /* if ((pins & GPIO_VGA_SWITCH) != 0) {
+		printf("Fit jumper to enable VGA\n");
+		return 0;
+	} */
+
+#ifdef CONFIG_ATI
+	printf("Looking for VGA\n");
+	vga = find_vga();
+	//printf("PINS: 0x%08x\n", pins);
+	
+	/* PostBIOS with x86 emulater */
+	if (vga < 0) {
+		printf("No VGA device found\n");
+		return init_diu();
+	} else 
+		return init_vga(vga);
+#else
+
+	return init_diu();
+#endif
 }

@@ -374,6 +374,12 @@ int fsl_diu_init(u16 xres, u16 yres, u32 pixel_format, int gamma_fix)
 	return 0;
 }
 
+void *diu_get_screen_base(void)
+{
+	return info.screen_base;
+}
+
+#ifndef CONFIG_DIU_SECONDARY
 void *video_hw_init(void)
 {
 	static GraphicDevice ctfb;
@@ -415,3 +421,5 @@ void *video_hw_init(void)
 
 	return &ctfb;
 }
+
+#endif
