@@ -24,9 +24,15 @@ extern int do_amigabootmenu(cmd_tbl_t *cmdtp, int flag, int argc, char *const ar
 
 int do_startlinux(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
 {
+	int rcode = 0;
+
         amigabootmenu_clear_screen() ;
         
         video_drawstring(160, 20, (unsigned char *)"<<<<<< Linux running >>>>>>")  ;
+
+        if (run_command(getenv("linuxboot"), 0) < 0) {
+                rcode = 1;
+	}
 
         getc() ;
 

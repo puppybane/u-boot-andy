@@ -92,18 +92,18 @@ void sysinfo_pciinfo(int BusNum, int ShortPCIListing)
 			if (!Function) pci_read_config_byte(dev, PCI_HEADER_TYPE, &HeaderType);
 			if (ShortPCIListing)
 			{
-				sprintf(data_buffer, "%02x.%02x.%02x ", BusNum, Device, Function);
-				video_drawstring(420, 50 + (Function * 32), (unsigned char *)data_buffer)  ;
 
 				pci_read_config_word(dev, PCI_VENDOR_ID, &vendor);
 				pci_read_config_word(dev, PCI_DEVICE_ID, &device);
 				pci_read_config_byte(dev, PCI_CLASS_CODE, &class);
 				pci_read_config_byte(dev, PCI_CLASS_SUB_CODE, &subclass);
 
-				sprintf(data_buffer, "0x%.4x 0x%.4x %-16s 0x%.2x",
+				sprintf(data_buffer, "%02x.%02x.%02x %.4x %.4x %-16s %.2x", 
+						BusNum, Device, Function,
 		  				vendor, device,
 		  				pci_class_str(class), subclass);
-				video_drawstring(420, 66 + (Function * 32), (unsigned char *)data_buffer)  ;
+//				video_drawstring(420, 66 + (Function * 32), (unsigned char *)data_buffer)  ;
+				video_drawstring(420, 50 + (Function * 16), (unsigned char *)data_buffer)  ;
 			}
 			else
 			{
@@ -115,7 +115,7 @@ void sysinfo_pciinfo(int BusNum, int ShortPCIListing)
     	}
 }
 
-void sysinfo_board_add_ram_info(char *data_buffer)
+void sysinfo_board_add_ram_info(char *data_buffer, int dimm_number)
 {
 	char tmp[64] ;
 	struct ccsr_ddr __iomem *ddr =
@@ -132,6 +132,10 @@ void sysinfo_board_add_ram_info(char *data_buffer)
 	dimm_params_t *pdimm;
 	fsl_ddr_info_t info;
 
+	if (dimm_number == 1) {
+		sdram_cfg = ddr_in32(&ddr->sdram_cfg_2);
+	}
+
 #if CONFIG_NUM_DDR_CONTROLLERS >= 2
 	if (!(sdram_cfg & SDRAM_CFG_MEM_EN)) {
 		ddr = (void __iomem *)CONFIG_SYS_FSL_DDR2_ADDR;
@@ -145,17 +149,20 @@ void sysinfo_board_add_ram_info(char *data_buffer)
 	}
 #endif
 
-#ifdef ooo
+#ifdef DIMM
 	fsl_ddr_get_dimm_params(pdimm,
-                        controller_number,
+                        0,
                         dimm_number) ;
 #endif
-//	fsl_ddr_compute(&info, STEP_GET_SPD, 0);
 
-//	strcpy(data_buffer, info.dimm_params[0][0].mpart) ;
-//	strcpy(data_buffer, dimm_name) ;
+	fsl_ddr_compute(&info, STEP_GET_SPD, 0);
+
 	memset(data_buffer, '\0', 128) ;
-	strcat(data_buffer, "DDR");
+//	sprintf(data_buffer, "DIMM 0: %1ldGb %s", (unsigned long)(gd->ram_size / 1073741824L), memory_info) ;
+	sprintf(data_buffer, "%1ldGb", (unsigned long)(info.dimm_params[0][dimm_number].capacity / 1073741824L)) ;
+//	strcpy(data_buffer, dimm_name) ;
+		
+	strcat(data_buffer, " DDR");
 	switch ((sdram_cfg & SDRAM_CFG_SDRAM_TYPE_MASK) >>
 		SDRAM_CFG_SDRAM_TYPE_SHIFT) {
 	case SDRAM_TYPE_DDR1:
@@ -310,14 +317,15 @@ void sysinfo_usb_display_desc(struct usb_device *dev, int dev_no)
 		usb_get_class_desc(dev->config.if_desc[0].desc.bInterfaceClass),
 				   (dev->descriptor.bcdUSB>>8) & 0xff,
 				   dev->descriptor.bcdUSB & 0xff);
-		video_drawstring(420, offset+(dev_no*80), (unsigned char *)data_buffer) ;
+		video_drawstring(420, offset+(dev_no*48), (unsigned char *)data_buffer) ;
 
 		if (strlen(dev->mf) || strlen(dev->prod) ||
 		    strlen(dev->serial)) {
 			sprintf(data_buffer, "%s %s %s", dev->mf, dev->prod,
 				dev->serial);
-			video_drawstring(420, offset+16+(dev_no*80), (unsigned char *)data_buffer) ;
+			video_drawstring(420, offset+16+(dev_no*48), (unsigned char *)data_buffer) ;
 		}
+#ifdef Expanded_USB
 		if (dev->descriptor.bDeviceClass) {
 			char tmp_buffer[256] ;
 			sysinfo_usb_display_class_sub(dev->descriptor.bDeviceClass,
@@ -325,26 +333,58 @@ void sysinfo_usb_display_desc(struct usb_device *dev, int dev_no)
 						 dev->descriptor.bDeviceProtocol,
 						 tmp_buffer) ;
 			sprintf(data_buffer,"Class: %s", tmp_buffer) ;
-			video_drawstring(420, offset+32+(dev_no*80), (unsigned char *)data_buffer) ;
+			video_drawstring(420, offset+32+(dev_no*48), (unsigned char *)data_buffer) ;
 		} else {
 			sprintf(data_buffer, "Class: (from I/f) %s",
 				  usb_get_class_desc(
 				dev->config.if_desc[0].desc.bInterfaceClass));
-			video_drawstring(420, offset+32+(dev_no*80), (unsigned char *)data_buffer) ;
+			video_drawstring(420, offset+32+(dev_no*48), (unsigned char *)data_buffer) ;
 		}
 		sprintf(data_buffer, "Packet Size: %d Configurations: %d",
 			dev->descriptor.bMaxPacketSize0,
 			dev->descriptor.bNumConfigurations);
-		video_drawstring(420, offset+48+(dev_no*80), (unsigned char *)data_buffer) ;
+		video_drawstring(420, offset+48+(dev_no*48), (unsigned char *)data_buffer) ;
+#endif
 		sprintf(data_buffer, "Vendor: 0x%04x Prod 0x%04x Ver %d.%d",
 			dev->descriptor.idVendor, dev->descriptor.idProduct,
 			(dev->descriptor.bcdDevice>>8) & 0xff,
 			dev->descriptor.bcdDevice & 0xff);
-		video_drawstring(420, offset+64+(dev_no*80), (unsigned char *)data_buffer) ;
+		video_drawstring(420, offset+32+(dev_no*48), (unsigned char *)data_buffer) ;
 	}
 
 }
 
+static void sysinfo_displaydatetime() 
+{
+	struct rtc_time tm;
+	int rcode = 0;
+	int old_bus ;
+	char data_buffer[128] ;
+
+	/* switch to correct I2C bus */
+#ifdef CONFIG_SYS_I2C
+	old_bus = i2c_get_bus_num();
+	i2c_set_bus_num(CONFIG_SYS_RTC_BUS_NUM);
+#else
+	old_bus = I2C_GET_BUS();
+	I2C_SET_BUS(CONFIG_SYS_RTC_BUS_NUM);
+#endif
+	rcode = rtc_get (&tm);
+
+	if (rcode) {
+		puts("## Get date failed\n");
+	}
+	sprintf(data_buffer, "%d", old_bus) ;
+	sprintf(data_buffer, "Date: %4d-%02d-%02d ", 
+			tm.tm_year, tm.tm_mon, tm.tm_mday) ;
+	video_drawstring(10, 472, (unsigned char *)data_buffer)  ;
+
+	sprintf (data_buffer, "Time: %2d:%02d:%02d",
+		tm.tm_hour, tm.tm_min, tm.tm_sec);
+	video_drawstring(150, 472, (unsigned char *)data_buffer)  ;
+
+	return ;
+}
 
 static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
 {
@@ -363,9 +403,6 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 	void *bmp_alloc_addr = NULL;
 	int reverse=0, len ;
 	int displayed = 0 ;
-	struct rtc_time tm;
-	int rcode = 0;
-	int old_bus ;
 	struct cpu_type *cpu ;
 	uint svr, pvr, ver, major, minor ;
 
@@ -418,8 +455,8 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 
 	/* Temperature */
 //do_dtt() ;
-	sprintf(data_buffer, "Temperature: N/A") ;
-	video_drawstring(10, 80, (unsigned char *)data_buffer)  ;
+//	sprintf(data_buffer, "Temperature: N/A") ;
+//	video_drawstring(10, 80, (unsigned char *)data_buffer)  ;
 
 	/*SATA Devices */
 	sysinfo_draw_titled_box(5, 120, 384, 96, " SATA Devices ") ;
@@ -483,36 +520,38 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 
 	/* DIMM 0: */
 //	sprintf(data_buffer, "DIMM 0: %lx", (unsigned long)(bd->bi_memsize)) ;
-	sysinfo_board_add_ram_info(memory_info) ;
-	sprintf(data_buffer, "DIMM 0: %1ldGb %s", 
-		(unsigned long)(gd->ram_size / 1073741824L), memory_info) ;
+	sysinfo_board_add_ram_info(memory_info, 0) ;
+//	sprintf(data_buffer, "DIMM 0: %1ldGb %s", (unsigned long)(gd->ram_size / 1073741824L), memory_info) ;
+	sprintf(data_buffer, "DIMM 0: %s", memory_info) ;
 	video_drawstring(10, 240, (unsigned char *)data_buffer)  ;
 
 	/* DIMM 1: */
-	sprintf(data_buffer, "DIMM 1: %s", "")  ;
+	sysinfo_board_add_ram_info(memory_info, 1) ;
+	sprintf(data_buffer, "DIMM 1: %s", memory_info) ;
 	video_drawstring(10, 272, (unsigned char *)data_buffer)  ;
 
 	/* Ethernet */
 	sysinfo_draw_titled_box(5, 338, 384, 80, " Ethernet ") ;
 
-	/* MAC Address : */
-	sprintf(data_buffer, "MAC Address: %s", getenv("ethaddr")) ;
+	/* MAC Addresses : */
+	sprintf(data_buffer, "MAC Address  : %s", getenv("ethaddr")) ;
 	video_drawstring(10, 348, (unsigned char *)data_buffer)  ;
+	sprintf(data_buffer, "MAC Address 2: %s", getenv("eth1addr")) ;
+	video_drawstring(10, 364, (unsigned char *)data_buffer)  ;
 
 	/* IP Address : */
 //	sprintf(data_buffer, "IP Address: %u", getenv("ipaddr") ;
-	sprintf(data_buffer, "IP Address: %ld", gd->bd->bi_ip_addr) ;
-	video_drawstring(10, 364, (unsigned char *)data_buffer)  ;
+//	sprintf(data_buffer, "IP Address: %ld", gd->bd->bi_ip_addr) ;
+//	video_drawstring(10, 364, (unsigned char *)data_buffer)  ;
 
 	/* Net Mask : */
 //	sprintf(data_buffer, "Net Mask: %s", getenv("netmask")) ;
-	sprintf(data_buffer, "Net Mask: %s", "255.255.255.248") ;
-	video_drawstring(10, 380, (unsigned char *)data_buffer)  ;
+//	sprintf(data_buffer, "Net Mask: %s", "255.255.255.248") ;
+//	video_drawstring(10, 380, (unsigned char *)data_buffer)  ;
 
 	/* Speed : */
-	sprintf(data_buffer, "Speed: %d", gd->bd->bi_ethspeed) ;
-	sprintf(data_buffer, "Speed: %d", gd->bd->bi_baudrate) ;
-	video_drawstring(10, 396, (unsigned char *)data_buffer)  ;
+//	sprintf(data_buffer, "Speed: %d", gd->bd->bi_ethspeed) ;
+//	sprintf(data_buffer, "Speed: %d", gd->bd->bi_baudrate) ;
 
 	/* Miscellaneous */
 	sysinfo_draw_titled_box(5, 430, 384, 64, " Miscelleneous ") ;
@@ -527,31 +566,11 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 	video_drawstring(10, 456, (unsigned char *)data_buffer)  ;
 
 	/* System Date and Time : */
-	/* switch to correct I2C bus */
-#ifdef CONFIG_SYS_I2C
-	old_bus = i2c_get_bus_num();
-	i2c_set_bus_num(CONFIG_SYS_RTC_BUS_NUM);
-#else
-	old_bus = I2C_GET_BUS();
-	I2C_SET_BUS(CONFIG_SYS_RTC_BUS_NUM);
-#endif
-	rcode = rtc_get (&tm);
-
-	if (rcode) {
-		puts("## Get date failed\n");
-	}
-	sprintf(data_buffer, "%d", old_bus) ;
-	sprintf(data_buffer, "Date: %4d-%02d-%02d ", 
-			tm.tm_year, tm.tm_mon, tm.tm_mday) ;
-	video_drawstring(10, 472, (unsigned char *)data_buffer)  ;
-
-	sprintf (data_buffer, "Time: %2d:%02d:%02d",
-		tm.tm_hour, tm.tm_min, tm.tm_sec);
-	video_drawstring(150, 472, (unsigned char *)data_buffer)  ;
+	sysinfo_displaydatetime() ;
 
 	/* PCI(e) Devices */
 	sysinfo_draw_titled_box(rightboxpos, 40, 384, 144, " PCI(e) Devices ") ;
-	for (ii = 0; ii < 3; ii++) {
+	for (ii = 0; ii < 6; ii++) {
 		sysinfo_pciinfo(ii, 1) ;
 	}
 
@@ -564,8 +583,8 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 		if (dev == NULL)
 			break;
 		if (dev->descriptor.bDeviceClass == USB_CLASS_HUB) {
-			sysinfo_usb_display_desc(dev, displayed);
-			displayed++ ;
+//			sysinfo_usb_display_desc(dev, displayed);
+//			displayed++ ;
 //			usb_display_config(dev);
 		} else {
 			sysinfo_usb_display_desc(dev, displayed);
@@ -584,6 +603,12 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 	bmp = unpack_bmp(addr) ;
 
 	video_display_bitmap((unsigned long)bmp, buttonpos , 570);
+
+ 	while (!tstc()) {
+		WATCHDOG_RESET();
+		sysinfo_displaydatetime() ;
+		udelay(1) ;
+	}
 
 	c = getc() ;
 	if ((c == 'b')  || (c == 'B')) {

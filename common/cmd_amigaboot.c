@@ -185,6 +185,7 @@ static void amigabootmenu_autoboot_loop(struct amigabootmenu_data *menu,
 	}
 #endif
 }
+
 #endif
 
 static void amigabootmenu_loop(struct amigabootmenu_data *menu,
@@ -535,6 +536,7 @@ static void amigabootmenu_show(int mdelay)
 
 		/* Start USB */
 		usb_init() ;
+		drv_usb_kbd_init() ;
 
 		/* Start SCSI too probably */
 
