@@ -94,6 +94,9 @@
 #define CONFIG_MP			/* support multiple processors */
 
 
+#define CONFIG_API
+#define CONFIG_SYS_MMC_MAX_DEVICE     1
+
 #ifndef CONFIG_SYS_TEXT_BASE
 #define CONFIG_SYS_TEXT_BASE	0xeff80000
 #endif
