@@ -78,6 +78,9 @@
 #define CONFIG_SYS_CLK_FREQ	get_board_sys_clk()
 #define CONFIG_DDR_CLK_FREQ	get_board_ddr_clk()
 
+#define CONFIG_API
+#define CONFIG_SYS_MMC_MAX_DEVICE     1
+
 /*
  * These can be toggled for performance analysis, otherwise use default.
  */
