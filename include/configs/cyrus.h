@@ -608,7 +608,7 @@
 #define CONFIG_BOOTDELAY 	10	/* -1 disables auto-boot */
 #define CONFIG_CMD_BOOTMENU		/* ANSI terminal Boot Menu */
 #define CONFIG_MENU
-#define CONFIG_MENU_SHOW
+#undef CONFIG_MENU_SHOW
  #define CONFIG_ESCAPEBOOTMENU "setenv stdout serial,vga"
 
 #define CONFIG_BAUDRATE	115200

@@ -193,8 +193,13 @@ static int abortboot_normal(int bootdelay)
 #ifdef CONFIG_MENUPROMPT
 	printf(CONFIG_MENUPROMPT);
 #else
+
+#ifdef CONFIG_CMD_AMIGABOOT
+#else
 	if (bootdelay >= 0)
 		printf("Hit any key to stop autoboot: %2d ", bootdelay);
+#endif
+
 #endif
 
 #if defined CONFIG_ZERO_BOOTDELAY_CHECK
@@ -210,6 +215,12 @@ static int abortboot_normal(int bootdelay)
 		}
 	}
 #endif
+
+#ifdef CONFIG_CMD_AMIGABOOT
+	abort = 1 ;
+	bootdelay = 0 ;
+	run_command("setenv stdout serial,vga", 0) ;
+#else
 
 	while ((bootdelay > 0) && (!abort)) {
 		--bootdelay;
@@ -233,6 +244,7 @@ static int abortboot_normal(int bootdelay)
 	}
 
 	putc('\n');
+#endif
 
 #ifdef CONFIG_SILENT_CONSOLE
 	if (abort)

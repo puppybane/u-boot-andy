@@ -233,8 +233,8 @@ compute_lowest_common_dimm_parameters(const dimm_params_t *dimm_params,
 			} else {
 				temp2 = 1;
 #ifndef CONFIG_SPL_BUILD
-//				printf("Detected UDIMM %s\n",
-//					dimm_params[i].mpart);
+				printf("Detected UDIMM %s\n",
+					dimm_params[i].mpart);
 //				strcpy(dimm_name, dimm_params[i].mpart) ;
 #endif
 			}

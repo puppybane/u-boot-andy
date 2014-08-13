@@ -66,17 +66,19 @@ static int bootmenu_print_entry(void *data)
 	 * Move cursor to line where the entry will be drown (entry->num)
 	 * First 3 lines contain bootmenu header + 1 empty line
 	 */
-	printf(ANSI_CURSOR_POSITION, entry->num + 4, 1);
+//	printf(ANSI_CURSOR_POSITION, entry->num + 4, 1);
 
-	puts("     ");
+//	puts("     ");
 
-	if (reverse)
-		puts(ANSI_COLOR_REVERSE);
+	if (reverse) {
+//		puts(ANSI_COLOR_REVERSE);
+	}
 
-	puts(entry->title);
+//	puts(entry->title);
 
-	if (reverse)
-		puts(ANSI_COLOR_RESET);
+	if (reverse) {
+//		puts(ANSI_COLOR_RESET);
+	}
 	return 0;
 }
 
@@ -85,8 +87,10 @@ static void bootmenu_autoboot_loop(struct bootmenu_data *menu,
 {
 	int i, c;
 
+//	menu->delay = 0 ;
+
 	if (menu->delay > 0) {
-		printf(ANSI_CURSOR_POSITION, menu->count + 5, 1);
+//		printf(ANSI_CURSOR_POSITION, menu->count + 5, 1);
 //		printf("  Hit any key to stop autoboot: %2d ", menu->delay);
 	}
 
@@ -121,11 +125,11 @@ static void bootmenu_autoboot_loop(struct bootmenu_data *menu,
 			break;
 
 		--menu->delay;
-		printf("\b\b\b%2d ", menu->delay);
+//		printf("\b\b\b%2d ", menu->delay);
 	}
 
-	printf(ANSI_CURSOR_POSITION, menu->count + 5, 1);
-	puts(ANSI_CLEAR_LINE);
+//	printf(ANSI_CURSOR_POSITION, menu->count + 5, 1);
+//	puts(ANSI_CLEAR_LINE);
 
 	if (menu->delay == 0)
 		*key = KEY_SELECT;
@@ -142,12 +146,18 @@ static void bootmenu_loop(struct bootmenu_data *menu,
 {
 	int c;
 
+#ifdef NOT_AUTO
 	while (!tstc()) {
 		WATCHDOG_RESET();
 		mdelay(10);
 	}
 
 	c = getc();
+#else
+
+	c = '\r' ;
+
+#endif
 
 	switch (*esc) {
 	case 0:
@@ -383,12 +393,12 @@ static void bootmenu_show(int delay)
 	if (delay == 0) {
 		option = bootmenu_getoption(0);
 		if (!option) {
-			puts("bootmenu option 0 was not found\n");
+//			puts("bootmenu option 0 was not found\n");
 			return;
 		}
 		sep = strchr(option, '=');
 		if (!sep) {
-			puts("bootmenu option 0 is invalid\n");
+//			puts("bootmenu option 0 is invalid\n");
 			return;
 		}
 		run_command(sep+1, 0);
@@ -414,9 +424,9 @@ static void bootmenu_show(int delay)
 	/* Default menu entry is always first */
 	menu_default_set(menu, "0");
 
-	puts(ANSI_CURSOR_HIDE);
+//	puts(ANSI_CURSOR_HIDE);
 	puts(ANSI_CLEAR_CONSOLE);
-	printf(ANSI_CURSOR_POSITION, 1, 1);
+//	printf(ANSI_CURSOR_POSITION, 1, 1);
 
 	init = 1;
 
@@ -514,3 +524,4 @@ U_BOOT_CMD(
 	"[delay]\n"
 	"    - show ANSI terminal bootmenu with autoboot delay"
 );
+

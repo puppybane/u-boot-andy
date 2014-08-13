@@ -983,9 +983,9 @@ done:
 		case FSL_DDR_CS0_CS1:
 			if (pdimm[0].n_ranks < 2) {
 				popts->ba_intlv_ctl = 0;
-//				printf("Not enough bank(chip-select) for "
-//					"CS0+CS1 on controller %d, "
-//					"interleaving disabled!\n", ctrl_num);
+				printf("Not enough bank(chip-select) for "
+					"CS0+CS1 on controller %d, "
+					"interleaving disabled!\n", ctrl_num);
 			}
 			break;
 		case FSL_DDR_CS2_CS3:
@@ -1093,8 +1093,8 @@ void check_interleaving_options(fsl_ddr_info_t *pinfo)
 	if (intlv_invalid) {
 		for (i = 0; i < CONFIG_NUM_DDR_CONTROLLERS; i++)
 			pinfo->memctl_opts[i].memctl_interleaving = 0;
-//		printf("Not all DIMMs are identical. "
-//			"Memory controller interleaving disabled.\n");
+		printf("Not all DIMMs are identical. "
+			"Memory controller interleaving disabled.\n");
 	} else {
 		switch (check_intlv) {
 		case FSL_DDR_256B_INTERLEAVING:

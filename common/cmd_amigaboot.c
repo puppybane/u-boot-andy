@@ -98,7 +98,7 @@ static bmp_image_t *unpack_bmp(unsigned long addr)
 int amigabootmenu_clear_screen( )
 {
 	ulong addr = BLANK_SCREEN ;
-    bmp_image_t *bmp;
+    	bmp_image_t *bmp;
 	int ii, jj; 
 
 	bmp = unpack_bmp(addr);
@@ -121,7 +121,7 @@ static int amigabootmenu_print_entry(void *data)
 	ulong addr_std = MAINMENU_BUTTONS ;
 	ulong addr_inv = MAINMENU_BUTTONS_INV ;
 	ulong addr;
-    bmp_image_t *bmp;
+    	bmp_image_t *bmp;
 
 	if (reverse) {
 		addr = (addr_inv - ((entry->num) * 0x2000)) ;
@@ -627,6 +627,7 @@ static void amigabootmenu_show(int mdelay)
 cleanup:
 	menu_destroy(menu);
 	amigabootmenu_destroy(amigabootmenu);
+	amigabootmenu_clear_screen() ;
 
 	if (title && command) {
 		debug("Starting entry '%s'\n", title);

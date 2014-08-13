@@ -42,6 +42,7 @@ extern struct bmp_image *gunzip_bmp(unsigned long addr, unsigned long *lenp, voi
 int do_amigabootmenu(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[]) ;
 char *usb_get_class_desc(unsigned char dclass) ;
 void pci_header_show(pci_dev_t dev);
+static void sysinfo_displaydatetime( void ) ;
 
 /*
  * Subroutine:  sysinfo_pciinfo
@@ -129,7 +130,7 @@ void sysinfo_board_add_ram_info(char *data_buffer, int dimm_number)
 #endif
 	uint32_t sdram_cfg = ddr_in32(&ddr->sdram_cfg);
 	int cas_lat;
-	dimm_params_t *pdimm;
+//	dimm_params_t *pdimm;
 	fsl_ddr_info_t info;
 
 	if (dimm_number == 1) {
@@ -155,7 +156,10 @@ void sysinfo_board_add_ram_info(char *data_buffer, int dimm_number)
                         dimm_number) ;
 #endif
 
-	fsl_ddr_compute(&info, STEP_GET_SPD, 0);
+//	fsl_ddr_compute(&info, STEP_GET_SPD, 0);
+	run_command("setenv stdout serial", 0) ;
+	fsl_ddr_compute(&info, STEP_GET_SPD, 1);
+	run_command("setenv stdout serial,vga", 0) ;
 
 	memset(data_buffer, '\0', 128) ;
 //	sprintf(data_buffer, "DIMM 0: %1ldGb %s", (unsigned long)(gd->ram_size / 1073741824L), memory_info) ;
@@ -203,6 +207,7 @@ void sysinfo_board_add_ram_info(char *data_buffer, int dimm_number)
 	return  ;
 }
 
+#ifdef FULL_USB
 static void sysinfo_usb_display_class_sub(unsigned char dclass, unsigned char subclass,
 				  unsigned char proto, char *data_buffer)
 {
@@ -288,6 +293,8 @@ static void sysinfo_usb_display_class_sub(unsigned char dclass, unsigned char su
 
 	return ;
 }
+#endif
+
 
 static bmp_image_t *unpack_bmp(unsigned long addr)
 {
@@ -369,7 +376,9 @@ static void sysinfo_displaydatetime()
 	old_bus = I2C_GET_BUS();
 	I2C_SET_BUS(CONFIG_SYS_RTC_BUS_NUM);
 #endif
+	run_command("setenv stdout serial", 0) ;
 	rcode = rtc_get (&tm);
+	run_command("setenv stdout serial,vga", 0) ;
 
 	if (rcode) {
 		puts("## Get date failed\n");
@@ -400,8 +409,7 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 	ulong addr = BACK_BUTTON ;
 	ulong addr_inv = BACK_BUTTON_INV ;
 	bmp_image_t *bmp = (bmp_image_t *)addr;
-	void *bmp_alloc_addr = NULL;
-	int reverse=0, len ;
+	int reverse=0 ;
 	int displayed = 0 ;
 	struct cpu_type *cpu ;
 	uint svr, pvr, ver, major, minor ;
