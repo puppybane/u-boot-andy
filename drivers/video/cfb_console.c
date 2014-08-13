@@ -2315,6 +2315,8 @@ int __board_video_skip(void)
 int board_video_skip(void)
 	__attribute__ ((weak, alias("__board_video_skip")));
 
+int gbVGAInit = 1 ;
+
 int drv_video_init(void)
 {
 	int skip_dev_init;
@@ -2334,9 +2336,13 @@ int drv_video_init(void)
 	debug("KBD: Keyboard init ...\n");
 	skip_dev_init |= (VIDEO_KBD_INIT_FCT == -1);
 #endif
-
-	if (skip_dev_init)
+	if (skip_dev_init) {
+#ifdef CONFIG_CMD_AMIGABOOT
+printf("No VGA - Required for AmigaBoot\n") ;
+		gbVGAInit = 0 ;
+#endif
 		return 0;
+	}
 
 	/* Init vga device */
 	memset(&console_dev, 0, sizeof(console_dev));

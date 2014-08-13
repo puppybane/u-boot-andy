@@ -65,6 +65,10 @@ int do_mdm_init = 0;
 extern void mdm_init(void); /* defined in board.c */
 #endif
 
+#ifdef CONFIG_CMD_AMIGABOOT
+extern int gbVGAInit ;
+#endif
+
 /***************************************************************************
  * Watch for 'delay' seconds for autoboot stop or autoboot delay string.
  * returns: 0 -  no key string, allow autoboot 1 - got key string, abort
@@ -470,8 +474,13 @@ void main_loop(void)
 # ifdef CONFIG_AUTOBOOT_KEYED
 		int prev = disable_ctrlc(1);	/* disable Control C checking */
 # endif
-
+#ifdef CONFIG_CMD_AMIGABOOT
+		if (gbVGAInit == 1) {
+			run_command_list(p, -1, 0);
+		}
+#else
 		run_command_list(p, -1, 0);
+#endif
 
 # ifdef CONFIG_AUTOBOOT_KEYED
 		disable_ctrlc(prev);	/* restore Control C checking */

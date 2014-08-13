@@ -48,6 +48,7 @@ int amigabootmenu_clear_screen( void ) ;
 extern void video_drawstring(int xx, int yy, unsigned char *s) ;
 extern void sysinfo_draw_titled_box(int x, int y, int w, int h, char * title) ;
 extern struct bmp_image *gunzip_bmp(unsigned long addr, unsigned long *lenp, void **alloc_addr);
+extern int gbVGAInit ;
 
 /* Globals */
 int init = 0 ;	/* Display boot logo or not */
@@ -667,7 +668,9 @@ int do_amigabootmenu(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
 	if (delay_str)
 		delay = (int)simple_strtol(delay_str, NULL, 10);
 
-	amigabootmenu_show(delay);
+	if (gbVGAInit == 1) {
+		amigabootmenu_show(delay);
+	}
 	return 0;
 }
 
