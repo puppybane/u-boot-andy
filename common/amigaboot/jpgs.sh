@@ -29,6 +29,8 @@ jpegtopnm sideline.jpg | ppmquant 256 | ppmtobmp -bpp 8 > sideline.bmp
 jpegtopnm background.jpg | ppmquant 256 | ppmtobmp -bpp 8 > background.bmp
 jpegtopnm logo.jpg | ppmquant 256 | ppmtobmp -bpp 8 > logo.bmp
 jpegtopnm maintitle.jpg | ppmquant 256 | ppmtobmp -bpp 8 > maintitle.bmp
+jpegtopnm sysinfo.jpg | ppmquant 256 | ppmtobmp -bpp 8 > sysinfo.bmp
+jpegtopnm bootoptions.jpg | ppmquant 256 | ppmtobmp -bpp 8 > bootoptions.bmp
 pngtopnm X5000_Boot01.png | ppmquant 256 | ppmtobmp -bpp 8  > X5000_Boot01.bmp
 pngtopnm X5000_Boot02.png | ppmquant 256 | ppmtobmp -bpp 8  > X5000_Boot02.bmp
 pngtopnm X5000_Boot03.png | ppmquant 256 | ppmtobmp -bpp 8  > X5000_Boot03.bmp

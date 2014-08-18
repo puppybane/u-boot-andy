@@ -65,7 +65,7 @@ static char *amigabootmenu_getoption(unsigned short int n)
 
 	switch(n) {
 	case 0 : 
-		return("Start AmigaOS = startamigaos") ;
+		return("Start AmigaOS = boota") ;
 	case 1 :   
 		return("Start Classic AmigaOS = startamigaclassic") ;
 	case 2 : 
@@ -548,7 +548,8 @@ static void amigabootmenu_show(int mdelay)
 				if (! bmp)
 					return;
 				video_display_bitmap((unsigned long)bmp, 0, 0);
-				delay = 100 ;
+				/* Could get delay from environment variable to make it tweakable? */
+				delay = 150 ;
 				while (get_timer(start) < delay) {
 					udelay(1);
 				}

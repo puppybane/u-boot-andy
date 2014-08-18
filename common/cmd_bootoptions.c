@@ -463,6 +463,8 @@ static void bootoptions_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const a
 	struct menu *menu;
 	struct amigabootmenu_data *bootoptionsmenu;
 	struct amigabootmenu_entry *iter;
+	ulong title_addr = BOOTOPTIONS_TITLE ;
+    	bmp_image_t *bmp = (bmp_image_t *)title_addr;
 
 	bootoptionsmenu = bootoptionsmenu_create(delay);
 	if (!bootoptionsmenu)
@@ -485,7 +487,9 @@ static void bootoptions_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const a
 
 	amigabootmenu_clear_screen() ;
 
-	video_drawstring(270, 10, (unsigned char *)"<<<<<< AmigaONE Boot Options >>>>>>")  ;
+//	video_drawstring(270, 10, (unsigned char *)"<<<<<< AmigaONE Boot Options >>>>>>")  ;
+	bmp = unpack_bmp(title_addr) ;
+	video_display_bitmap((unsigned long)bmp, ((800-192)/2), 10);
 
 	sysinfo_draw_titled_box(centreboxposx, centreboxposy, 248, 160, "") ;
 

@@ -163,6 +163,11 @@ void sysinfo_board_add_ram_info(char *data_buffer, int dimm_number)
 
 	memset(data_buffer, '\0', 128) ;
 //	sprintf(data_buffer, "DIMM 0: %1ldGb %s", (unsigned long)(gd->ram_size / 1073741824L), memory_info) ;
+	if (info.dimm_params[0][dimm_number].capacity == 0L) {
+		sprintf(data_buffer, "Slot Empty") ;
+		return ;
+	}
+
 	sprintf(data_buffer, "%1ldGb", (unsigned long)(info.dimm_params[0][dimm_number].capacity / 1073741824L)) ;
 //	strcpy(data_buffer, dimm_name) ;
 		
@@ -406,17 +411,22 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 	typedef struct button6 button ;
 	char 	cpu_type[32] ;
 	char	cpu_core1[32] ;
+	ulong title_addr = SYSINFO_TITLE ;
 	ulong addr = BACK_BUTTON ;
 	ulong addr_inv = BACK_BUTTON_INV ;
 	bmp_image_t *bmp = (bmp_image_t *)addr;
-	int reverse=0 ;
+	int reverse=1 ;
 	int displayed = 0 ;
 	struct cpu_type *cpu ;
 	uint svr, pvr, ver, major, minor ;
 
 	amigabootmenu_clear_screen() ;
 
-	video_drawstring(250, 5, (unsigned char *)"<<<<<< AmigaONE System Information >>>>>>")  ;
+//	video_drawstring(250, 5, (unsigned char *)"AmigaONE System Information")  ;
+	/* Load bitmap for title */
+	bmp = unpack_bmp(title_addr) ;
+
+	video_display_bitmap((unsigned long)bmp, ((800-239) / 2), 10);
 
 	/* CPU */
 	sysinfo_draw_titled_box(5, 40, 384, 64, " CPU ") ;
@@ -570,7 +580,7 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 	video_drawstring(10, 440, (unsigned char *)data_buffer)  ;
 
 	/* Vendor : */
-	sprintf(data_buffer, "Vendor: %s", "Cyrus") ;
+	sprintf(data_buffer, "Vendor: %s", "A-EON Technology Ltd.") ;
 	video_drawstring(10, 456, (unsigned char *)data_buffer)  ;
 
 	/* System Date and Time : */
@@ -618,22 +628,24 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 		udelay(1) ;
 	}
 
-	c = getc() ;
-	if ((c == 'b')  || (c == 'B')) {
-		unsigned long delay;
-		ulong start = get_timer(0);
-		bmp = (bmp_image_t *) (addr_inv) ;
-		video_display_bitmap((unsigned long)bmp, buttonpos , 570);
-		delay = 1 * CONFIG_SYS_HZ;
-		while (get_timer(start) < delay) {
-			udelay(1);
-		}
-		start = get_timer(0);
-		bmp = (bmp_image_t *) (addr) ;
-		video_display_bitmap((unsigned long)bmp, buttonpos , 570);
-		delay = 1 * CONFIG_SYS_HZ;
-		while (get_timer(start) < delay) {
-			udelay(1);
+	while (c = getc() ) {
+		if ((c == 'b')  || (c == 'B') || (c == '\r')) {
+			unsigned long delay;
+			ulong start = get_timer(0);
+			bmp = (bmp_image_t *) (addr_inv) ;
+			video_display_bitmap((unsigned long)bmp, buttonpos , 570);
+			delay = 1 * CONFIG_SYS_HZ;
+			while (get_timer(start) < delay) {
+				udelay(1);
+			}
+			start = get_timer(0);
+			bmp = (bmp_image_t *) (addr) ;
+			video_display_bitmap((unsigned long)bmp, buttonpos , 570);
+			delay = 1 * CONFIG_SYS_HZ;
+			while (get_timer(start) < delay) {
+				udelay(1);
+			}
+			break ;
 		}
 	}
 

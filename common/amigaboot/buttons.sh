@@ -35,6 +35,8 @@ sudo dd of=$1 if=topline.bmp bs=512 seek=1696
 sudo dd of=$1 if=bottomline.bmp bs=512 seek=1712
 sudo dd of=$1 if=sideline.bmp bs=512 seek=1728
 sudo dd of=$1 if=maintitle.bmp bs=512 seek=1744
+sudo dd of=$1 if=sysinfo.bmp bs=512 seek=1760
+sudo dd of=$1 if=bootoptions.bmp bs=512 seek=1776
 
 sudo dd of=$1 if=lb2.img bs=512 seek=1792
 sudo dd of=$1 if=logo.bmp bs=512 seek=1808
