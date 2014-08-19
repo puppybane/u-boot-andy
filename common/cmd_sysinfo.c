@@ -632,16 +632,17 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 		if ((c == 'b')  || (c == 'B') || (c == '\r')) {
 			unsigned long delay;
 			ulong start = get_timer(0);
-			bmp = (bmp_image_t *) (addr_inv) ;
-			video_display_bitmap((unsigned long)bmp, buttonpos , 570);
-			delay = 1 * CONFIG_SYS_HZ;
-			while (get_timer(start) < delay) {
-				udelay(1);
-			}
+//		 	bmp = (bmp_image_t *) (addr_inv) ;
+//			video_display_bitmap((unsigned long)bmp, buttonpos , 570);
+//			delay = BUTTON_DELAY;
+//			while (get_timer(start) < delay) {
+//				udelay(1);
+//			}
 			start = get_timer(0);
+			addr = BACK_BUTTON ;
 			bmp = (bmp_image_t *) (addr) ;
 			video_display_bitmap((unsigned long)bmp, buttonpos , 570);
-			delay = 1 * CONFIG_SYS_HZ;
+			delay = BUTTON_DELAY;
 			while (get_timer(start) < delay) {
 				udelay(1);
 			}

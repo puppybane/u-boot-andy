@@ -243,7 +243,7 @@ static void bootoptionsmenu_loop(struct amigabootmenu_data *menu,
 			return ;
 		video_display_bitmap((unsigned long)bmp, buttonpos, (menu->active * 30) + 190);
 
-		delay = 1 * CONFIG_SYS_HZ;
+		delay = BUTTON_DELAY;
 		while (get_timer(start) < delay) {
 			udelay(1);
 		}
@@ -260,7 +260,7 @@ static void bootoptionsmenu_loop(struct amigabootmenu_data *menu,
 		video_display_bitmap((unsigned long)bmp, buttonpos, (menu->active * 30) + 190);
 
 		start = get_timer(0);
-		delay = 1 * CONFIG_SYS_HZ;
+		delay = 1 * BUTTON_DELAY;
 		while (get_timer(start) < delay) {
 			udelay(1);
 		}
@@ -518,7 +518,7 @@ static void bootoptions_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const a
 
 	video_display_bitmap((unsigned long)bmp, buttonpos, 330);
 
-	delay = 3 * CONFIG_SYS_HZ;
+	delay = 3 * BUTTON_DELAY ;
 	while (get_timer(start) < delay) {
 		udelay(3);
 	}

@@ -302,7 +302,7 @@ static void amigabootmenu_loop(struct amigabootmenu_data *menu,
 		}
 		video_display_bitmap((unsigned long)bmp, buttonpos, (menu->active * 30) + 190);
 
-		delay = 1 * CONFIG_SYS_HZ;
+		delay = BUTTON_DELAY ;
 		while (get_timer(start) < delay) {
 			udelay(1);
 		}
@@ -314,7 +314,7 @@ static void amigabootmenu_loop(struct amigabootmenu_data *menu,
 			return;
 		video_display_bitmap((unsigned long)bmp, buttonpos, (menu->active * 30) + 190);
 
-		delay = 1 * CONFIG_SYS_HZ;
+		delay = BUTTON_DELAY ;
 		while (get_timer(start) < delay) {
 			udelay(1);
 		}
