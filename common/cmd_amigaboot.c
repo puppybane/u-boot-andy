@@ -540,6 +540,7 @@ static void amigabootmenu_show(int mdelay)
 		drv_usb_kbd_init() ;
 
 		/* Start SCSI too probably */
+		scsi_init() ;
 
 		mdelay = 0 ;
 		for (jj = 0; jj < 10; jj++) {
