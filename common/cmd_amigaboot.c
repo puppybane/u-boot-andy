@@ -15,6 +15,8 @@
 #include <linux/string.h>
 #include <video.h>
 #include <usb.h>
+#include <scsi.h>
+#include <sata.h>
 #include <amigaboot.h>
 
 /* maximum amigabootmenu entries */
@@ -539,8 +541,11 @@ static void amigabootmenu_show(int mdelay)
 		usb_init() ;
 		drv_usb_kbd_init() ;
 
-		/* Start SCSI too probably */
+		/* Start SCSI too */
 		scsi_init() ;
+
+		/* And SATA */
+		sata_initialize() ;
 
 		mdelay = 0 ;
 		for (jj = 0; jj < 10; jj++) {

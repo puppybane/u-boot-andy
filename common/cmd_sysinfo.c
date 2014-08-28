@@ -66,6 +66,7 @@ void sysinfo_pciinfo(int BusNum, int ShortPCIListing)
 	char data_buffer[64] ;
 	u16 vendor, device;
 	u8 class, subclass;
+	static int dev_displayed = 0 ;
 
 //	printf("Scanning PCI devices on bus %d\n", BusNum);
 
@@ -74,6 +75,7 @@ void sysinfo_pciinfo(int BusNum, int ShortPCIListing)
 //		printf("_____________________________________________________________\n");
 	}
 
+	if (BusNum == 0) dev_displayed = 0 ;
 	for (Device = 0; Device < PCI_MAX_PCI_DEVICES; Device++) {
 		HeaderType = 0;
 		VendorID = 0;
@@ -91,26 +93,30 @@ void sysinfo_pciinfo(int BusNum, int ShortPCIListing)
 				continue;
 
 			if (!Function) pci_read_config_byte(dev, PCI_HEADER_TYPE, &HeaderType);
-			if (ShortPCIListing)
+			if ((ShortPCIListing) && (dev_displayed < 8))
 			{
-
 				pci_read_config_word(dev, PCI_VENDOR_ID, &vendor);
 				pci_read_config_word(dev, PCI_DEVICE_ID, &device);
 				pci_read_config_byte(dev, PCI_CLASS_CODE, &class);
 				pci_read_config_byte(dev, PCI_CLASS_SUB_CODE, &subclass);
-
-				sprintf(data_buffer, "%02x.%02x.%02x %.4x %.4x %-16s %.2x", 
-						BusNum, Device, Function,
-		  				vendor, device,
-		  				pci_class_str(class), subclass);
-//				video_drawstring(420, 66 + (Function * 32), (unsigned char *)data_buffer)  ;
-				video_drawstring(420, 50 + (Function * 16), (unsigned char *)data_buffer)  ;
+				
+				if (device != 0x8092) {	// Don't display bridge devices
+					sprintf(data_buffer, "%02x.%02x.%02x %.4x %.4x %-16s %.2x", 
+							BusNum, Device, Function,
+		  					vendor, device,
+		  					pci_class_str(class), subclass);
+					if (strlen(data_buffer) > 49) {
+						data_buffer[49] = '\0';
+					}
+					video_drawstring(420, 50 + (dev_displayed * 16), (unsigned char *)data_buffer)  ;
+					dev_displayed++;
+				}
 			}
 			else
 			{
-				printf("\nFound PCI device %02x.%02x.%02x:\n",
-					  BusNum, Device, Function);
-				pci_header_show(dev);
+//				printf("\nFound PCI device %02x.%02x.%02x:\n",
+//					  BusNum, Device, Function);
+//				pci_header_show(dev);
 			}
 		}
     	}
@@ -329,12 +335,18 @@ void sysinfo_usb_display_desc(struct usb_device *dev, int dev_no)
 		usb_get_class_desc(dev->config.if_desc[0].desc.bInterfaceClass),
 				   (dev->descriptor.bcdUSB>>8) & 0xff,
 				   dev->descriptor.bcdUSB & 0xff);
+		if (strlen(data_buffer) > 49) {
+			data_buffer[49] = '\0' ;
+		}
 		video_drawstring(420, offset+(dev_no*48), (unsigned char *)data_buffer) ;
 
 		if (strlen(dev->mf) || strlen(dev->prod) ||
 		    strlen(dev->serial)) {
 			sprintf(data_buffer, "%s %s %s", dev->mf, dev->prod,
 				dev->serial);
+			if (strlen(data_buffer) > 49) {
+				data_buffer[49] = '\0' ;
+			}
 			video_drawstring(420, offset+16+(dev_no*48), (unsigned char *)data_buffer) ;
 		}
 #ifdef Expanded_USB
@@ -345,22 +357,34 @@ void sysinfo_usb_display_desc(struct usb_device *dev, int dev_no)
 						 dev->descriptor.bDeviceProtocol,
 						 tmp_buffer) ;
 			sprintf(data_buffer,"Class: %s", tmp_buffer) ;
+			if (strlen(data_buffer) > 49) {
+				data_buffer[49] = '\0' ;
+			}
 			video_drawstring(420, offset+32+(dev_no*48), (unsigned char *)data_buffer) ;
 		} else {
 			sprintf(data_buffer, "Class: (from I/f) %s",
 				  usb_get_class_desc(
 				dev->config.if_desc[0].desc.bInterfaceClass));
+			if (strlen(data_buffer) > 49) {
+				data_buffer[49] = '\0' ;
+			}
 			video_drawstring(420, offset+32+(dev_no*48), (unsigned char *)data_buffer) ;
 		}
 		sprintf(data_buffer, "Packet Size: %d Configurations: %d",
 			dev->descriptor.bMaxPacketSize0,
 			dev->descriptor.bNumConfigurations);
+		if (strlen(data_buffer) > 49) {
+			data_buffer[49] = '\0' ;
+		}
 		video_drawstring(420, offset+48+(dev_no*48), (unsigned char *)data_buffer) ;
 #endif
 		sprintf(data_buffer, "Vendor: 0x%04x Prod 0x%04x Ver %d.%d",
 			dev->descriptor.idVendor, dev->descriptor.idProduct,
 			(dev->descriptor.bcdDevice>>8) & 0xff,
 			dev->descriptor.bcdDevice & 0xff);
+		if (strlen(data_buffer) > 49) {
+			data_buffer[49] = '\0' ;
+		}
 		video_drawstring(420, offset+32+(dev_no*48), (unsigned char *)data_buffer) ;
 	}
 
@@ -509,10 +533,14 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 //			sata_dev_desc[i].revision,
 //			sata_dev_desc[i].product);
 		sprintf(data_buffer, 
-			"SATA dev %d: Mod: %s Typ: %s",
+			"SATA dev %d: Mod: %s Prod: %s Typ: %s",
 			i,
+			sata_dev_desc[i].product,
 			sata_dev_desc[i].vendor,
 			devtype);
+		if (strlen(data_buffer) > 49) {
+			data_buffer[49] = '\0';
+		}
 		video_drawstring(10, 130 + (i * 16), (unsigned char *)data_buffer) ;
 	}
 
@@ -588,7 +616,7 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 
 	/* PCI(e) Devices */
 	sysinfo_draw_titled_box(rightboxpos, 40, 384, 144, " PCI(e) Devices ") ;
-	for (ii = 0; ii < 6; ii++) {
+	for (ii = 0; ii < 16; ii++) {
 		sysinfo_pciinfo(ii, 1) ;
 	}
 
@@ -628,7 +656,7 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 		udelay(1) ;
 	}
 
-	while (c = getc() ) {
+	while (c = getc()) {
 		if ((c == 'b')  || (c == 'B') || (c == '\r')) {
 			unsigned long delay;
 			ulong start = get_timer(0);
