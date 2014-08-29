@@ -13,6 +13,7 @@
 #include <watchdog.h>
 #include <malloc.h>
 #include <linux/string.h>
+#include <linux/ctype.h>
 #include <linux/compiler.h>
 #include <usb.h>
 #include <pci.h>
@@ -100,13 +101,13 @@ void sysinfo_pciinfo(int BusNum, int ShortPCIListing)
 				pci_read_config_byte(dev, PCI_CLASS_CODE, &class);
 				pci_read_config_byte(dev, PCI_CLASS_SUB_CODE, &subclass);
 				
-				if (device != 0x8092) {	// Don't display bridge devices
+				if ((device != 0x8092) && (device != 0xe111) && (device != 0x8608)) {	// Don't display bridge devices
 					sprintf(data_buffer, "%02x.%02x.%02x %.4x %.4x %-16s %.2x", 
 							BusNum, Device, Function,
 		  					vendor, device,
 		  					pci_class_str(class), subclass);
-					if (strlen(data_buffer) > 49) {
-						data_buffer[49] = '\0';
+					if (strlen(data_buffer) > 46) {
+						data_buffer[46] = '\0';
 					}
 					video_drawstring(420, 50 + (dev_displayed * 16), (unsigned char *)data_buffer)  ;
 					dev_displayed++;
@@ -335,8 +336,8 @@ void sysinfo_usb_display_desc(struct usb_device *dev, int dev_no)
 		usb_get_class_desc(dev->config.if_desc[0].desc.bInterfaceClass),
 				   (dev->descriptor.bcdUSB>>8) & 0xff,
 				   dev->descriptor.bcdUSB & 0xff);
-		if (strlen(data_buffer) > 49) {
-			data_buffer[49] = '\0' ;
+		if (strlen(data_buffer) > 46) {
+			data_buffer[46] = '\0' ;
 		}
 		video_drawstring(420, offset+(dev_no*48), (unsigned char *)data_buffer) ;
 
@@ -344,8 +345,8 @@ void sysinfo_usb_display_desc(struct usb_device *dev, int dev_no)
 		    strlen(dev->serial)) {
 			sprintf(data_buffer, "%s %s %s", dev->mf, dev->prod,
 				dev->serial);
-			if (strlen(data_buffer) > 49) {
-				data_buffer[49] = '\0' ;
+			if (strlen(data_buffer) > 46) {
+				data_buffer[46] = '\0' ;
 			}
 			video_drawstring(420, offset+16+(dev_no*48), (unsigned char *)data_buffer) ;
 		}
@@ -357,24 +358,24 @@ void sysinfo_usb_display_desc(struct usb_device *dev, int dev_no)
 						 dev->descriptor.bDeviceProtocol,
 						 tmp_buffer) ;
 			sprintf(data_buffer,"Class: %s", tmp_buffer) ;
-			if (strlen(data_buffer) > 49) {
-				data_buffer[49] = '\0' ;
+			if (strlen(data_buffer) > 46) {
+				data_buffer[46] = '\0' ;
 			}
 			video_drawstring(420, offset+32+(dev_no*48), (unsigned char *)data_buffer) ;
 		} else {
 			sprintf(data_buffer, "Class: (from I/f) %s",
 				  usb_get_class_desc(
 				dev->config.if_desc[0].desc.bInterfaceClass));
-			if (strlen(data_buffer) > 49) {
-				data_buffer[49] = '\0' ;
+			if (strlen(data_buffer) > 46) {
+				data_buffer[46] = '\0' ;
 			}
 			video_drawstring(420, offset+32+(dev_no*48), (unsigned char *)data_buffer) ;
 		}
 		sprintf(data_buffer, "Packet Size: %d Configurations: %d",
 			dev->descriptor.bMaxPacketSize0,
 			dev->descriptor.bNumConfigurations);
-		if (strlen(data_buffer) > 49) {
-			data_buffer[49] = '\0' ;
+		if (strlen(data_buffer) > 46) {
+			data_buffer[46] = '\0' ;
 		}
 		video_drawstring(420, offset+48+(dev_no*48), (unsigned char *)data_buffer) ;
 #endif
@@ -382,8 +383,8 @@ void sysinfo_usb_display_desc(struct usb_device *dev, int dev_no)
 			dev->descriptor.idVendor, dev->descriptor.idProduct,
 			(dev->descriptor.bcdDevice>>8) & 0xff,
 			dev->descriptor.bcdDevice & 0xff);
-		if (strlen(data_buffer) > 49) {
-			data_buffer[49] = '\0' ;
+		if (strlen(data_buffer) > 46) {
+			data_buffer[46] = '\0' ;
 		}
 		video_drawstring(420, offset+32+(dev_no*48), (unsigned char *)data_buffer) ;
 	}
@@ -422,6 +423,25 @@ static void sysinfo_displaydatetime()
 	video_drawstring(150, 472, (unsigned char *)data_buffer)  ;
 
 	return ;
+}
+
+void compress_spaces(char *str)
+{
+    char *dst = str;
+
+    for (; *str; ++str) {
+        *dst++ = *str;
+
+        if (isspace(*str)) {
+            do ++str; 
+
+            while (isspace(*str));
+
+            --str;
+        }
+    }
+
+    *dst = 0;
 }
 
 static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[])
@@ -525,6 +545,10 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 			break;
 		}
 
+		if (sata_dev_desc[i].lba == 0L) {
+			continue;
+		}
+
 //		sprintf(data_buffer, 
 //			"SATA device %d: Model: %s Firm: %s Ser#: %s",
 //			"SATA device %d: Model: %s Type: %s",
@@ -533,32 +557,64 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 //			sata_dev_desc[i].revision,
 //			sata_dev_desc[i].product);
 		sprintf(data_buffer, 
-			"SATA dev %d: Mod: %s Prod: %s Typ: %s",
+			"SATA dev %d: Mod: %s Typ: %s",
 			i,
 			sata_dev_desc[i].product,
-			sata_dev_desc[i].vendor,
 			devtype);
-		if (strlen(data_buffer) > 49) {
-			data_buffer[49] = '\0';
+		compress_spaces(data_buffer) ;
+		if (strlen(data_buffer) > 47) {
+			data_buffer[47] = '\0';
 		}
 		video_drawstring(10, 130 + (i * 16), (unsigned char *)data_buffer) ;
+//		sprintf(data_buffer, 
+//			"Vend: %s Rev: %s",
+//			sata_dev_desc[i].vendor,
+//			sata_dev_desc[i].revision);
+//		if (strlen(data_buffer) > 46) {
+//			data_buffer[46] = '\0';
+//		}
+//		video_drawstring(10, 130 + 16 + (i * 32), (unsigned char *)data_buffer) ;
 	}
 
 	/* SCSI info */
 	for (i=0; i<CONFIG_SYS_SCSI_MAX_DEVICE; ++i) {
+		if (scsi_dev_desc[i].type == DEV_TYPE_UNKNOWN)
+			continue;
+		switch (scsi_dev_desc[i].type & 0x1F) {
+		case DEV_TYPE_HARDDISK:
+			strcpy(devtype, "Hard Disk");
+			break;
+		case DEV_TYPE_CDROM:
+			strcpy(devtype, "CD ROM");
+			break;
+		case DEV_TYPE_OPDISK:
+			strcpy(devtype, "Optical Device");
+			break;
+		case DEV_TYPE_TAPE:
+			strcpy(devtype, "Tape");
+			break;
+		default:
+			sprintf (devtype, "# %02X #", sata_dev_desc[i].type & 0x1F);
+			break;
+		}
+
+		if (scsi_dev_desc[i].lba == 0L) {
+			continue;
+		}
+
 		if(scsi_dev_desc[i].type==DEV_TYPE_UNKNOWN)
 			continue; /* list only known devices */
-		sprintf (data_buffer, "SCSI dev. %d: (%d:%d) Vend: %s", 
+
+		sprintf (data_buffer, "SCSI dev %d: Mod: %s Typ: %s", 
 			i,
-			scsi_dev_desc[i].target,
-			scsi_dev_desc[i].lun,
-			scsi_dev_desc[i].vendor) ;
-		video_drawstring(10, 162 + (i * 32), (unsigned char *)data_buffer) ;
-		sprintf (data_buffer, 
-			"Prod.: %s Rev: %s",
 			scsi_dev_desc[i].product,
-			scsi_dev_desc[i].revision);
-		video_drawstring(10, 178 + (i * 32), (unsigned char *)data_buffer) ;
+			devtype);
+		video_drawstring(10, 162 + (i * 16), (unsigned char *)data_buffer) ;
+//		sprintf (data_buffer, 
+//			"Prod.: %s Rev: %s",
+//			scsi_dev_desc[i].product,
+//			scsi_dev_desc[i].revision);
+//		video_drawstring(10, 178 + (i * 16), (unsigned char *)data_buffer) ;
 	}
 
 	/* Memory */
@@ -624,7 +680,7 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 	sysinfo_draw_titled_box(rightboxpos, 198, 384, 360, " USB Devices ") ;
 	displayed = 0 ;
 	ii = 0 ;
-	while (displayed < 4) {
+	while (displayed < 7) {
 		dev = usb_get_dev_index(ii);
 		if (dev == NULL)
 			break;

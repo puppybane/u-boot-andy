@@ -13,6 +13,7 @@
 #include <watchdog.h>
 #include <malloc.h>
 #include <linux/string.h>
+#include <linux/ctype.h>
 #include <video.h>
 #include <usb.h>
 #include <scsi.h>
@@ -541,11 +542,13 @@ static void amigabootmenu_show(int mdelay)
 		usb_init() ;
 		drv_usb_kbd_init() ;
 
-		/* Start SCSI too */
-		scsi_init() ;
-
 		/* And SATA */
 		sata_initialize() ;
+
+		/* Start SCSI too */
+		scsi_bus_reset() ;
+		scsi_scan(1) ;
+		scsi_init() ;
 
 		mdelay = 0 ;
 		for (jj = 0; jj < 10; jj++) {
