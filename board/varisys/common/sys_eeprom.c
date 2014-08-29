@@ -34,7 +34,11 @@
 #endif
 
 #ifdef CONFIG_SYS_I2C_EEPROM_NXID
+#ifdef CONFIG_SYS_I2C_EEPROM_NXID_MAC
+#define MAX_NUM_PORTS	CONFIG_SYS_I2C_EEPROM_NXID_MAC
+#else 
 #define MAX_NUM_PORTS	8
+#endif
 #define NXID_VERSION	0
 #endif
 
@@ -424,6 +428,45 @@ int do_mac(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	return 0;
 }
 
+#ifdef CONFIG_SYS_I2C_GENERIC_MAC
+int mac_read_from_generic_eeprom(const char *envvar, int chip,
+	int address)
+{
+	int ret;
+#ifdef CONFIG_SYS_EEPROM_BUS_NUM
+	unsigned int bus;
+#endif
+	unsigned char mac[6];
+	char ethaddr[18];
+
+#ifdef CONFIG_SYS_EEPROM_BUS_NUM
+	bus = i2c_get_bus_num();
+	i2c_set_bus_num(CONFIG_SYS_EEPROM_BUS_NUM);
+#endif
+
+	ret = i2c_read(chip, address, 1, mac, 6);
+
+#ifdef CONFIG_SYS_EEPROM_BUS_NUM
+	i2c_set_bus_num(bus);
+#endif
+
+	if (! ret) {
+		sprintf(ethaddr, "%02X:%02X:%02X:%02X:%02X:%02X",
+			mac[0],
+			mac[1],
+			mac[2],
+			mac[3],
+			mac[4],
+			mac[5]);
+
+		printf("MAC: %s\n", ethaddr);
+		setenv(envvar, ethaddr);
+	}
+
+	return ret;
+}
+#endif
+
 /**
  * mac_read_from_eeprom - read the MAC addresses from EEPROM
  *
@@ -444,6 +487,15 @@ int mac_read_from_eeprom(void)
 	unsigned int i;
 	u32 crc, crc_offset = offsetof(struct eeprom, crc);
 	u32 *crcp; /* Pointer to the CRC in the data read from the EEPROM */
+
+#ifdef CONFIG_SYS_I2C_MAC1_CHIP_ADDR
+	mac_read_from_generic_eeprom("ethaddr", CONFIG_SYS_I2C_MAC1_CHIP_ADDR,
+		CONFIG_SYS_I2C_MAC1_DATA_ADDR);
+#endif
+#ifdef CONFIG_SYS_I2C_MAC2_CHIP_ADDR
+	mac_read_from_generic_eeprom("eth2addr", CONFIG_SYS_I2C_MAC2_CHIP_ADDR,
+		CONFIG_SYS_I2C_MAC2_DATA_ADDR);
+#endif
 
 	puts("EEPROM: ");
 

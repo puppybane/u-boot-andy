@@ -40,6 +40,8 @@
 #define AD_COMP_1_SHIFT		4
 #define AD_COMP_0_SHIFT		0
 
+#define GPIO_VGA_SWITCH 0x00000001
+
 void diu_set_pixel_clock(unsigned int pixclock)
 {
 	ccsr_gur_t *gur = (void *)(CONFIG_SYS_MPC85xx_GUTS_ADDR);
@@ -76,5 +78,57 @@ int platform_diu_init(unsigned int xres, unsigned int yres, const char *port)
 	clrsetbits_be32(&gur->pmuxcr, PMUXCR_ELBCDIU_MASK, PMUXCR_ELBCDIU_DIU);
 	in_be32(&gur->pmuxcr);
 
-	return fsl_diu_init(xres, yres, pixel_format, 0);
+	if (fsl_diu_init(grd.winSizeX, grd.winSizeY, pixel_format, 0) < 0)
+		return NULL;
+
+	/* fill in Graphic device struct */
+	sprintf(grd.modeIdent, "%ix%ix%i %ikHz %iHz",
+		grd.winSizeX, grd.winSizeY, 32, 64, 60);
+
+	grd.frameAdrs = (unsigned int)diu_get_screen_base();
+	grd.plnSizeX = grd.winSizeX;
+	grd.plnSizeY = grd.winSizeY;
+
+	grd.gdfBytesPP = 4;
+	grd.gdfIndex = GDF_32BIT_X888RGB;
+
+	grd.isaBase = 0;
+	grd.pciBase = 0;
+	grd.memSize = 800 * 600 * 4;
+
+	/* Cursor Start Address */
+	grd.dprBase = 0;
+	grd.vprBase = 0;
+	grd.cprBase = 0;
+
+	return &grd;
+}
+
+void * video_hw_init(void)
+{	
+	volatile ccsr_gpio_t *gpio_2 = (void *)(CONFIG_SYS_MPC85xx_GPIO_ADDR + 0x100);
+	pci_dev_t vga;
+	u32 pins = in_be32(&gpio_2->gpdat);
+
+	printf("Pins = 0x%x\n", pins);
+   if ((pins & GPIO_VGA_SWITCH) != 0) {
+		printf("Fit jumper to enable VGA\n");
+		return 0;
+	}
+
+#ifdef CONFIG_ATI
+	printf("Looking for VGA\n");
+	vga = find_vga();
+	//printf("PINS: 0x%08x\n", pins);
+	
+	/* PostBIOS with x86 emulater */
+	if (vga < 0) {
+		printf("No VGA device found\n");
+		return init_diu();
+	} else 
+		return init_vga(vga);
+#else
+
+	return init_diu();
+#endif
 }
