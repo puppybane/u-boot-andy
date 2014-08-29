@@ -40,6 +40,8 @@
 #define AD_COMP_1_SHIFT		4
 #define AD_COMP_0_SHIFT		0
 
+#define GPIO_VGA_SWITCH 0x00000001
+
 void diu_set_pixel_clock(unsigned int pixclock)
 {
 	ccsr_gur_t *gur = (void *)(CONFIG_SYS_MPC85xx_GUTS_ADDR);
@@ -218,15 +220,15 @@ void *init_diu(void)
 
 void * video_hw_init(void)
 {	
-	//volatile ccsr_gpio_t *pgpio = (void *)(CONFIG_SYS_MPC85xx_GPIO_ADDR);
-	// Boot video here once everything else is working
+	volatile ccsr_gpio_t *gpio_2 = (void *)(CONFIG_SYS_MPC85xx_GPIO_ADDR + 0x100);
 	pci_dev_t vga;
-	//u32 pins = in_be32(&pgpio->gpdat);
+	u32 pins = in_be32(&gpio_2->gpdat);
 
-   /* if ((pins & GPIO_VGA_SWITCH) != 0) {
+	printf("Pins = 0x%x\n", pins);
+   if ((pins & GPIO_VGA_SWITCH) != 0) {
 		printf("Fit jumper to enable VGA\n");
 		return 0;
-	} */
+	}
 
 #ifdef CONFIG_ATI
 	printf("Looking for VGA\n");

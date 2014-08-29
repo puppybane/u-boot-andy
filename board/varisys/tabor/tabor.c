@@ -28,13 +28,18 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+#define GPIO_INITIAL     0x00018000
+#define GPIO_OPENDRAIN   0x00018000
+
 int board_early_init_f(void)
 {
-	ccsr_gur_t *gur = (void *)CONFIG_SYS_MPC85xx_GUTS_ADDR;
+	volatile ccsr_gur_t *gur = (void *)CONFIG_SYS_MPC85xx_GUTS_ADDR;
+	volatile ccsr_gpio_t *gpio_3 = (void *)(CONFIG_SYS_MPC85xx_GPIO_ADDR + 0x200);
 
 	/* Set pmuxcr to allow both i2c1 and i2c2, set 8 bit LBC */
 	gur->pmuxcr = 0x40011030;
-	gur->pmuxcr2 = 0xf6000000;
+	/* Enable GPIO3 */
+	gur->pmuxcr2 = 0xf7000000;
 	/* Disable unused USB2 */
 	gur->devdisr = 0x07400000;
 
@@ -42,6 +47,13 @@ int board_early_init_f(void)
 	in_be32(&gur->pmuxcr);
 	in_be32(&gur->pmuxcr2);
 	in_be32(&gur->devdisr);
+
+	/* Init GPIO Direction */
+	setbits_be32(&gpio_3->gpdat, GPIO_INITIAL);
+	setbits_be32(&gpio_3->gpodr, GPIO_OPENDRAIN);
+	
+	/* Set GPIO Direction */
+	setbits_be32(&gpio_3->gpdir, GPIO_OPENDRAIN);
 
 	return 0;
 }
@@ -79,6 +91,53 @@ int misc_init_r(void)
 	debug("DVI Encoder Read: 0x%02x\n",temp);
 
 	return 0;
+}
+
+/* Soft I2C for DVI */
+
+#define GPIO_SCL 0x400
+#define GPIO_SDA 0x800
+
+void tabor_iic_init(void)
+{
+	volatile ccsr_gpio_t *gpio_3 = (void *)(CONFIG_SYS_MPC85xx_GPIO_ADDR + 0x200);
+
+	setbits_be32(&gpio_3->gpdat, GPIO_SCL | GPIO_SDA);
+	setbits_be32(&gpio_3->gpodr, GPIO_SCL | GPIO_SDA);
+}
+
+int tabor_iic_read(void)
+{
+	volatile ccsr_gpio_t *gpio_3 = (void *)(CONFIG_SYS_MPC85xx_GPIO_ADDR + 0x200);
+
+	clrbits_be32(&gpio_3->gpdir, GPIO_SDA);
+	return (in_be32(&gpio_3->gpdat) & GPIO_SDA) ? 1 : 0;
+}
+
+void tabor_iic_sda(int bit)
+{
+	volatile ccsr_gpio_t *gpio_3 = (void *)(CONFIG_SYS_MPC85xx_GPIO_ADDR + 0x200);
+
+	if (bit) {
+		setbits_be32(&gpio_3->gpdat, GPIO_SDA );
+		clrbits_be32(&gpio_3->gpdir, GPIO_SDA);
+	} else {
+		setbits_be32(&gpio_3->gpdir, GPIO_SDA);
+		clrbits_be32(&gpio_3->gpdat, GPIO_SDA);
+	}
+}
+
+void tabor_iic_scl(int bit)
+{
+	volatile ccsr_gpio_t *gpio_3 = (void *)(CONFIG_SYS_MPC85xx_GPIO_ADDR + 0x200);
+
+	if (bit) {
+		setbits_be32(&gpio_3->gpdat, GPIO_SCL);
+		clrbits_be32(&gpio_3->gpdir, GPIO_SCL);
+	} else {
+		setbits_be32(&gpio_3->gpdir, GPIO_SCL);
+		clrbits_be32(&gpio_3->gpdat, GPIO_SCL);
+	}
 }
 
 /*

@@ -341,22 +341,44 @@
 /* I2C */
 #define CONFIG_SYS_I2C
 #define CONFIG_SYS_I2C_FSL
-#define CONFIG_SYS_FSL_I2C_SPEED	400000
+#define CONFIG_SYS_FSL_I2C_SPEED	200000
 #define CONFIG_SYS_FSL_I2C_SLAVE	0x7F
 #define CONFIG_SYS_FSL_I2C_OFFSET	0x3000
-#define CONFIG_SYS_FSL_I2C2_SPEED	400000
+#define CONFIG_SYS_FSL_I2C2_SPEED	200000
 #define CONFIG_SYS_FSL_I2C2_SLAVE	0x7F
 #define CONFIG_SYS_FSL_I2C2_OFFSET	0x3100
 #define CONFIG_SYS_I2C_NOPROBES		{{0, 0x29}}
 
+#define CONFIG_SYS_I2C_SOFT
+#define CONFIG_SOFT_I2C_OFFSET 2
+#define CONFIG_SYS_I2C_SOFT_SPEED   400000
+#define CONFIG_SYS_I2C_SOFT_SLAVE   0x7f
+
+#define I2C_SOFT_DECLARATIONS		void tabor_iic_init(void);\
+					int tabor_iic_read(void);\
+					void tabor_iic_sda(int);\
+					void tabor_iic_scl(int);
+#define I2C_ACTIVE
+#define I2C_TRISTATE
+#define I2C_INIT			tabor_iic_init()
+#define I2C_READ			tabor_iic_read()
+#define I2C_SDA(bit)			tabor_iic_sda(bit)
+#define I2C_SCL(bit)			tabor_iic_scl(bit)
+#define I2C_DELAY			udelay(3)
 /*
  * I2C2 EEPROM
  */
 #define CONFIG_ID_EEPROM
 #define CONFIG_SYS_I2C_EEPROM_NXID
-#define CONFIG_SYS_I2C_EEPROM_ADDR	0x57
+#define CONFIG_SYS_I2C_EEPROM_NXID_MAC 0
+#define CONFIG_SYS_I2C_EEPROM_ADDR	0x50
 #define CONFIG_SYS_I2C_EEPROM_ADDR_LEN	1
 #define CONFIG_SYS_EEPROM_BUS_NUM	1
+#define CONFIG_SYS_I2C_GENERIC_MAC
+#define CONFIG_SYS_I2C_MAC1_CHIP_ADDR 0x50
+#define CONFIG_SYS_I2C_MAC1_DATA_ADDR 0xfa
+#define CONFIG_SYS_I2C_MAC2_CHIP_ADDR 0x57
+#define CONFIG_SYS_I2C_MAC2_DATA_ADDR 0xf2
 
 #define CONFIG_CMD_DATE			1
 #define CONFIG_RTC_MCP7411		1
