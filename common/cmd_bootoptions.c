@@ -61,13 +61,13 @@ static char *bootoptionsmenu_getoption(unsigned short int n)
 
 	switch(n) {
 	case 0 :
-		return("Boot from Hard Disk = echo reboot jam") ;
+		return("Boot from Hard Disk = run harddiskboot") ;
 	case 1 :
-		return("Boot from Optical = echo reboot marmalade") ;
+		return("Boot from Optical = run opticalboot") ;
 	case 2 :
-		return("Boot from Ethernet = echo reboot lemon curd") ;
+		return("Boot from Ethernet = run ethernetboot") ;
 	case 3 :
-		return("Boot from Mass Storage = echo reboot mango chutney") ;
+		return("Boot from Mass Storage = run massboot") ;
 	case 4 :
 		return("Back to Main Boot Menu = ami") ;
 	default :

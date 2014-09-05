@@ -68,7 +68,8 @@ static char *amigabootmenu_getoption(unsigned short int n)
 
 	switch(n) {
 	case 0 : 
-		return("Start AmigaOS = boota") ;
+//		return("Start AmigaOS = boota") ;
+		return("Start AmigaOS = scsi reset; sata init; usb reset; boota") ;
 	case 1 :   
 		return("Start Classic AmigaOS = startamigaclassic") ;
 	case 2 : 
