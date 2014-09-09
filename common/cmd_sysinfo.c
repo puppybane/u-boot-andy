@@ -76,6 +76,7 @@ void sysinfo_pciinfo(int BusNum, int ShortPCIListing)
 //		printf("_____________________________________________________________\n");
 	}
 
+	run_command("setenv stdout serial", 0) ;
 	if (BusNum == 0) dev_displayed = 0 ;
 	for (Device = 0; Device < PCI_MAX_PCI_DEVICES; Device++) {
 		HeaderType = 0;
@@ -121,6 +122,7 @@ void sysinfo_pciinfo(int BusNum, int ShortPCIListing)
 			}
 		}
     	}
+	run_command("setenv stdout serial,vga", 0) ;
 }
 
 void sysinfo_board_add_ram_info(char *data_buffer, int dimm_number)
