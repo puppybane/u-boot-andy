@@ -674,7 +674,7 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 
 	/* PCI(e) Devices */
 	sysinfo_draw_titled_box(rightboxpos, 40, 384, 144, " PCI(e) Devices ") ;
-	for (ii = 0; ii < 16; ii++) {
+	for (ii = 0; ii <= pci_last_busno(); ii++) {
 		sysinfo_pciinfo(ii, 1) ;
 	}
 
