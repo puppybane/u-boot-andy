@@ -211,9 +211,9 @@ int read_eeprom(void)
  */
 static void update_crc(void)
 {
-	u32 crc;
+	u32 crc, crc_offset = offsetof(struct eeprom, crc);
 
-	crc = crc32(0, (void *)&e, sizeof(e) - 4);
+	crc = crc32(0, (void *)&e, crc_offset);
 	e.crc = cpu_to_be32(crc);
 }
 
@@ -493,7 +493,7 @@ int mac_read_from_eeprom(void)
 		CONFIG_SYS_I2C_MAC1_DATA_ADDR);
 #endif
 #ifdef CONFIG_SYS_I2C_MAC2_CHIP_ADDR
-	mac_read_from_generic_eeprom("eth2addr", CONFIG_SYS_I2C_MAC2_CHIP_ADDR,
+	mac_read_from_generic_eeprom("eth1addr", CONFIG_SYS_I2C_MAC2_CHIP_ADDR,
 		CONFIG_SYS_I2C_MAC2_DATA_ADDR);
 #endif
 
@@ -509,15 +509,6 @@ int mac_read_from_eeprom(void)
 		       e.id[0], e.id[1], e.id[2], e.id[3]);
 		return -1;
 	}
-
-#ifdef CONFIG_SYS_I2C_EEPROM_NXID
-	/*
-	 * If we've read an NXID v0 EEPROM, then we need to set the CRC offset
-	 * to where it is in v0.
-	 */
-	if (e.version == 0)
-		crc_offset = 0x72;
-#endif
 
 	crc = crc32(0, (void *)&e, crc_offset);
 	crcp = (void *)&e + crc_offset;
