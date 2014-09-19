@@ -63,12 +63,23 @@ int centreboxposy = 240 ;
 
 static char *amigabootmenu_getoption(unsigned short int n)
 {
+	char *s;
 	if (n > MAX_COUNT)
 		return NULL;
 
 	switch(n) {
 	case 0 : 
-//		return("Start AmigaOS = boota") ;
+		if ((s = getenv("amigaboot_quiet")) == NULL) {
+			run_command("setenv stdout serial", 0) ;
+		} else {
+			if (((strcmp(s, "Y") == 0)) || (strcmp(s, "y") == 0)) {
+				run_command("setenv stdout serial", 0) ;
+			} else {
+				if (((strcmp(s, "N") == 0)) || (strcmp(s, "n") == 0)) {
+					run_command("setenv stdout serial,vga", 0) ;
+				}
+			}
+		}
 		return("Start AmigaOS = scsi reset; sata init; usb reset; boota") ;
 	case 1 :   
 		return("Start Classic AmigaOS = startamigaclassic") ;
