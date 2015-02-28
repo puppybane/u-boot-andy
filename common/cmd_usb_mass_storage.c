@@ -88,6 +88,6 @@ exit:
 }
 
 U_BOOT_CMD(ums, CONFIG_SYS_MAXARGS, 1, do_usb_mass_storage,
-	"Use the UMS [User Mass Storage]",
+	"Use the UMS [USB Mass Storage]",
 	"ums <USB_controller> <mmc_dev>  e.g. ums 0 0"
 );
