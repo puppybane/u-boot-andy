@@ -629,10 +629,12 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 	sprintf(data_buffer, "DIMM 0: %s", memory_info) ;
 	video_drawstring(10, 240, (unsigned char *)data_buffer)  ;
 
+#if CONFIG_NUM_DDR_CONTROLLERS > 1
 	/* DIMM 1: */
 	sysinfo_board_add_ram_info(memory_info, 1) ;
 	sprintf(data_buffer, "DIMM 1: %s", memory_info) ;
 	video_drawstring(10, 272, (unsigned char *)data_buffer)  ;
+#endif
 
 	/* Ethernet */
 	sysinfo_draw_titled_box(5, 338, 384, 80, " Ethernet ") ;

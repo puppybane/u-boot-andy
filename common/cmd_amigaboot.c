@@ -90,6 +90,7 @@ static char *amigabootmenu_getoption(unsigned short int n)
 	case 4 :  
 		return("System Info... = sysinfo") ;
 	default :
+		run_command("setenv stdout serial,vga", 0) ;
 		return NULL;
 	}
 }
