@@ -547,7 +547,6 @@ static void amigabootmenu_show(int mdelay)
 
 	cols = video_get_screen_columns() ;
 	rows = video_get_screen_rows() ;
-printf("Rows %d Cols %d \n",cols, rows) ;
 
 	/* Temporarily pop up animated splash screen - first time only */
 	if (init == 0) {
