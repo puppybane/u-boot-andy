@@ -50,6 +50,7 @@ extern void sysinfo_draw_titled_box(int x, int y, int w, int h, char * title) ;
 extern struct bmp_image *gunzip_bmp(unsigned long addr, unsigned long *lenp, void **alloc_addr);
 int do_amigabootmenu(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[]) ;
 
+extern int buttony ;
 extern int buttonpos ;
 extern int centreboxposx ;
 extern int centreboxposy ;
@@ -122,7 +123,7 @@ static int bootoptionsmenu_print_entry(void *data)
 		return -1;
 
 
-	video_display_bitmap((unsigned long)bmp, buttonpos, (entry->num * 30) + 190);
+	video_display_bitmap((unsigned long)bmp, buttonpos, (entry->num * 30) + buttony);
 	return 0;
 }
 
@@ -230,7 +231,7 @@ static void bootoptionsmenu_loop(struct amigabootmenu_data *menu,
 		bmp = unpack_bmp(addr);
 		if (!bmp)
 			return ;
-		video_display_bitmap((unsigned long)bmp, buttonpos, (current_active * 30) + 190);
+		video_display_bitmap((unsigned long)bmp, buttonpos, (current_active * 30) + buttony);
 
 		/* Highlight selected button and pause slightly before acting */
 		if (menu->active == 4) {
@@ -241,7 +242,7 @@ static void bootoptionsmenu_loop(struct amigabootmenu_data *menu,
 		bmp = unpack_bmp(addr);
 		if (!bmp) 
 			return ;
-		video_display_bitmap((unsigned long)bmp, buttonpos, (menu->active * 30) + 190);
+		video_display_bitmap((unsigned long)bmp, buttonpos, (menu->active * 30) + buttony);
 
 		delay = BUTTON_DELAY;
 		while (get_timer(start) < delay) {
@@ -257,7 +258,7 @@ static void bootoptionsmenu_loop(struct amigabootmenu_data *menu,
 		bmp = unpack_bmp(addr);
 		if (!bmp) 
 			return ;
-		video_display_bitmap((unsigned long)bmp, buttonpos, (menu->active * 30) + 190);
+		video_display_bitmap((unsigned long)bmp, buttonpos, (menu->active * 30) + buttony);
 
 		start = get_timer(0);
 		delay = 1 * BUTTON_DELAY;
@@ -501,7 +502,7 @@ static void bootoptions_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const a
 		if (!bmp) 
 			return ;
 
-		video_display_bitmap((unsigned long)bmp, buttonpos, 190 + (ii * 20));
+		video_display_bitmap((unsigned long)bmp, buttonpos, buttony + (ii * 20));
 	}
 	
 	bmp = unpack_bmp(addr_back_button);

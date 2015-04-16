@@ -56,6 +56,7 @@ extern int gbVGAInit ;
 /* Globals */
 int init = 0 ;	/* Display boot logo or not */
 int buttonpos = 400 ;
+int buttony = 190 ;
 int leftboxpos = 5 ;
 int rightboxpos = 405 ;
 int centreboxposx = 300 ;
@@ -150,7 +151,8 @@ static int amigabootmenu_print_entry(void *data)
 	if (! bmp)
 		return -1;
 
-    video_display_bitmap((unsigned long)bmp, buttonpos, (entry->num * 30) + 190);
+    video_display_bitmap((unsigned long)bmp, buttonpos, (entry->num * 30) + buttony);
+
     return 0;
 }
 
@@ -305,7 +307,7 @@ static void amigabootmenu_loop(struct amigabootmenu_data *menu,
 		if (!bmp)
 			return ;
 
-		video_display_bitmap((unsigned long)bmp, buttonpos, (current_active * 30) + 190);
+		video_display_bitmap((unsigned long)bmp, buttonpos, (current_active * 30) + buttony);
 
 		/* Highlight selected button and pause slightly before acting */
 		bmp = (bmp_image_t *) (addr_inv - ((menu->active) * 0x2000)) ;
@@ -316,7 +318,7 @@ static void amigabootmenu_loop(struct amigabootmenu_data *menu,
 			printf(" Not bmp - There is no valid bmp file at the given address\n");
 			return ;
 		}
-		video_display_bitmap((unsigned long)bmp, buttonpos, (menu->active * 30) + 190);
+		video_display_bitmap((unsigned long)bmp, buttonpos, (menu->active * 30) + buttony);
 
 		delay = BUTTON_DELAY ;
 		while (get_timer(start) < delay) {
@@ -328,7 +330,7 @@ static void amigabootmenu_loop(struct amigabootmenu_data *menu,
 		bmp = unpack_bmp (addr - ((menu->active) * 0x2000));
 		if (! bmp)
 			return;
-		video_display_bitmap((unsigned long)bmp, buttonpos, (menu->active * 30) + 190);
+		video_display_bitmap((unsigned long)bmp, buttonpos, (menu->active * 30) + buttony);
 
 		delay = BUTTON_DELAY ;
 		while (get_timer(start) < delay) {
@@ -541,6 +543,11 @@ static void amigabootmenu_show(int mdelay)
 	ulong start = get_timer(0);
 	unsigned char bBootMenu = 0 ;
 	int delay ;
+	int xPos, yPos ;
+
+	cols = video_get_screen_columns() ;
+	rows = video_get_screen_rows() ;
+printf("Rows %d Cols %d \n",cols, rows) ;
 
 	/* Temporarily pop up animated splash screen - first time only */
 	if (init == 0) {
@@ -549,7 +556,16 @@ static void amigabootmenu_show(int mdelay)
 		bmp = unpack_bmp(addr_splash) ;
 		if (! bmp)
 			return;
-		video_display_bitmap((unsigned long)bmp, 0, 0);
+		if (cols == 100) {
+			video_display_bitmap((unsigned long)bmp, 0, 0);
+		} else {
+			/* Centre bitmap on 1024 * 768 */
+			xPos = ((cols * 8) - 800) / 2 ;
+			yPos = ((rows * 15)  - 600) / 2 ;
+			leftboxpos = (((cols * 8) - 800) / 2) + 5 ;
+			rightboxpos = ((cols * 8) / 2) + 5 ;
+			video_display_bitmap((unsigned long)bmp, xPos, yPos);
+		}
 
 		/* Start USB */
 		usb_init() ;
@@ -569,7 +585,15 @@ static void amigabootmenu_show(int mdelay)
 				bmp = unpack_bmp(addr_splash + (ii * 0x00080000)) ;
 				if (! bmp)
 					return;
-				video_display_bitmap((unsigned long)bmp, 0, 0);
+				if (cols == 100) {
+					video_display_bitmap((unsigned long)bmp, 0, 0);
+				} else {
+					/* Centre bitmap on 1024 * 768 */
+					xPos = ((cols * 8) - 800) / 2 ;
+					yPos = ((rows * 15)  - 600) / 2 ;
+					video_display_bitmap((unsigned long)bmp, xPos, yPos);
+				}
+				
 				/* Could get delay from environment variable to make it tweakable? */
 				delay = 150 ;
 				while (get_timer(start) < delay) {
@@ -626,8 +650,7 @@ static void amigabootmenu_show(int mdelay)
 	menu_default_set(menu, "0");
 	amigabootmenu_clear_screen() ;
 
-	cols = video_get_screen_columns() ;
-	rows = video_get_screen_rows() ;
+	buttony = ((rows * 15) - 170) / 2 ;
 
 	centreboxposx = ((cols * 8) - 250) / 2 ;
 	centreboxposy = ((rows * 15) - 192) / 2 ;

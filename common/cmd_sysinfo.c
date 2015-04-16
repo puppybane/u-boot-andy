@@ -33,6 +33,7 @@ extern block_dev_desc_t sata_dev_desc[CONFIG_SYS_SATA_MAX_DEVICE];
 extern int buttonpos ;
 extern int leftboxpos ;
 extern int rightboxpos ;
+extern int buttony ;
 extern char dimm_name[] ;
 
 /* Function Declarations */
@@ -110,7 +111,7 @@ void sysinfo_pciinfo(int BusNum, int ShortPCIListing)
 					if (strlen(data_buffer) > 46) {
 						data_buffer[46] = '\0';
 					}
-					video_drawstring(420, 50 + (dev_displayed * 16), (unsigned char *)data_buffer)  ;
+					video_drawstring(rightboxpos+15, 50 + (dev_displayed * 16), (unsigned char *)data_buffer)  ;
 					dev_displayed++;
 				}
 			}
@@ -341,7 +342,7 @@ void sysinfo_usb_display_desc(struct usb_device *dev, int dev_no)
 		if (strlen(data_buffer) > 46) {
 			data_buffer[46] = '\0' ;
 		}
-		video_drawstring(420, offset+(dev_no*48), (unsigned char *)data_buffer) ;
+		video_drawstring(rightboxpos+15, offset+(dev_no*48), (unsigned char *)data_buffer) ;
 
 		if (strlen(dev->mf) || strlen(dev->prod) ||
 		    strlen(dev->serial)) {
@@ -350,7 +351,7 @@ void sysinfo_usb_display_desc(struct usb_device *dev, int dev_no)
 			if (strlen(data_buffer) > 46) {
 				data_buffer[46] = '\0' ;
 			}
-			video_drawstring(420, offset+16+(dev_no*48), (unsigned char *)data_buffer) ;
+			video_drawstring(rightboxpos+15, offset+16+(dev_no*48), (unsigned char *)data_buffer) ;
 		}
 #ifdef Expanded_USB
 		if (dev->descriptor.bDeviceClass) {
@@ -363,7 +364,7 @@ void sysinfo_usb_display_desc(struct usb_device *dev, int dev_no)
 			if (strlen(data_buffer) > 46) {
 				data_buffer[46] = '\0' ;
 			}
-			video_drawstring(420, offset+32+(dev_no*48), (unsigned char *)data_buffer) ;
+			video_drawstring(rightboxbox+15, offset+32+(dev_no*48), (unsigned char *)data_buffer) ;
 		} else {
 			sprintf(data_buffer, "Class: (from I/f) %s",
 				  usb_get_class_desc(
@@ -371,7 +372,7 @@ void sysinfo_usb_display_desc(struct usb_device *dev, int dev_no)
 			if (strlen(data_buffer) > 46) {
 				data_buffer[46] = '\0' ;
 			}
-			video_drawstring(420, offset+32+(dev_no*48), (unsigned char *)data_buffer) ;
+			video_drawstring(rightboxpos+15, offset+32+(dev_no*48), (unsigned char *)data_buffer) ;
 		}
 		sprintf(data_buffer, "Packet Size: %d Configurations: %d",
 			dev->descriptor.bMaxPacketSize0,
@@ -379,7 +380,7 @@ void sysinfo_usb_display_desc(struct usb_device *dev, int dev_no)
 		if (strlen(data_buffer) > 46) {
 			data_buffer[46] = '\0' ;
 		}
-		video_drawstring(420, offset+48+(dev_no*48), (unsigned char *)data_buffer) ;
+		video_drawstring(rightboxpos+15, offset+48+(dev_no*48), (unsigned char *)data_buffer) ;
 #endif
 		sprintf(data_buffer, "Vendor: 0x%04x Prod 0x%04x Ver %d.%d",
 			dev->descriptor.idVendor, dev->descriptor.idProduct,
@@ -388,7 +389,7 @@ void sysinfo_usb_display_desc(struct usb_device *dev, int dev_no)
 		if (strlen(data_buffer) > 46) {
 			data_buffer[46] = '\0' ;
 		}
-		video_drawstring(420, offset+32+(dev_no*48), (unsigned char *)data_buffer) ;
+		video_drawstring(rightboxpos+15, offset+32+(dev_no*48), (unsigned char *)data_buffer) ;
 	}
 
 }
@@ -418,11 +419,11 @@ static void sysinfo_displaydatetime()
 	sprintf(data_buffer, "%d", old_bus) ;
 	sprintf(data_buffer, "Date: %4d-%02d-%02d ", 
 			tm.tm_year, tm.tm_mon, tm.tm_mday) ;
-	video_drawstring(10, 472, (unsigned char *)data_buffer)  ;
+	video_drawstring(leftboxpos+5, 472, (unsigned char *)data_buffer)  ;
 
 	sprintf (data_buffer, "Time: %2d:%02d:%02d",
 		tm.tm_hour, tm.tm_min, tm.tm_sec);
-	video_drawstring(150, 472, (unsigned char *)data_buffer)  ;
+	video_drawstring(leftboxpos+140, 472, (unsigned char *)data_buffer)  ;
 
 	return ;
 }
@@ -472,10 +473,11 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 	/* Load bitmap for title */
 	bmp = unpack_bmp(title_addr) ;
 
-	video_display_bitmap((unsigned long)bmp, ((800-239) / 2), 10);
+	int cols = video_get_screen_columns() ;
+	video_display_bitmap((unsigned long)bmp, (((cols * 8)-239) / 2), 10);
 
 	/* CPU */
-	sysinfo_draw_titled_box(5, 40, 384, 64, " CPU ") ;
+	sysinfo_draw_titled_box(leftboxpos, 40, 384, 64, " CPU ") ;
 
 	/* Type : 	Rev: 	Speed: */
 	cpu = gd->arch.cpu ;
@@ -487,7 +489,7 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 		"Type: %s Rev: %d.%d Speed: %4ldMHz", 
 		cpu_type, major, minor, (gd->bd->bi_intfreq / 1000000)) ;
 
-	video_drawstring(10, 48, (unsigned char *)data_buffer)  ;
+	video_drawstring(leftboxpos+5, 48, (unsigned char *)data_buffer)  ;
 
 	/* Core1 : 	Core2: 	FSB: */
 	pvr = get_pvr();
@@ -515,15 +517,15 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 	}
 	sprintf(data_buffer, "Core1: %s Ver: %d.%d FSB: %3ldMHz", 
 		cpu_core1, major, minor, (gd->bd->bi_busfreq / 1000000)) ;
-	video_drawstring(10, 64, (unsigned char *)data_buffer)  ;
+	video_drawstring(leftboxpos+5, 64, (unsigned char *)data_buffer)  ;
 
 	/* Temperature */
 //do_dtt() ;
 //	sprintf(data_buffer, "Temperature: N/A") ;
-//	video_drawstring(10, 80, (unsigned char *)data_buffer)  ;
+//	video_drawstring(leftboxpos+5, 80, (unsigned char *)data_buffer)  ;
 
 	/*SATA Devices */
-	sysinfo_draw_titled_box(5, 120, 384, 96, " SATA Devices ") ;
+	sysinfo_draw_titled_box(leftboxpos, 120, 384, 96, " SATA Devices ") ;
 
 	/* SATA info */
 	for (i = 0; i < CONFIG_SYS_SATA_MAX_DEVICE; ++i) {
@@ -567,7 +569,7 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 		if (strlen(data_buffer) > 47) {
 			data_buffer[47] = '\0';
 		}
-		video_drawstring(10, 130 + (i * 16), (unsigned char *)data_buffer) ;
+		video_drawstring(leftboxpos+5, 130 + (i * 16), (unsigned char *)data_buffer) ;
 //		sprintf(data_buffer, 
 //			"Vend: %s Rev: %s",
 //			sata_dev_desc[i].vendor,
@@ -575,7 +577,7 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 //		if (strlen(data_buffer) > 46) {
 //			data_buffer[46] = '\0';
 //		}
-//		video_drawstring(10, 130 + 16 + (i * 32), (unsigned char *)data_buffer) ;
+//		video_drawstring(leftboxpos+5, 130 + 16 + (i * 32), (unsigned char *)data_buffer) ;
 	}
 
 	/* SCSI info */
@@ -611,65 +613,65 @@ static void sysinfo_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[
 			i,
 			scsi_dev_desc[i].product,
 			devtype);
-		video_drawstring(10, 162 + (i * 16), (unsigned char *)data_buffer) ;
+		video_drawstring(leftboxpos+5, 162 + (i * 16), (unsigned char *)data_buffer) ;
 //		sprintf (data_buffer, 
 //			"Prod.: %s Rev: %s",
 //			scsi_dev_desc[i].product,
 //			scsi_dev_desc[i].revision);
-//		video_drawstring(10, 178 + (i * 16), (unsigned char *)data_buffer) ;
+//		video_drawstring(leftboxpos+5, 178 + (i * 16), (unsigned char *)data_buffer) ;
 	}
 
 	/* Memory */
-	sysinfo_draw_titled_box(5, 230, 384, 96, " Memory ") ;
+	sysinfo_draw_titled_box(leftboxpos, 230, 384, 96, " Memory ") ;
 
 	/* DIMM 0: */
 //	sprintf(data_buffer, "DIMM 0: %lx", (unsigned long)(bd->bi_memsize)) ;
 	sysinfo_board_add_ram_info(memory_info, 0) ;
 //	sprintf(data_buffer, "DIMM 0: %1ldGb %s", (unsigned long)(gd->ram_size / 1073741824L), memory_info) ;
 	sprintf(data_buffer, "DIMM 0: %s", memory_info) ;
-	video_drawstring(10, 240, (unsigned char *)data_buffer)  ;
+	video_drawstring(leftboxpos+5, 240, (unsigned char *)data_buffer)  ;
 
 #if CONFIG_NUM_DDR_CONTROLLERS > 1
 	/* DIMM 1: */
 	sysinfo_board_add_ram_info(memory_info, 1) ;
 	sprintf(data_buffer, "DIMM 1: %s", memory_info) ;
-	video_drawstring(10, 272, (unsigned char *)data_buffer)  ;
+	video_drawstring(leftboxpos+5, 272, (unsigned char *)data_buffer)  ;
 #endif
 
 	/* Ethernet */
-	sysinfo_draw_titled_box(5, 338, 384, 80, " Ethernet ") ;
+	sysinfo_draw_titled_box(leftboxpos, 338, 384, 80, " Ethernet ") ;
 
 	/* MAC Addresses : */
 	sprintf(data_buffer, "MAC Address  : %s", getenv("ethaddr")) ;
-	video_drawstring(10, 348, (unsigned char *)data_buffer)  ;
+	video_drawstring(leftboxpos+5, 348, (unsigned char *)data_buffer)  ;
 	sprintf(data_buffer, "MAC Address 2: %s", getenv("eth1addr")) ;
-	video_drawstring(10, 364, (unsigned char *)data_buffer)  ;
+	video_drawstring(leftboxpos+5, 364, (unsigned char *)data_buffer)  ;
 
 	/* IP Address : */
 //	sprintf(data_buffer, "IP Address: %u", getenv("ipaddr") ;
 //	sprintf(data_buffer, "IP Address: %ld", gd->bd->bi_ip_addr) ;
-//	video_drawstring(10, 364, (unsigned char *)data_buffer)  ;
+//	video_drawstring(leftboxpos+5 364, (unsigned char *)data_buffer)  ;
 
 	/* Net Mask : */
 //	sprintf(data_buffer, "Net Mask: %s", getenv("netmask")) ;
 //	sprintf(data_buffer, "Net Mask: %s", "255.255.255.248") ;
-//	video_drawstring(10, 380, (unsigned char *)data_buffer)  ;
+//	video_drawstring(leftboxpos+5, 380, (unsigned char *)data_buffer)  ;
 
 	/* Speed : */
 //	sprintf(data_buffer, "Speed: %d", gd->bd->bi_ethspeed) ;
 //	sprintf(data_buffer, "Speed: %d", gd->bd->bi_baudrate) ;
 
 	/* Miscellaneous */
-	sysinfo_draw_titled_box(5, 430, 384, 64, " Miscelleneous ") ;
+	sysinfo_draw_titled_box(leftboxpos, 430, 384, 64, " Miscelleneous ") ;
 
 	/* Firmware: */
 	sprintf(data_buffer, "Firmware: %s", version_string) ;
 	data_buffer[29] = '\0' ;
-	video_drawstring(10, 440, (unsigned char *)data_buffer)  ;
+	video_drawstring(leftboxpos+5, 440, (unsigned char *)data_buffer)  ;
 
 	/* Vendor : */
 	sprintf(data_buffer, "Vendor: %s", "A-EON Technology Ltd.") ;
-	video_drawstring(10, 456, (unsigned char *)data_buffer)  ;
+	video_drawstring(leftboxpos+5, 456, (unsigned char *)data_buffer)  ;
 
 	/* System Date and Time : */
 	sysinfo_displaydatetime() ;
