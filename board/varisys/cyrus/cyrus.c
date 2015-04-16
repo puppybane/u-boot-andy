@@ -181,6 +181,7 @@ void * video_hw_init(void)
 	// Boot video here once everything else is working
 	pci_dev_t vga = find_vga();
 	u32 pins = in_be32(&pgpio->gpdat);
+	bool swappedmode = false;
 
 	printf("Looking for VGA\n");
 	printf("PINS: 0x%08x\n", pins);
@@ -200,6 +201,13 @@ void * video_hw_init(void)
 	printf("Setting VESA Mode\n");
 	/* Set to 800 * 600 */
 	fbi = set_vesa_mode(0x114);
+
+	/* Check the video card setting to see if we need to swap to 1024 * 768 */
+	if ((fbi) && (fbi->Modulo == 0x680)) {
+		/* Set to 1024 * 768 */
+		fbi = set_vesa_mode(0x117);
+		swappedmode = true;
+	}
 			
 	if (fbi)
 	{
@@ -214,12 +222,19 @@ void * video_hw_init(void)
 					PCI_REGION_MEM, 0, MAP_NOCACHE);
 		printf("mmio_base = 0x%p\n",
 		       mmio_base);
-		
-		for(i = 0; i < 800*600*2; i++)
-			*(mmio_base + i) = 0;
-		
-		grd.winSizeX = 800;
-		grd.winSizeY = 600;
+	
+		if (swappedmode == false) {
+			for(i = 0; i < 800*600*2; i++)
+				*(mmio_base + i) = 0;
+			grd.winSizeX = 800;
+			grd.winSizeY = 600;
+		} else {
+			for(i = 0; i < 1024*768*2; i++)
+				*(mmio_base + i) = 0;
+			grd.winSizeX = 1024;
+			grd.winSizeY = 768;
+		}
+
 		grd.gdfBytesPP = 2;
 		grd.frameAdrs = (uint)mmio_base;
 		grd.gdfIndex = GDF_16BIT_565RGB;
