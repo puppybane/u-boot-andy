@@ -38,8 +38,12 @@
 /*
  * This is the timeout to allow for submitting an urb in ms. We allow more
  * time for a BULK device to react - some are slow.
+ *
+ * For non-bulk we run faster than the default u-boot timeout, to avoid 
+ * P5040 errata A-005695. Standard retries are too long, and lead to device
+ * STALL.
  */
-#define USB_TIMEOUT_MS(pipe) (usb_pipebulk(pipe) ? 5000 : 1000)
+#define USB_TIMEOUT_MS(pipe) (usb_pipebulk(pipe) ? 5000 : USB_CNTL_TIMEOUT)
 
 /* device request (setup) */
 struct devrequest {
