@@ -490,7 +490,8 @@ static void bootoptions_show(cmd_tbl_t *cmdtp, int flag, int argc, char *const a
 
 //	video_drawstring(270, 10, (unsigned char *)"<<<<<< AmigaONE Boot Options >>>>>>")  ;
 	bmp = unpack_bmp(title_addr) ;
-	video_display_bitmap((unsigned long)bmp, ((800-192)/2), 10);
+        int cols = video_get_screen_columns() ;
+        video_display_bitmap((unsigned long)bmp, (((cols * 8)-239) / 2), 10);
 
 	sysinfo_draw_titled_box(centreboxposx, centreboxposy, 248, 160, "") ;
 

@@ -555,14 +555,16 @@ static void amigabootmenu_show(int mdelay)
 		bmp = unpack_bmp(addr_splash) ;
 		if (! bmp)
 			return;
-		if (cols == 100) {
+
+		leftboxpos = (((cols * 8) - 800) / 2) + 5 ;
+		rightboxpos = ((cols * 8) / 2) + 5 ;
+
+		if ((cols == 128) || (cols == 100)) {
 			video_display_bitmap((unsigned long)bmp, 0, 0);
 		} else {
 			/* Centre bitmap on 1024 * 768 */
 			xPos = ((cols * 8) - 800) / 2 ;
 			yPos = ((rows * 15)  - 600) / 2 ;
-			leftboxpos = (((cols * 8) - 800) / 2) + 5 ;
-			rightboxpos = ((cols * 8) / 2) + 5 ;
 			video_display_bitmap((unsigned long)bmp, xPos, yPos);
 		}
 
@@ -580,11 +582,12 @@ static void amigabootmenu_show(int mdelay)
 
 		mdelay = 0 ;
 		for (jj = 0; jj < 10; jj++) {
-			for (ii = 0; ii < 10; ii++) {
-				bmp = unpack_bmp(addr_splash + (ii * 0x00080000)) ;
+			for (ii = 0; ii < 31; ii++) {
+				if ( ii != 10) {
+				bmp = unpack_bmp(addr_splash + (ii * 0x00100000)) ;
 				if (! bmp)
 					return;
-				if (cols == 100) {
+				if ((cols == 128) || (cols == 100)) {
 					video_display_bitmap((unsigned long)bmp, 0, 0);
 				} else {
 					/* Centre bitmap on 1024 * 768 */
@@ -594,7 +597,7 @@ static void amigabootmenu_show(int mdelay)
 				}
 				
 				/* Could get delay from environment variable to make it tweakable? */
-				delay = 150 ;
+				delay = 50 ;
 				while (get_timer(start) < delay) {
 					udelay(1);
 				}
@@ -602,11 +605,12 @@ static void amigabootmenu_show(int mdelay)
 				start = get_timer(0) ;
 				/* If any key has been pressed break out and run menu */
 				if (tstc()) {
-					ii = 10 ;
+					ii = 31 ;
 					jj = 10 ;
 					bBootMenu = 1 ;
 					mdelay = 10 ;
 					getc() ;
+				}
 				}
 			}
 		}
