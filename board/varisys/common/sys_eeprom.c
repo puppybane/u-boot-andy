@@ -430,25 +430,19 @@ int do_mac(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 
 #ifdef CONFIG_SYS_I2C_GENERIC_MAC
 int mac_read_from_generic_eeprom(const char *envvar, int chip,
-	int address)
+	int address, int mac_bus)
 {
 	int ret;
-#ifdef CONFIG_SYS_EEPROM_BUS_NUM
 	unsigned int bus;
-#endif
 	unsigned char mac[6];
 	char ethaddr[18];
 
-#ifdef CONFIG_SYS_EEPROM_BUS_NUM
 	bus = i2c_get_bus_num();
-	i2c_set_bus_num(CONFIG_SYS_EEPROM_BUS_NUM);
-#endif
+	i2c_set_bus_num(mac_bus);
 
 	ret = i2c_read(chip, address, 1, mac, 6);
 
-#ifdef CONFIG_SYS_EEPROM_BUS_NUM
 	i2c_set_bus_num(bus);
-#endif
 
 	if (! ret) {
 		sprintf(ethaddr, "%02X:%02X:%02X:%02X:%02X:%02X",
@@ -490,11 +484,11 @@ int mac_read_from_eeprom(void)
 
 #ifdef CONFIG_SYS_I2C_MAC1_CHIP_ADDR
 	mac_read_from_generic_eeprom("ethaddr", CONFIG_SYS_I2C_MAC1_CHIP_ADDR,
-		CONFIG_SYS_I2C_MAC1_DATA_ADDR);
+		CONFIG_SYS_I2C_MAC1_DATA_ADDR, CONFIG_SYS_I2C_MAC1_BUS);
 #endif
 #ifdef CONFIG_SYS_I2C_MAC2_CHIP_ADDR
 	mac_read_from_generic_eeprom("eth1addr", CONFIG_SYS_I2C_MAC2_CHIP_ADDR,
-		CONFIG_SYS_I2C_MAC2_DATA_ADDR);
+		CONFIG_SYS_I2C_MAC2_DATA_ADDR, CONFIG_SYS_I2C_MAC2_BUS);
 #endif
 
 	puts("EEPROM: ");
