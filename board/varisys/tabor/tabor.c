@@ -25,6 +25,7 @@
 #include <netdev.h>
 #include <i2c.h>
 #include <hwconfig.h>
+ #include "../common/eeprom.h"
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -323,3 +324,12 @@ void ft_board_setup(void *blob, bd_t *bd)
 	ft_codec_setup(blob, "wlf,wm8776");
 }
 #endif
+
+int mac_read_from_eeprom(void)
+{
+	init_eeprom(CONFIG_SYS_EEPROM_BUS_NUM, 
+		CONFIG_SYS_I2C_EEPROM_ADDR, 
+		CONFIG_SYS_I2C_EEPROM_ADDR_LEN);
+	mac_read_from_fixed_id();
+	return mac_read_from_eeprom_common();
+}

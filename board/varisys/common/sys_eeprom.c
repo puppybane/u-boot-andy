@@ -33,6 +33,8 @@
 #define MAX_NUM_PORTS	8
 #endif
 
+ #include "eeprom.h"
+
 #ifdef CONFIG_SYS_I2C_EEPROM_NXID
 #ifdef CONFIG_SYS_I2C_EEPROM_NXID_MAC
 #define MAX_NUM_PORTS	CONFIG_SYS_I2C_EEPROM_NXID_MAC
@@ -96,6 +98,20 @@ static int has_been_read = 0;
 
 /** Fixed ID field in EEPROM */
 static unsigned char uid[16];
+
+static int eeprom_bus_num = -1;
+static int eeprom_addr;
+static int eeprom_addr_len;
+
+/**
+ * This must be called before any eeprom access.
+ */
+void init_eeprom(int bus_num, int addr, int addr_len)
+{
+	eeprom_bus_num = bus_num;
+	eeprom_addr = addr;
+	eeprom_addr_len = addr_len;
+}
 
 /**
  * show_eeprom - display the contents of the EEPROM
@@ -171,28 +187,27 @@ void show_eeprom(void)
 int read_eeprom(void)
 {
 	int ret;
-#ifdef CONFIG_SYS_EEPROM_BUS_NUM
 	unsigned int bus;
-#endif
+
+	if (eeprom_bus_num < 0) {
+		printf("EEPROM not configured\n");
+		return -1;
+	}
 
 	if (has_been_read)
 		return 0;
 
-#ifdef CONFIG_SYS_EEPROM_BUS_NUM
 	bus = i2c_get_bus_num();
-	i2c_set_bus_num(CONFIG_SYS_EEPROM_BUS_NUM);
-#endif
+	i2c_set_bus_num(eeprom_bus_num);
 
-	ret = i2c_read(CONFIG_SYS_I2C_EEPROM_ADDR, 0, CONFIG_SYS_I2C_EEPROM_ADDR_LEN,
+	ret = i2c_read(eeprom_addr, 0, eeprom_addr_len,
 		(void *)&e, sizeof(e));
 
 	
 	/* Fixed address of ID field */
 	i2c_read(0x5f, 0x80, 1, uid, 16);
 	
-#ifdef CONFIG_SYS_EEPROM_BUS_NUM
 	i2c_set_bus_num(bus);
-#endif
 
 #ifdef DEBUG
 	show_eeprom();
@@ -225,9 +240,12 @@ static int prog_eeprom(void)
 	int ret = 0;
 	int i;
 	void *p;
-#ifdef CONFIG_SYS_EEPROM_BUS_NUM
 	unsigned int bus;
-#endif
+
+	if (eeprom_bus_num < 0) {
+		printf("EEPROM not configured\n");
+		return -1;
+	}
 
 	/* Set the reserved values to 0xFF   */
 #ifdef CONFIG_SYS_I2C_EEPROM_NXID
@@ -238,10 +256,8 @@ static int prog_eeprom(void)
 #endif
 	update_crc();
 
-#ifdef CONFIG_SYS_EEPROM_BUS_NUM
 	bus = i2c_get_bus_num();
-	i2c_set_bus_num(CONFIG_SYS_EEPROM_BUS_NUM);
-#endif
+	i2c_set_bus_num(eeprom_bus_num);
 
 	/*
 	 * The AT24C02 datasheet says that data can only be written in page
@@ -249,7 +265,7 @@ static int prog_eeprom(void)
 	 * complete a given write.
 	 */
 	for (i = 0, p = &e; i < sizeof(e); i += 8, p += 8) {
-		ret = i2c_write(CONFIG_SYS_I2C_EEPROM_ADDR, i, CONFIG_SYS_I2C_EEPROM_ADDR_LEN,
+		ret = i2c_write(eeprom_addr, i, eeprom_addr_len,
 			p, min((sizeof(e) - i), 8));
 		if (ret) 
 			break;
@@ -260,15 +276,13 @@ static int prog_eeprom(void)
 		/* Verify the write by reading back the EEPROM and comparing */
 		struct eeprom e2;
 
-		ret = i2c_read(CONFIG_SYS_I2C_EEPROM_ADDR, 0,
-			CONFIG_SYS_I2C_EEPROM_ADDR_LEN, (void *)&e2, sizeof(e2));
+		ret = i2c_read(eeprom_addr, 0,
+			eeprom_addr_len, (void *)&e2, sizeof(e2));
 		if (!ret && memcmp(&e, &e2, sizeof(e)))
 			ret = -1;
 	}
 
-#ifdef CONFIG_SYS_EEPROM_BUS_NUM
 	i2c_set_bus_num(bus);
-#endif
 
 	if (ret) {
 		printf("Programming failed.\n");
@@ -461,6 +475,18 @@ int mac_read_from_generic_eeprom(const char *envvar, int chip,
 }
 #endif
 
+void mac_read_from_fixed_id()
+{
+#ifdef CONFIG_SYS_I2C_MAC1_CHIP_ADDR
+	mac_read_from_generic_eeprom("ethaddr", CONFIG_SYS_I2C_MAC1_CHIP_ADDR,
+		CONFIG_SYS_I2C_MAC1_DATA_ADDR, CONFIG_SYS_I2C_MAC1_BUS);
+#endif
+#ifdef CONFIG_SYS_I2C_MAC2_CHIP_ADDR
+	mac_read_from_generic_eeprom("eth1addr", CONFIG_SYS_I2C_MAC2_CHIP_ADDR,
+		CONFIG_SYS_I2C_MAC2_DATA_ADDR, CONFIG_SYS_I2C_MAC2_BUS);
+#endif
+}
+
 /**
  * mac_read_from_eeprom - read the MAC addresses from EEPROM
  *
@@ -476,20 +502,11 @@ int mac_read_from_generic_eeprom(const char *envvar, int chip,
  * format.  In a v0 EEPROM, there are only eight MAC addresses and the CRC is
  * located at a different offset.
  */
-int mac_read_from_eeprom(void)
+int mac_read_from_eeprom_common(void)
 {
 	unsigned int i;
 	u32 crc, crc_offset = offsetof(struct eeprom, crc);
 	u32 *crcp; /* Pointer to the CRC in the data read from the EEPROM */
-
-#ifdef CONFIG_SYS_I2C_MAC1_CHIP_ADDR
-	mac_read_from_generic_eeprom("ethaddr", CONFIG_SYS_I2C_MAC1_CHIP_ADDR,
-		CONFIG_SYS_I2C_MAC1_DATA_ADDR, CONFIG_SYS_I2C_MAC1_BUS);
-#endif
-#ifdef CONFIG_SYS_I2C_MAC2_CHIP_ADDR
-	mac_read_from_generic_eeprom("eth1addr", CONFIG_SYS_I2C_MAC2_CHIP_ADDR,
-		CONFIG_SYS_I2C_MAC2_DATA_ADDR, CONFIG_SYS_I2C_MAC2_BUS);
-#endif
 
 	puts("EEPROM: ");
 

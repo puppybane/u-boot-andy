@@ -35,6 +35,7 @@
 #include <fm_eth.h>
 
 #include "cyrus.h"
+ #include "../common/eeprom.h"
 
 #include <video_fb.h>
 
@@ -270,4 +271,30 @@ void ft_board_setup(void *blob, bd_t *bd)
 	fdt_fixup_fman_ethernet(blob);
 	fdt_fixup_board_enet(blob);
 #endif
+}
+
+int mac_read_from_eeprom(void)
+{
+	// Detect board type
+#ifdef CONFIG_CYRUS_V2
+	init_eeprom(CONFIG_SYS_EEPROM_BUS_NUM, 
+		CONFIG_SYS_I2C_EEPROM_V20_ADDR, 
+		CONFIG_SYS_I2C_EEPROM_ADDR_LEN);
+#else
+	u16 boardrev;
+	*((volatile u16 *)CONFIG_SYS_LBC0_BASE) = 2;
+	boardrev = *((volatile u16 *)(CONFIG_SYS_LBC0_BASE + 0x8000));
+	printf("Board Revision %04x\n", boardrev);
+	if ((boardrev >> 8) >= 0x22) {
+		init_eeprom(CONFIG_SYS_EEPROM_BUS_NUM, 
+			CONFIG_SYS_I2C_EEPROM_V22_ADDR, 
+			CONFIG_SYS_I2C_EEPROM_ADDR_LEN);
+		mac_read_from_fixed_id();
+	} else {
+		init_eeprom(CONFIG_SYS_EEPROM_BUS_NUM, 
+			CONFIG_SYS_I2C_EEPROM_V20_ADDR, 
+			CONFIG_SYS_I2C_EEPROM_ADDR_LEN);
+	}
+#endif
+	return mac_read_from_eeprom_common();
 }
