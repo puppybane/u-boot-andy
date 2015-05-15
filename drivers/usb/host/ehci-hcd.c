@@ -1080,7 +1080,8 @@ submit_control_msg(struct usb_device *dev, unsigned long pipe, void *buffer,
 {
 	struct ehci_ctrl *ctrl = dev->controller;
 	int result;
-	int retries = 5;
+	// Increased as part of A-005695 workaround.
+	int retries = 10;
 
 	if (usb_pipetype(pipe) != PIPE_CONTROL) {
 		debug("non-control pipe (type=%lu)", usb_pipetype(pipe));
