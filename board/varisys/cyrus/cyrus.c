@@ -275,26 +275,18 @@ void ft_board_setup(void *blob, bd_t *bd)
 
 int mac_read_from_eeprom(void)
 {
-	// Detect board type
-#ifdef CONFIG_CYRUS_V2
 	init_eeprom(CONFIG_SYS_EEPROM_BUS_NUM, 
-		CONFIG_SYS_I2C_EEPROM_V20_ADDR, 
+		CONFIG_SYS_I2C_EEPROM_ADDR, 
 		CONFIG_SYS_I2C_EEPROM_ADDR_LEN);
-#else
+	// Detect board type
+#ifndef CONFIG_CYRUS_V2
 	u16 boardrev;
 	*((volatile u16 *)CONFIG_SYS_LBC0_BASE) = 2;
 	boardrev = *((volatile u16 *)(CONFIG_SYS_LBC0_BASE + 0x8000));
 	printf("Board Revision %04x\n", boardrev);
 	if ((boardrev >> 8) >= 0x22) {
-		init_eeprom(CONFIG_SYS_EEPROM_BUS_NUM, 
-			CONFIG_SYS_I2C_EEPROM_V22_ADDR, 
-			CONFIG_SYS_I2C_EEPROM_ADDR_LEN);
 		mac_read_from_fixed_id();
-	} else {
-		init_eeprom(CONFIG_SYS_EEPROM_BUS_NUM, 
-			CONFIG_SYS_I2C_EEPROM_V20_ADDR, 
-			CONFIG_SYS_I2C_EEPROM_ADDR_LEN);
-	}
+	} 
 #endif
 	return mac_read_from_eeprom_common();
 }
