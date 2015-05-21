@@ -131,6 +131,8 @@ static GraphicDevice grd;
 #ifdef CONFIG_ATI
 static void *init_vga(pci_dev_t vga)
 {
+	bool swappedmode = false;
+
 	if (!BootVideoCardBIOS(vga, NULL, 0)) {
 		printf("VGA initialisation failed\n");
 		return 0;
@@ -138,7 +140,18 @@ static void *init_vga(pci_dev_t vga)
 
 	printf("Setting VESA Mode\n");
 	/* Set to 800 * 600 */
-	fbi = set_vesa_mode(0x114);
+	//fbi = set_vesa_mode(0x114);
+
+        /* Set to 1024 * 768 */
+        fbi = set_vesa_mode(0x117);
+	swappedmode = true;
+
+        /* Check the video card setting to see if we need to swap to 1024 * 768 */
+        if ((fbi) && (fbi->Modulo == 0x680)) {
+                /* Set to 1024 * 768 */
+                fbi = set_vesa_mode(0x117);
+                swappedmode = true;
+        }
 			
 	if (fbi)
 	{
@@ -153,12 +166,19 @@ static void *init_vga(pci_dev_t vga)
 					PCI_REGION_MEM, 0, MAP_NOCACHE);
 		printf("mmio_base = 0x%p\n",
 		       mmio_base);
-		
-		for(i = 0; i < 800*600*2; i++)
-			*(mmio_base + i) = 0;
-		
-		grd.winSizeX = 800;
-		grd.winSizeY = 600;
+
+                if (swappedmode == false) {
+                        for(i = 0; i < 800*600*2; i++)
+                                *(mmio_base + i) = 0;
+                        grd.winSizeX = 800;
+                        grd.winSizeY = 600;
+                } else {
+                        for(i = 0; i < 1024*768*2; i++)
+                                *(mmio_base + i) = 0;
+                        grd.winSizeX = 1024;
+                        grd.winSizeY = 768;
+                }
+
 		grd.gdfBytesPP = 2;
 		grd.frameAdrs = (uint)mmio_base;
 		grd.gdfIndex = GDF_16BIT_565RGB;

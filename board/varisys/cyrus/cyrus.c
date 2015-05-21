@@ -201,7 +201,11 @@ void * video_hw_init(void)
 	
 	printf("Setting VESA Mode\n");
 	/* Set to 800 * 600 */
-	fbi = set_vesa_mode(0x114);
+	//fbi = set_vesa_mode(0x114);
+
+	/* Set to 1024 * 768 */
+	fbi = set_vesa_mode(0x117);
+	swappedmode = true;
 
 	/* Check the video card setting to see if we need to swap to 1024 * 768 */
 	if ((fbi) && (fbi->Modulo == 0x680)) {
