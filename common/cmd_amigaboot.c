@@ -61,6 +61,7 @@ int leftboxpos = 5 ;
 int rightboxpos = 405 ;
 int centreboxposx = 300 ;
 int centreboxposy = 240 ;
+bool gbNoBootDev = false;
 
 static char *amigabootmenu_getoption(unsigned short int n)
 {
@@ -108,7 +109,7 @@ static bmp_image_t *unpack_bmp(unsigned long addr)
 
     if (!bmp)
             printf(" Not bmp - There is no valid bmp file at address 0x%lx\n",
-            	addr);
+               addr);
 	
     return bmp;
 }
@@ -550,8 +551,8 @@ static void amigabootmenu_show(int mdelay)
 
 	/* Temporarily pop up animated splash screen - first time only */
 	if (init == 0) {
-		if (amigabootmenu_clear_screen() < 0)
-			return;
+		//if (amigabootmenu_clear_screen() < 0)
+		//	return;
 		bmp = unpack_bmp(addr_splash) ;
 		if (! bmp)
 			return;
@@ -576,14 +577,11 @@ static void amigabootmenu_show(int mdelay)
 		sata_initialize() ;
 
 		/* Start SCSI too */
-		scsi_bus_reset() ;
-		scsi_scan(1) ;
 		scsi_init() ;
 
 		mdelay = 0 ;
 		for (jj = 0; jj < 10; jj++) {
-			for (ii = 0; ii < 31; ii++) {
-				if ( ii != 10) {
+			for (ii = 0; ii < 36; ii++) {
 				bmp = unpack_bmp(addr_splash + (ii * 0x00100000)) ;
 				if (! bmp)
 					return;
@@ -605,17 +603,15 @@ static void amigabootmenu_show(int mdelay)
 				start = get_timer(0) ;
 				/* If any key has been pressed break out and run menu */
 				if (tstc()) {
-					ii = 31 ;
+					ii = 36 ;
 					jj = 10 ;
 					bBootMenu = 1 ;
 					mdelay = 10 ;
 					getc() ;
 				}
-				}
 			}
 		}
 	}
-
 
 	/* If delay is 0 do not create menu, just run first entry */
  	if ((mdelay == 0) && (bBootMenu == 0)) {
@@ -629,6 +625,8 @@ static void amigabootmenu_show(int mdelay)
 			puts("amigabootmenu option 0 is invalid\n");
 			return;
 		}
+		/* Clear screen so there's just a prompt if nothing runs */
+		amigabootmenu_clear_screen() ;
 		run_command(sep+1, 0);
 		return;
 	}

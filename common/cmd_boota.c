@@ -9,6 +9,7 @@ static unsigned long load_elf_image_phdr(unsigned long addr);
 static unsigned long load_elf_image_shdr(unsigned long addr);
 
 extern int valid_elf_image(unsigned long addr);
+extern bool gbNoBootDev;
 
 typedef struct {
 	unsigned long long  sdram_base;
@@ -98,8 +99,10 @@ int do_boota(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 		try_load_amigaboot((void *)addr);
 	}
 
-	if (!valid_elf_image(addr))
+	if (!valid_elf_image(addr)) {
+		gbNoBootDev = true;
 		return 1;
+	}
 
 	if (sload && sload[1] == 'p')
 		addr = load_elf_image_phdr(addr);

@@ -67,6 +67,7 @@ extern void mdm_init(void); /* defined in board.c */
 
 #ifdef CONFIG_CMD_AMIGABOOT
 extern int gbVGAInit ;
+extern bool gbNoBootDev;
 #endif
 
 /***************************************************************************
@@ -1038,8 +1039,13 @@ int readline_into_buffer(const char *const prompt, char *buffer, int timeout)
 			initted = 1;
 		}
 
-		if (prompt)
+		if (prompt) {
+			if (gbNoBootDev == true) {
+				puts("No boot device found\n") ;
+				gbNoBootDev = false ;
+			}
 			puts (prompt);
+		}
 
 		rc = cread_line(prompt, p, &len, timeout);
 		return rc < 0 ? rc : len;
@@ -1054,6 +1060,10 @@ int readline_into_buffer(const char *const prompt, char *buffer, int timeout)
 
 	/* print prompt */
 	if (prompt) {
+		if (gbNoBootDev == true) {
+			gbNoBootDev = false ;
+			puts("No boot device found\n") ;
+		}
 		plen = strlen (prompt);
 		puts (prompt);
 	}
