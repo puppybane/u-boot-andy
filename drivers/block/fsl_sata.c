@@ -486,7 +486,9 @@ static int fsl_ata_exec_scsi_cmd(struct fsl_sata *sata,
 	memset((void *)prde, 0, sizeof(struct prdt));
 
 	prde_count = 0;
-	ttl = len;
+	// Freescale A-005619 (avoid TTL=0)
+	// All SFF-8020i command packets are 12 bytes
+	ttl = (len == 0) ? 12 : len;
 	for (i = 0; i < SATA_HC_MAX_PRD_DIRECT; i++) {
 		if (!len)
 			break;
@@ -560,7 +562,7 @@ static int fsl_ata_exec_scsi_cmd(struct fsl_sata *sata,
 
 		if (hstatus & HSTATUS_DATA_OVERRUN) {
 			// Ignore spurious ATAPI overrun
-			debug("Clearing spurious data length mismatch");
+			debug("Clearing spurious data length mismatch\n");
 		} else {
 			printf("CE at device 0x%x\n", hstatus);
 			fsl_sata_dump_sfis((struct sata_fis_d2h *)cmd_desc->sfis);
