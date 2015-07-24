@@ -160,8 +160,16 @@ void scsi_scan(int mode)
 
 				while(retry > 0) {
 					scsi_setup_test_unit_ready(pccb);
-					if (scsi_exec(pccb) == true) 
-						break;
+					if (scsi_exec(pccb) == true) {
+
+						if (scsi_read_capacity(pccb, &capacity, &blksz))
+							break;
+						// Some DVD drives report unit ready early, but
+						// report a fake blocksize
+						// while reading the disk.
+						if (blksz < 0x100000ul)
+							break;
+					}
 					printf("Not ready...\n");
 					retry--;
 					mdelay(1500);
@@ -178,10 +186,11 @@ void scsi_scan(int mode)
 					scsi_print_error(pccb);
 					continue;
 				}
-			}
-			if (scsi_read_capacity(pccb, &capacity, &blksz)) {
-				scsi_print_error(pccb);
-				continue;
+
+				if (scsi_read_capacity(pccb, &capacity, &blksz)) {
+					scsi_print_error(pccb);
+					continue;
+				}
 			}
 			scsi_dev_desc[scsi_max_devs].lba=capacity;
 			scsi_dev_desc[scsi_max_devs].blksz=blksz;
