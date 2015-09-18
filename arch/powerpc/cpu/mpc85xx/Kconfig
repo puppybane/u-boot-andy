@@ -149,6 +149,8 @@ config TARGET_XPEDITE550X
 config TARGET_UCP1020
 	bool "Support uCP1020"
 
+config TARGET_CYRUS
+
 endchoice
 
 source "board/freescale/b4860qds/Kconfig"
