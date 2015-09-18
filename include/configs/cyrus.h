@@ -56,11 +56,11 @@
 #ifdef CONFIG_RAMBOOT_PBL
 #define CONFIG_RAMBOOT_TEXT_BASE	CONFIG_SYS_TEXT_BASE
 #define CONFIG_RESET_VECTOR_ADDRESS	0xfffffffc
-#define CONFIG_PBLPBI_CONFIG $(SRCTREE)/board/varisys/cyrus/pbi.cfg
+#define CONFIG_SYS_FSL_PBL_PBI $(SRCTREE)/board/varisys/cyrus/pbi.cfg
 #if defined(CONFIG_PPC_P3041)
-#define CONFIG_PBLRCW_CONFIG $(SRCTREE)/board/varisys/cyrus/rcw_p3041.cfg
+#define CONFIG_SYS_FSL_PBL_RCW $(SRCTREE)/board/varisys/cyrus/rcw_p3041.cfg
 #elif defined(CONFIG_PPC_P5020)
-#define CONFIG_PBLRCW_CONFIG $(SRCTREE)/board/varisys/cyrus/rcw_p5020.cfg
+#define CONFIG_SYS_FSL_PBL_RCW $(SRCTREE)/board/varisys/cyrus/rcw_p5020.cfg
 #endif
 #endif
 
@@ -69,9 +69,8 @@
 #define CONFIG_E500			/* BOOKE e500 family */
 #define CONFIG_E500MC			/* BOOKE e500mc family */
 #define CONFIG_SYS_BOOK3E_HV		/* Category E.HV supported */
-#define CONFIG_MPC85xx			/* MPC85xx/PQ3 platform */
-#define CONFIG_FSL_CORENET		/* Freescale CoreNet platform */
 #define CONFIG_MP			/* support multiple processors */
+
 
 #ifndef CONFIG_SYS_TEXT_BASE
 #define CONFIG_SYS_TEXT_BASE	0xeff80000
@@ -92,10 +91,10 @@
 #define CONFIG_FSL_PCI_INIT		/* Use common FSL init code */
 #define CONFIG_SYS_PCI_64BIT		/* enable 64-bit PCI resources */
 
+#define CONFIG_FSL_LAW			/* Use common FSL init code */
+
 #define CONFIG_BIOSEMU
 #define VIDEO_IO_OFFSET		CONFIG_SYS_PCIE1_IO_VIRT
-
-#define CONFIG_FSL_LAW			/* Use common FSL init code */
 
 #define CONFIG_ENV_OVERWRITE
 
@@ -168,7 +167,7 @@
 #define CONFIG_CHIP_SELECTS_PER_CTRL	(4 * CONFIG_DIMM_SLOTS_PER_CTLR)
 
 #define CONFIG_DDR_SPD
-#define CONFIG_FSL_DDR3
+#define CONFIG_SYS_FSL_DDR3
 
 #ifdef CONFIG_P3060QDS
 #define CONFIG_SYS_SPD_BUS_NUM	0
@@ -281,15 +280,19 @@
 #define CONFIG_FIT_VERBOSE	/* enable fit_format_{error,warning}() */
 
 /* I2C */
-#define CONFIG_FSL_I2C		/* Use FSL common I2C driver */
-#define CONFIG_HARD_I2C		/* I2C with hardware support */
+#define CONFIG_SYS_I2C
+#define CONFIG_SYS_I2C_FSL
 #define CONFIG_I2C_MULTI_BUS
 #define CONFIG_I2C_CMD_TREE
-#define CONFIG_SYS_I2C_SPEED		400000	/* I2C speed and slave address */
-#define CONFIG_SYS_I2C_SLAVE		0x7F
-#define CONFIG_SYS_I2C_OFFSET		0x118000
-#define CONFIG_SYS_I2C2_OFFSET		0x118100
-#define CONFIG_SYS_I2C4_OFFSET		0x119100
+#define CONFIG_SYS_FSL_I2C_SPEED		400000	/* I2C speed and slave address */
+#define CONFIG_SYS_FSL_I2C_SLAVE		0x7F
+#define CONFIG_SYS_FSL_I2C_OFFSET		0x118000
+#define CONFIG_SYS_FSL_I2C2_SPEED		400000	/* I2C speed and slave address */
+#define CONFIG_SYS_FSL_I2C2_SLAVE		0x7F
+#define CONFIG_SYS_FSL_I2C2_OFFSET		0x118100
+#define CONFIG_SYS_FSL_I2C4_SPEED		400000	/* I2C speed and slave address */
+#define CONFIG_SYS_FSL_I2C4_SLAVE		0x7F
+#define CONFIG_SYS_FSL_I2C4_OFFSET		0x119100
 
 #define CONFIG_ID_EEPROM
 #define CONFIG_SYS_I2C_EEPROM_NXID
@@ -426,6 +429,7 @@
 #endif
 
 #ifdef CONFIG_PCI
+#define CONFIG_PCI_INDIRECT_BRIDGE
 #define CONFIG_PCI_PNP			/* do pci plug-and-play */
 #define CONFIG_E1000
 #define CONFIG_NET_MULTI
@@ -581,7 +585,7 @@
 #define CONFIG_VGA_AS_SINGLE_DEVICE
 #define CONFIG_VIDEO_BMP_LOGO
 #define CONFIG_CMD_BMP
-#define CONFIG_VGA_LOGO_ONLY
+#define CONFIG_VGA_AS_SINGLE_DEVICE
 #define CONFIG_VIDEO_BMP_GZIP
 #define CONFIG_SYS_VIDEO_LOGO_MAX_SIZE  (640*480*2 + 1024)
 

@@ -21,36 +21,6 @@
 # MA 02111-1307 USA
 #
 
-include $(TOPDIR)/config.mk
-
-ifneq ($(OBJTREE),$(SRCTREE))
-$(shell mkdir -p $(obj)board/varisys/common)
-endif
-
-LIB	= $(obj)libvarisys.o
-
-COBJS-$(CONFIG_FMAN_ENET)	+= fman.o
-COBJS-$(CONFIG_ID_EEPROM)	+= sys_eeprom.o
-
-# deal with common files for P-series corenet based devices
-SUBLIB-$(CONFIG_CYRUS)		+= p_corenet/libp_corenet.o
-
-SRCS	:= $(SOBJS:.o=.S) $(COBJS-y:.o=.c)
-OBJS	:= $(addprefix $(obj),$(COBJS-y))
-SOBJS	:= $(addprefix $(obj),$(SOBJS))
-SUBLIB	:= $(addprefix $(obj),$(SUBLIB-y))
-
-$(LIB):	$(obj).depend $(OBJS) $(SUBLIB)
-	$(call cmd_link_o_target, $(OBJS) $(SUBLIB))
-
-$(SUBLIB): $(obj).depend
-	$(MAKE) -C $(dir $(subst $(obj),,$@))
-
-#########################################################################
-
-# defines $(obj).depend target
-include $(SRCTREE)/rules.mk
-
-sinclude $(obj).depend
-
-#########################################################################
+obj-$(CONFIG_FMAN_ENET)	+= fman.o
+obj-$(CONFIG_ID_EEPROM)	+= sys_eeprom.o
+obj-y += p_corenet/
