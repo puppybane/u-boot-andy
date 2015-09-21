@@ -21,7 +21,6 @@
 #include <part.h>
 #include <ext4fs.h>
 #include <fat.h>
-#include <iso9660.h>
 #include <fs.h>
 #include <sandboxfs.h>
 #include <asm/io.h>
@@ -156,18 +155,6 @@ static struct fstype_info fstypes[] = {
 		.read = fs_read_sandbox,
 		.write = fs_write_sandbox,
 		.uuid = fs_uuid_unsupported,
-	},
-#endif
-#ifdef CONFIG_FS_ISO9660
-	{
-		.fstype = FS_TYPE_ISO9660,
-		.null_dev_desc_ok = false,
-		.probe = iso9660_set_blk_dev,
-		.close = iso9660_close,
-		.ls = file_iso9660_ls,
-		.exists = iso9660_exists,
-		.read = iso9660_read_file,
-		.write = fs_write_unsupported,
 	},
 #endif
 	{

@@ -494,7 +494,6 @@
 #define CONFIG_CMD_SATA
 #define CONFIG_DOS_PARTITION
 #define CONFIG_CMD_EXT2
-#define CONFIG_FS_ISO9660
 #endif
 
 #ifdef CONFIG_FMAN_ENET
