@@ -23,6 +23,9 @@
 #ifndef __CONFIG_CYRUS_H
 #define __CONFIG_CYRUS_H
 
+#define CONFIG_SYS_GENERIC_BOARD
+#define CONFIG_DISPLAY_BOARDINFO
+
 /*
  * P5020 DS board configuration file
  * Also supports P5010 DS
