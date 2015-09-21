@@ -33,6 +33,7 @@
 #include <asm/fsl_portals.h>
 #include <asm/fsl_liodn.h>
 #include <fm_eth.h>
+#include <pci.h>
 
 #include "cyrus.h"
  #include "../common/eeprom.h"
@@ -215,8 +216,10 @@ void * video_hw_init(void)
 		u8 *mmio_base;
 		int i;
 		printf("OK\n");
+#if 0
 		printf("XSize = %d YSize = %d Base =0x%x\n", 
 			fbi->XSize, fbi->YSize, fbi->BaseAddress);
+#endif
 		
 		
 		mmio_base = pci_bus_to_virt(vga, 0xffffffffu & (u64)fbi->BaseAddress,
@@ -248,7 +251,7 @@ void * video_hw_init(void)
 	return 0;
 }
 
-void ft_board_setup(void *blob, bd_t *bd)
+int ft_board_setup(void *blob, bd_t *bd)
 {
 	phys_addr_t base;
 	phys_size_t size;
@@ -271,6 +274,8 @@ void ft_board_setup(void *blob, bd_t *bd)
 	fdt_fixup_fman_ethernet(blob);
 	fdt_fixup_board_enet(blob);
 #endif
+
+	return 0;
 }
 
 int mac_read_from_eeprom(void)
