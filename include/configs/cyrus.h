@@ -50,9 +50,6 @@
 #endif
 #define CONFIG_SYS_DPAA_PME
 
-/* Enable splash screen */
-#define CONFIG_PREBOOT
-
 /*
  * Corenet DS style board configuration file
  */
@@ -84,7 +81,6 @@
 #define CONFIG_MP			/* support multiple processors */
 
 
-#define CONFIG_API
 #define CONFIG_SYS_MMC_MAX_DEVICE     1
 
 #ifndef CONFIG_SYS_TEXT_BASE
@@ -108,9 +104,6 @@
 
 #define CONFIG_FSL_LAW			/* Use common FSL init code */
 
-#define CONFIG_BIOSEMU
-#define VIDEO_IO_OFFSET		CONFIG_SYS_PCIE1_IO_VIRT
-
 #define CONFIG_ENV_OVERWRITE
 
 #define CONFIG_SYS_NO_FLASH
@@ -118,6 +111,7 @@
 #if defined(CONFIG_SDCARD)
 #define CONFIG_SYS_EXTRA_ENV_RELOC
 #define CONFIG_ENV_IS_IN_MMC
+#define CONFIG_FSL_FIXED_MMC_LOCATION
 #define CONFIG_SYS_MMC_ENV_DEV          0
 #define CONFIG_ENV_SIZE			0x2000
 #define CONFIG_ENV_OFFSET		(512 * 1658)
