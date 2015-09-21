@@ -198,8 +198,8 @@ void * video_hw_init(void)
 	}
 	
 	printf("Setting VESA Mode\n");
-	/* VGA running...? */
-	fbi = set_vesa_mode(0x111);
+	/* Set to 800 * 600 */
+	fbi = set_vesa_mode(0x114);
 			
 	if (fbi)
 	{
@@ -215,12 +215,11 @@ void * video_hw_init(void)
 		printf("mmio_base = 0x%p\n",
 		       mmio_base);
 		
-		for(i = 0; i < 640*480*2; i++)
+		for(i = 0; i < 800*600*2; i++)
 			*(mmio_base + i) = 0;
 		
-		
-		grd.winSizeX = 640;
-		grd.winSizeY = 480;
+		grd.winSizeX = 800;
+		grd.winSizeY = 600;
 		grd.gdfBytesPP = 2;
 		grd.frameAdrs = (uint)mmio_base;
 		grd.gdfIndex = GDF_16BIT_565RGB;
