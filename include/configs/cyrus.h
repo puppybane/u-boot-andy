@@ -88,7 +88,7 @@
 #define CONFIG_SYS_MMC_MAX_DEVICE     1
 
 #ifndef CONFIG_SYS_TEXT_BASE
-#define CONFIG_SYS_TEXT_BASE	0xeff80000
+#define CONFIG_SYS_TEXT_BASE	0xeff40000
 #endif
 
 /*
@@ -120,7 +120,7 @@
 #define CONFIG_ENV_IS_IN_MMC
 #define CONFIG_SYS_MMC_ENV_DEV          0
 #define CONFIG_ENV_SIZE			0x2000
-#define CONFIG_ENV_OFFSET		(512 * 1097)
+#define CONFIG_ENV_OFFSET		(512 * 1658)
 #endif
 
 /*
@@ -330,10 +330,6 @@
  * eSPI - Enhanced SPI
  */
 #define CONFIG_FSL_ESPI
-#define CONFIG_CMD_SF
-#define CONFIG_CMD_SPI
-#define CONFIG_SF_DEFAULT_SPEED         10000000
-#define CONFIG_SF_DEFAULT_MODE          0
 
 /*
  * General PCI
@@ -452,11 +448,11 @@
 #elif defined(CONFIG_SDCARD)
 /*
  * PBL SD boot image should stored at 0x1000(8 blocks), the size of the image is
- * about 545KB (1089 blocks), Env is stored after the image, and the env size is
- * 0x2000 (16 blocks), 8 + 1089 + 16 = 1113, enlarge it to 1130.
+ * about 825KB (1650 blocks), Env is stored after the image, and the env size i
+ * 0x2000 (16 blocks), 8 + 1650 + 16 = 1674, enlarge it to 1680.
  */
 #define CONFIG_SYS_QE_FMAN_FW_IN_MMC
-#define CONFIG_SYS_FMAN_FW_ADDR	(512 * 1130)
+#define CONFIG_SYS_FMAN_FW_ADDR	(512 * 1680)
 #endif
 
 #define CONFIG_SYS_QE_FMAN_FW_LENGTH	0x10000
@@ -605,10 +601,6 @@
 #define CONFIG_LOADADDR		1000000
 
 #define CONFIG_BOOTDELAY 	10	/* -1 disables auto-boot */
-#define CONFIG_CMD_BOOTMENU		/* ANSI terminal Boot Menu */
-#define CONFIG_MENU
-#define CONFIG_MENU_SHOW
- #define CONFIG_ESCAPEBOOTMENU "setenv stdout serial,vga"
 
 #define CONFIG_BAUDRATE	115200
 
@@ -617,19 +609,6 @@
 #else
 #define __USB_PHY_TYPE	utmi
 #endif
-
-/* Video support */
-#define CONFIG_VIDEO
-#define VIDEO_FB_LITTLE_ENDIAN
-#define CONFIG_CFB_CONSOLE
-#define CONFIG_CFB_CONSOLE_ANSI
-#define CONFIG_VIDEO_SW_CURSOR
-#define CONFIG_VGA_AS_SINGLE_DEVICE
-#define CONFIG_VIDEO_BMP_LOGO
-#define CONFIG_CMD_BMP
-#define CONFIG_VGA_AS_SINGLE_DEVICE
-#define CONFIG_VIDEO_BMP_GZIP
-#define CONFIG_SYS_VIDEO_LOGO_MAX_SIZE  (640*480*2 + 1024)
 
 #define	CONFIG_EXTRA_ENV_SETTINGS \
  "hwconfig=fsl_ddr:ctlr_intlv=cacheline,"		\
@@ -641,11 +620,8 @@
 "ubootaddr=" __stringify(CONFIG_SYS_TEXT_BASE) "\0"			\
 "consoledev=ttyS0\0"					\
 "ramdiskaddr=2000000\0"					\
-"ramdiskfile=p4080ds/ramdisk.uboot\0"			\
 "fdtaddr=c00000\0"					\
-"fdtfile=p4080ds/p4080ds.dtb\0"				\
-"bdev=sda3\0"						\
-"c=ffe\0"
+"bdev=sda3\0"
 
 #define CONFIG_HDBOOT					\
 "setenv bootargs root=/dev/$bdev rw "		\
