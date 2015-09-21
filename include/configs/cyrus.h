@@ -56,19 +56,19 @@
 #ifdef CONFIG_RAMBOOT_PBL
 #define CONFIG_RAMBOOT_TEXT_BASE	CONFIG_SYS_TEXT_BASE
 #define CONFIG_RESET_VECTOR_ADDRESS	0xfffffffc
-#define CONFIG_SYS_FSL_PBL_PBI $(SRCTREE)/board/varisys/cyrus/pbi.cfg
+#define CONFIG_SYS_FSL_PBL_PBI board/varisys/cyrus/pbi.cfg
 #if defined(CONFIG_PPC_P3041)
 #define CONFIG_SYS_CLK_FREQ 133000000
-#define CONFIG_SYS_FSL_PBL_RCW $(SRCTREE)/board/varisys/cyrus/rcw_p3041.cfg
+#define CONFIG_SYS_FSL_PBL_RCW board/varisys/cyrus/rcw_p3041.cfg
 #elif defined(CONFIG_CYRUS_V2)
 #define CONFIG_SYS_CLK_FREQ 133000000
-#define CONFIG_SYS_FSL_PBL_RCW $(SRCTREE)/board/varisys/cyrus/rcw_p5020_v2.cfg
+#define CONFIG_SYS_FSL_PBL_RCW board/varisys/cyrus/rcw_p5020_v2.cfg
 #elif defined(CONFIG_PPC_P5020)
 #define CONFIG_SYS_CLK_FREQ 133000000
-#define CONFIG_SYS_FSL_PBL_RCW $(SRCTREE)/board/varisys/cyrus/rcw_p5020.cfg
+#define CONFIG_SYS_FSL_PBL_RCW board/varisys/cyrus/rcw_p5020.cfg
 #elif defined(CONFIG_PPC_P5040)
 #define CONFIG_SYS_CLK_FREQ 100000000
-#define CONFIG_SYS_FSL_PBL_RCW $(SRCTREE)/board/varisys/cyrus/rcw_p5040.cfg
+#define CONFIG_SYS_FSL_PBL_RCW board/varisys/cyrus/rcw_p5040.cfg
 #endif
 #endif
 
@@ -327,7 +327,6 @@
  * eSPI - Enhanced SPI
  */
 #define CONFIG_FSL_ESPI
-#define CONFIG_SPI_FLASH
 #define CONFIG_SPI_FLASH_SPANSION
 #define CONFIG_CMD_SF
 #define CONFIG_CMD_SPI
@@ -454,7 +453,6 @@
 #ifdef CONFIG_PCI
 #define CONFIG_PCI_INDIRECT_BRIDGE
 #define CONFIG_PCI_PNP			/* do pci plug-and-play */
-#define CONFIG_E1000
 #define CONFIG_NET_MULTI
 
 #define CONFIG_PCI_SCAN_SHOW		/* show pci devices on startup */
@@ -511,12 +509,10 @@
 #define CONFIG_CMD_I2C
 #define CONFIG_CMD_MII
 #define CONFIG_CMD_PING
-#define CONFIG_CMD_SETEXPR
 #define CONFIG_CMD_REGINFO
 
 #ifdef CONFIG_PCI
 #define CONFIG_CMD_PCI
-#define CONFIG_CMD_NET
 #endif
 
 /*
@@ -579,7 +575,6 @@
 
 #ifdef CONFIG_CMD_KGDB
 #define CONFIG_KGDB_BAUDRATE	230400	/* speed to run kgdb serial port */
-#define CONFIG_KGDB_SER_INDEX	2	/* which serial port to use */
 #endif
 
 /*
