@@ -26,10 +26,6 @@
 #define CONFIG_SYS_GENERIC_BOARD
 #define CONFIG_DISPLAY_BOARDINFO
 
-/*
- * P5020 DS board configuration file
- * Also supports P5010 DS
- */
 #define CONFIG_CYRUS
 
 #define CONFIG_PHYS_64BIT
@@ -634,8 +630,9 @@
 
 #define CONFIG_BOOTCOMMAND		CONFIG_HDBOOT
 
-#ifdef CONFIG_SECURE_BOOT
 #include <asm/fsl_secure_boot.h>
+
+#ifdef CONFIG_SECURE_BOOT
 #endif
 
 #endif	/* __CONFIG_H */
