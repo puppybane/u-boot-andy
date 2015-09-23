@@ -51,10 +51,6 @@ int checkboard (void)
 {
 	printf("Board: CYRUS\n");
 
-#ifdef CONFIG_PHYS_64BIT
-	puts("36-bit Addressing\n");
-#endif
-
 	return 0;
 }
 
