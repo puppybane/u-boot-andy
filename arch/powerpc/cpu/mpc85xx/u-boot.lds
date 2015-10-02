@@ -49,6 +49,8 @@ SECTIONS
   {
     _GOT2_TABLE_ = .;
     KEEP(*(.got2))
+    KEEP(*(.data.rel.ro))
+    KEEP(*(.data.rel.ro.local))
     KEEP(*(.got))
     PROVIDE(_GLOBAL_OFFSET_TABLE_ = . + 4);
     _FIXUP_TABLE_ = .;
