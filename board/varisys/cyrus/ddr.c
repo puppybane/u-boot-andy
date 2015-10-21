@@ -17,96 +17,6 @@
 DECLARE_GLOBAL_DATA_PTR;
 
 
-/*
- * Fixed sdram init -- doesn't use serial presence detect.
- */
-extern fixed_ddr_parm_t fixed_ddr_parm_0[];
-#if (CONFIG_NUM_DDR_CONTROLLERS == 2)
-extern fixed_ddr_parm_t fixed_ddr_parm_1[];
-#endif
-
-phys_size_t fixed_sdram(void)
-{
-	int i;
-	char buf[32];
-	fsl_ddr_cfg_regs_t ddr_cfg_regs;
-	phys_size_t ddr_size;
-	unsigned int lawbar1_target_id;
-	ulong ddr_freq, ddr_freq_mhz;
-
-	ddr_freq = get_ddr_freq(0);
-	ddr_freq_mhz = ddr_freq / 1000000;
-
-	printf("Configuring DDR for %s MT/s data rate\n",
-				strmhz(buf, ddr_freq));
-
-	for (i = 0; fixed_ddr_parm_0[i].max_freq > 0; i++) {
-		if ((ddr_freq_mhz > fixed_ddr_parm_0[i].min_freq) &&
-		   (ddr_freq_mhz <= fixed_ddr_parm_0[i].max_freq)) {
-			memcpy(&ddr_cfg_regs,
-				fixed_ddr_parm_0[i].ddr_settings,
-				sizeof(ddr_cfg_regs));
-			break;
-		}
-	}
-
-	if (fixed_ddr_parm_0[i].max_freq == 0)
-		panic("Unsupported DDR data rate %s MT/s data rate\n",
-			strmhz(buf, ddr_freq));
-
-	ddr_size = (phys_size_t) CONFIG_SYS_SDRAM_SIZE * 1024 * 1024;
-	ddr_cfg_regs.ddr_cdr1 = DDR_CDR1_DHC_EN;
-	fsl_ddr_set_memctl_regs(&ddr_cfg_regs, 0, 0);
-
-#if (CONFIG_NUM_DDR_CONTROLLERS == 2)
-	memcpy(&ddr_cfg_regs,
-		fixed_ddr_parm_1[i].ddr_settings,
-		sizeof(ddr_cfg_regs));
-	ddr_cfg_regs.ddr_cdr1 = DDR_CDR1_DHC_EN;
-	fsl_ddr_set_memctl_regs(&ddr_cfg_regs, 1, 0);
-#endif
-
-	/*
-	 * setup laws for DDR. If not interleaving, presuming half memory on
-	 * DDR1 and the other half on DDR2
-	 */
-	if (fixed_ddr_parm_0[i].ddr_settings->cs[0].config & 0x20000000) {
-		if (set_ddr_laws(CONFIG_SYS_DDR_SDRAM_BASE,
-				 ddr_size,
-				 LAW_TRGT_IF_DDR_INTRLV) < 0) {
-			printf("ERROR setting Local Access Windows for DDR\n");
-			return 0;
-		}
-	} else {
-#if (CONFIG_NUM_DDR_CONTROLLERS == 2)
-		/* We require both controllers have identical DIMMs */
-		lawbar1_target_id = LAW_TRGT_IF_DDR_1;
-		if (set_ddr_laws(CONFIG_SYS_DDR_SDRAM_BASE,
-				 ddr_size / 2,
-				 lawbar1_target_id) < 0) {
-			printf("ERROR setting Local Access Windows for DDR\n");
-			return 0;
-		}
-		lawbar1_target_id = LAW_TRGT_IF_DDR_2;
-		if (set_ddr_laws(CONFIG_SYS_DDR_SDRAM_BASE + ddr_size / 2,
-				 ddr_size / 2,
-				 lawbar1_target_id) < 0) {
-			printf("ERROR setting Local Access Windows for DDR\n");
-			return 0;
-		}
-#else
-		lawbar1_target_id = LAW_TRGT_IF_DDR_1;
-		if (set_ddr_laws(CONFIG_SYS_DDR_SDRAM_BASE,
-				 ddr_size,
-				 lawbar1_target_id) < 0) {
-			printf("ERROR setting Local Access Windows for DDR\n");
-			return 0;
-		}
-#endif
-	}
-	return ddr_size;
-}
-
 struct board_specific_parameters {
 	u32 n_ranks;
 	u32 datarate_mhz_high;
@@ -268,13 +178,12 @@ phys_size_t initdram(int board_type)
 
 	puts("Initializing....");
 
-	if (fsl_use_spd()) {
-		puts("using SPD\n");
-		dram_size = fsl_ddr_sdram();
-	} else {
-		puts("using fixed parameters\n");
-		dram_size = fixed_sdram();
+	if (!fsl_use_spd()) {
+		panic("Cyrus only supports using SPD for DRAM\n");
 	}
+
+	puts("using SPD\n");
+	dram_size = fsl_ddr_sdram();
 
 	dram_size = setup_ddr_tlbs(dram_size / 0x100000);
 	dram_size *= 0x100000;

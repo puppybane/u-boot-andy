@@ -51,6 +51,7 @@ static void cyrus_phy_tuning(int phy)
 	// force re-negotiation
 	miiphy_write(DEFAULT_FM_MDIO_NAME, phy, 0x0, 0x1340);	
 }
+#endif
 
 int board_eth_init(bd_t *bis)
 {
