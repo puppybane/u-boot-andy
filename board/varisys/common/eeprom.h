@@ -1,4 +1,4 @@
-/* EEPROM init functions for Cyrus / Tabor */
+/* EEPROM init functions for Cyrus */
 
 
 void init_eeprom(int bus_num, int addr, int addr_len);

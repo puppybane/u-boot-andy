@@ -152,10 +152,6 @@ config TARGET_UCP1020
 config TARGET_CYRUS
 	bool "Support Varisys Cyrus"
 
-config TARGET_TABOR
-	bool "Support Varisys Tabor"
-
-
 endchoice
 
 source "board/freescale/b4860qds/Kconfig"
@@ -193,7 +189,6 @@ source "board/keymile/kmp204x/Kconfig"
 source "board/sbc8548/Kconfig"
 source "board/socrates/Kconfig"
 source "board/varisys/cyrus/Kconfig"
-source "board/varisys/tabor/Kconfig"
 source "board/xes/xpedite520x/Kconfig"
 source "board/xes/xpedite537x/Kconfig"
 source "board/xes/xpedite550x/Kconfig"
