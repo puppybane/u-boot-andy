@@ -445,36 +445,31 @@ static int  soft_i2c_write(struct i2c_adapter *adap, uchar chip, uint addr,
 	return(failures);
 }
 
-#ifndef CONFIG_SOFT_I2C_OFFSET
-#define CONFIG_SOFT_I2C_OFFSET 0
-#endif
-
-
 /*
  * Register soft i2c adapters
  */
 U_BOOT_I2C_ADAP_COMPLETE(soft0, soft_i2c_init, soft_i2c_probe,
 			 soft_i2c_read, soft_i2c_write, NULL,
 			 CONFIG_SYS_I2C_SOFT_SPEED, CONFIG_SYS_I2C_SOFT_SLAVE,
-			 CONFIG_SOFT_I2C_OFFSET + 0)
+			 0)
 #if defined(I2C_SOFT_DECLARATIONS2)
 U_BOOT_I2C_ADAP_COMPLETE(soft1, soft_i2c_init, soft_i2c_probe,
 			 soft_i2c_read, soft_i2c_write, NULL,
 			 CONFIG_SYS_I2C_SOFT_SPEED_2,
 			 CONFIG_SYS_I2C_SOFT_SLAVE_2,
-			 CONFIG_SOFT_I2C_OFFSET + 1)
+			 1)
 #endif
 #if defined(I2C_SOFT_DECLARATIONS3)
 U_BOOT_I2C_ADAP_COMPLETE(soft2, soft_i2c_init, soft_i2c_probe,
 			 soft_i2c_read, soft_i2c_write, NULL,
 			 CONFIG_SYS_I2C_SOFT_SPEED_3,
 			 CONFIG_SYS_I2C_SOFT_SLAVE_3,
-			 CONFIG_SOFT_I2C_OFFSET + 2)
+			 2)
 #endif
 #if defined(I2C_SOFT_DECLARATIONS4)
 U_BOOT_I2C_ADAP_COMPLETE(soft3, soft_i2c_init, soft_i2c_probe,
 			 soft_i2c_read, soft_i2c_write, NULL,
 			 CONFIG_SYS_I2C_SOFT_SPEED_4,
 			 CONFIG_SYS_I2C_SOFT_SLAVE_4,
-			 CONFIG_SOFT_I2C_OFFSET + 3)
+			 3)
 #endif
