@@ -1,27 +1,11 @@
 /*
- * Copyright 2009-2011 Freescale Semiconductor, Inc.
+ * Based on corenet_ds.h
  *
- * See file CREDITS for list of people who contributed to this
- * project.
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
-#ifndef __CONFIG_CYRUS_H
-#define __CONFIG_CYRUS_H
+#ifndef __CONFIG_H
+#define __CONFIG_H
 
 #define CONFIG_SYS_GENERIC_BOARD
 #define CONFIG_DISPLAY_BOARDINFO
@@ -30,7 +14,7 @@
 
 #define CONFIG_PHYS_64BIT
 
-#if !defined(CONFIG_PPC_P5020) && !defined(CONFIG_PPC_P3041) && !defined(CONFIG_PPC_P5040)
+#if !defined(CONFIG_PPC_P5020) && !defined(CONFIG_PPC_P5040)
 #error Must call Cyrus CONFIG with a specific CPU enabled.
 #endif
 
@@ -49,14 +33,10 @@
 /*
  * Corenet DS style board configuration file
  */
-#ifdef CONFIG_RAMBOOT_PBL
 #define CONFIG_RAMBOOT_TEXT_BASE	CONFIG_SYS_TEXT_BASE
 #define CONFIG_RESET_VECTOR_ADDRESS	0xfffffffc
 #define CONFIG_SYS_FSL_PBL_PBI board/varisys/cyrus/pbi.cfg
-#if defined(CONFIG_PPC_P3041)
-#define CONFIG_SYS_CLK_FREQ 133000000
-#define CONFIG_SYS_FSL_PBL_RCW board/varisys/cyrus/rcw_p3041.cfg
-#elif defined(CONFIG_CYRUS_V2)
+#if defined(CONFIG_CYRUS_V2)
 #define CONFIG_SYS_CLK_FREQ 133000000
 #define CONFIG_SYS_FSL_PBL_RCW board/varisys/cyrus/rcw_p5020_v2.cfg
 #elif defined(CONFIG_PPC_P5020)
@@ -65,7 +45,6 @@
 #elif defined(CONFIG_PPC_P5040)
 #define CONFIG_SYS_CLK_FREQ 100000000
 #define CONFIG_SYS_FSL_PBL_RCW board/varisys/cyrus/rcw_p5040.cfg
-#endif
 #endif
 
 
@@ -82,12 +61,6 @@
 #ifndef CONFIG_SYS_TEXT_BASE
 #define CONFIG_SYS_TEXT_BASE	0xeff40000
 #endif
-
-/*
-#ifndef CONFIG_RESET_VECTOR_ADDRESS
-#define CONFIG_RESET_VECTOR_ADDRESS	0xeffffffc
-#endif
-*/
 
 #define CONFIG_SYS_FSL_CPC		/* Corenet Platform Cache */
 #define CONFIG_SYS_NUM_CPC		CONFIG_NUM_DDR_CONTROLLERS
@@ -170,31 +143,23 @@
 #define CONFIG_DDR_SPD
 #define CONFIG_SYS_FSL_DDR3
 
-#ifdef CONFIG_P3060QDS
-#define CONFIG_SYS_SPD_BUS_NUM	0
-#else
 #define CONFIG_SYS_SPD_BUS_NUM	1
-#endif
-#if defined(CONFIG_PPC_P5020) || defined(CONFIG_PPC_P5040)
 #define SPD_EEPROM_ADDRESS1	0x51
 #define SPD_EEPROM_ADDRESS2	0x52
-#else
-#define SPD_EEPROM_ADDRESS	0x51
-#endif
 #define CONFIG_SYS_SDRAM_SIZE	4096	/* for fixed parameter use */
 
 /*
  * Local Bus Definitions
  */
 
-#define CONFIG_SYS_LBC0_BASE		0xe0000000	/* Start of LBC Registers */
+#define CONFIG_SYS_LBC0_BASE		0xe0000000 /* Start of LBC Registers */
 #ifdef CONFIG_PHYS_64BIT
 #define CONFIG_SYS_LBC0_BASE_PHYS	0xfe0000000ull
 #else
 #define CONFIG_SYS_LBC0_BASE_PHYS	CONFIG_SYS_LBC0_BASE
 #endif
 
-#define CONFIG_SYS_LBC1_BASE		0xe1000000	/* Start of LBC Registers */
+#define CONFIG_SYS_LBC1_BASE		0xe1000000 /* Start of LBC Registers */
 #ifdef CONFIG_PHYS_64BIT
 #define CONFIG_SYS_LBC1_BASE_PHYS	0xfe1000000ull
 #else
@@ -474,12 +439,6 @@
 #endif
 
 #ifdef CONFIG_FMAN_ENET
-#define CONFIG_SYS_FM1_DTSEC4_PHY_ADDR	0x6
-#define CONFIG_SYS_FM1_10GEC1_PHY_ADDR	4
-
-#define CONFIG_SYS_FM2_DTSEC4_PHY_ADDR	0x1f
-#define CONFIG_SYS_FM2_10GEC1_PHY_ADDR	0
-
 #define CONFIG_SYS_TBIPA_VALUE	8
 #define CONFIG_MII		/* MII PHY management */
 #define CONFIG_ETHPRIME		"FM1@DTSEC4"
@@ -584,11 +543,7 @@
 
 #define CONFIG_BAUDRATE	115200
 
-#if defined(CONFIG_P4080DS) || defined(CONFIG_P3060QDS)
-#define __USB_PHY_TYPE	ulpi
-#else
 #define __USB_PHY_TYPE	utmi
-#endif
 
 #define	CONFIG_EXTRA_ENV_SETTINGS \
  "hwconfig=fsl_ddr:ctlr_intlv=cacheline,"		\
@@ -635,6 +590,4 @@
 #endif
 
 #endif	/* __CONFIG_H */
-
-/* end #include "corenet_ds.h" */
 
